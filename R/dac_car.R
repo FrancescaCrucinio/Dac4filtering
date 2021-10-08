@@ -46,7 +46,7 @@ dac_car <- function(xOld, obs, sigmaX, sigmaY, Sigma.det){
           prec <- x[n1, ci[1]] * sum(xOld[n1, ci[1]:d])/(d^2*sigmaX)
           for (n2 in 1:Nparticles) {
             lWmix[n1, n2] <- lW[n1, (nchild*(i-1)+1)] + lW[n2, i*nchild] -
-              sum(x[n1, ci[1]:(ci[1]+nv-1)])*sum(x[n2, (ci[1]+nv):ci[2]])/(d*sigmaX) -
+              x[n1, ci[1]:(ci[1]+nv-1)]*x[n2, (ci[1]+nv):ci[2]]/(d*sigmaX) -
               (x[n1, ci[1]:(ci[1]+nv-1)]/d)^2/(2*sigmaX)
           }
           lWmix[n1, ] <- lWmix[n1, ] + prec
@@ -60,11 +60,11 @@ dac_car <- function(xOld, obs, sigmaX, sigmaY, Sigma.det){
           # precompute quantities which only depend on n1
           prec <- 0
           for (i1 in ci[1]:(ci[1]+nv-1)){
-            prec <- prec + x[n1, i1] * sum(xOld[n2, i1:d])
+            prec <- prec + x[n1, i1] * sum(xOld[n1, i1:d])
           }
           prec <- nv*prec/(d^2*sigmaX)
           for (n2 in 1:Nparticles) {
-            # concatenate dimension indices on the two children nodes
+            # merge the two children nodes
             mx <- c(x[n1, ci[1]:(ci[1]+nv-1)], x[n2, (ci[1]+nv):ci[2]])
             lWmix[n1, n2] <- sum(x[n1, ci[1]:(ci[1]+nv-1)])*sum(x[n2, (ci[1]+nv):ci[2]])/(d*sigmaX) -
               (sum(cumsum(mx[1:(nvNew-1)]/d)^2) - sum(cumsum(x[n1, ci[1]:(ci[1]+nv-1)][1:(nv-1)]/d)^2) -

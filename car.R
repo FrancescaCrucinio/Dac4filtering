@@ -78,7 +78,6 @@ for (j in 1:Nrep){
   lZ <- rep(0, times = Time.step)
   m <- matrix(0, nrow = Time.step, ncol = d)
   v <- matrix(0, nrow = Time.step, ncol = d)
-  x2 <- array(0, dim = c(Nparticles, d, Time.step+1))
   for (t in 1:Time.step) {
     res_dac <- dac_car(x[, , t], y[t, ], sigmaX, sigmaY, Sigma.det)
     x[, , t+1] <- res_dac[, 1:d]
