@@ -68,30 +68,53 @@ for (u in 1:nlevels){
 Nparticles <- 1000
 Nrep <- 10
 
-registerDoParallel(3)
-res <- foreach (j=1:Nrep, .packages= c('MASS', 'resample'), .combine='rbind',
-                .multicombine=TRUE, .inorder = FALSE,
-                .init=list(list(), list(), vector())) %dopar% {
-                  x <- array(0, dim = c(Nparticles, d, Time.step+1))
-                  x[, , 1] <- mvrnorm(n = Nparticles, mu0, Sigma0)
-                  lZ <- rep(0, times = Time.step)
-                  m <- matrix(0, nrow = Time.step, ncol = d)
-                  v <- matrix(0, nrow = Time.step, ncol = d)
-                  for (t in 1:Time.step) {
-                    res_dac <- dac_lgssm(x[, , t], y[t, ], tau, lambda, sigmaY, Sigma.det)
-                    x[, , t+1] <- res_dac[, 1:d]
-                    lZ[t] <- res_dac[1, d+1]
-                    m[t, ] <- colMeans(x[, , t+1])
-                    v[t, ] <- colVars(x[, , t+1])
-                  }
-                  list((m - t(true_means))^2, (v - true_variances)^2, sum(lZ))
-                }
-mse <- apply(array(unlist(res[, 1]), dim = c(Time.step, d, Nrep)), c(1,2), mean)
-vmse <- apply(array(unlist(res[, 2]), dim = c(Time.step, d, Nrep)), c(1,2), mean)
-boxplot(unlist(res[, 3]))
+# registerDoParallel(3)
+# res <- foreach (j=1:Nrep, .packages= c('MASS', 'resample'), .combine='rbind',
+#                 .multicombine=TRUE, .inorder = FALSE,
+#                 .init=list(list(), list(), vector())) %dopar% {
+#                   x <- array(0, dim = c(Nparticles, d, Time.step+1))
+#                   x[, , 1] <- mvrnorm(n = Nparticles, mu0, Sigma0)
+#                   lZ <- rep(0, times = Time.step)
+#                   m <- matrix(0, nrow = Time.step, ncol = d)
+#                   v <- matrix(0, nrow = Time.step, ncol = d)
+#                   for (t in 1:Time.step) {
+#                     res_dac <- dac_lgssm(x[, , t], y[t, ], tau, lambda, sigmaY, Sigma.det)
+#                     x[, , t+1] <- res_dac[, 1:d]
+#                     lZ[t] <- res_dac[1, d+1]
+#                     m[t, ] <- colMeans(x[, , t+1])
+#                     v[t, ] <- colVars(x[, , t+1])
+#                   }
+#                   list((m - t(true_means))^2, (v - true_variances)^2, sum(lZ))
+#                 }
+# mse <- apply(array(unlist(res[, 1]), dim = c(Time.step, d, Nrep)), c(1,2), mean)
+# vmse <- apply(array(unlist(res[, 2]), dim = c(Time.step, d, Nrep)), c(1,2), mean)
+# boxplot(unlist(res[, 3]))
+# abline(h = true_ll, col = "red")
+
+se <- array(0, dim = c(Time.step, d, Nrep))
+vse <- array(0, dim = c(Time.step, d, Nrep))
+Zrep <- rep(0, times = Nrep)
+for (j in 1:Nrep){
+  x <- array(0, dim = c(Nparticles, d, Time.step+1))
+  x[, , 1] <- mvrnorm(n = Nparticles, mu0, Sigma0)
+  lZ <- rep(0, times = Time.step)
+  m <- matrix(0, nrow = Time.step, ncol = d)
+  v <- matrix(0, nrow = Time.step, ncol = d)
+  for (t in 1:Time.step) {
+    res_dac <- dac_lgssm(x[, , t], y[t, ], tau, lambda, sigmaY, Sigma.det)
+    x[, , t+1] <- res_dac[, 1:d]
+    lZ[t] <- res_dac[1, d+1]
+    m[t, ] <- colMeans(x[, , t+1])
+    v[t, ] <- colVars(x[, , t+1])
+  }
+  Zrep[j] <- sum(lZ)
+  se[, , j] <- (m - t(true_means))^2
+  vse[, , j] <- (v - true_variances)^2
+}
+mse <- apply(se, c(1,2), mean)
+vmse <- apply(vse, c(1,2), mean)
+boxplot(Zrep)
 abline(h = true_ll, col = "red")
 
 plot(1:Time.step, type = "l", rowMeans(mse))
 plot(1:Time.step, type = "l", rowMeans(vmse))
-
-

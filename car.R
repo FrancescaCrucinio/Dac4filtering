@@ -19,7 +19,7 @@ m1 <- matrix(0, d, d)
 m1[lower.tri(m1, diag = FALSE)] <- -1/d
 diag(m1) <- 1
 m2 <- matrix(0, d, d)
-m2[upper.tri(m1, diag = TRUE)] <- -1/d
+m2[upper.tri(m1, diag = TRUE)] <- 1/d
 x.coeff <- solve(m1)%*%m2
 x.error.prec <- sigmaX^(-2) * t(m1)%*%m1
 x.error.var <- solve(x.error.prec)
@@ -67,7 +67,7 @@ for (u in 1:nlevels){
 
 # DAC
 Nparticles <- 1000
-Nrep <- 1
+Nrep <- 10
 se <- array(0, dim = c(Time.step, d, Nrep))
 vse <- array(0, dim = c(Time.step, d, Nrep))
 Zrep <- rep(0, times = Nrep)

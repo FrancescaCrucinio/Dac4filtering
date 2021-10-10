@@ -42,14 +42,12 @@ dac_car <- function(xOld, obs, sigmaX, sigmaY, Sigma.det){
       # all children are leaves
       if(u == 1){
         for (n1 in 1:Nparticles) {
-          # precompute quantities which only depend on n1
-          prec <- x[n1, ci[1]] * sum(xOld[n1, ci[1]:d])/(d^2*sigmaX)
           for (n2 in 1:Nparticles) {
-            lWmix[n1, n2] <- lW[n1, (nchild*(i-1)+1)] + lW[n2, i*nchild] -
+            lWmix[n1, n2] <- lW[n1, (nchild*(i-1)+1)] + lW[n2, i*nchild] +
               x[n1, ci[1]:(ci[1]+nv-1)]*x[n2, (ci[1]+nv):ci[2]]/(d*sigmaX) -
-              (x[n1, ci[1]:(ci[1]+nv-1)]/d)^2/(2*sigmaX)
+              (x[n1, ci[1]:(ci[1]+nv-1)]/d)^2/(2*sigmaX) - 
+              x[n1, ci[1]] * sum(xOld[n2, ci[1]:d])/(d^2*sigmaX)
           }
-          lWmix[n1, ] <- lWmix[n1, ] + prec
         }
         max.lWmix <- max(lWmix)
         Wmix <- exp(lWmix - max.lWmix)
@@ -57,20 +55,19 @@ dac_car <- function(xOld, obs, sigmaX, sigmaY, Sigma.det){
           0.5*Sigma.det[[u]][nchild*(i-1)+1] - 0.5*Sigma.det[[u]][i*nchild] + 0.5*Sigma.det[[u+1]][i]
       } else {
         for (n1 in 1:Nparticles) {
-          # precompute quantities which only depend on n1
-          prec <- 0
-          for (i1 in ci[1]:(ci[1]+nv-1)){
-            prec <- prec + x[n1, i1] * sum(xOld[n1, i1:d])
-          }
-          prec <- nv*prec/(d^2*sigmaX)
           for (n2 in 1:Nparticles) {
             # merge the two children nodes
             mx <- c(x[n1, ci[1]:(ci[1]+nv-1)], x[n2, (ci[1]+nv):ci[2]])
+            # get last term in mixture weights
+            tmp <- 0
+            for (i1 in ci[1]:(ci[1]+nv-1)){
+              tmp <- tmp + x[n1, i1] * sum(xOld[n2, i1:d])
+            }
+            tmp <- nv*tmp/(d^2*sigmaX)
             lWmix[n1, n2] <- sum(x[n1, ci[1]:(ci[1]+nv-1)])*sum(x[n2, (ci[1]+nv):ci[2]])/(d*sigmaX) -
               (sum(cumsum(mx[1:(nvNew-1)]/d)^2) - sum(cumsum(x[n1, ci[1]:(ci[1]+nv-1)][1:(nv-1)]/d)^2) -
-                 sum(cumsum(x[n2, (ci[1]+nv):ci[2]][1:(nv-1)]/d)^2))/(2*sigmaX)
+                 sum(cumsum(x[n2, (ci[1]+nv):ci[2]][1:(nv-1)]/d)^2))/(2*sigmaX) - tmp
           }
-          lWmix[n1, ] <- lWmix[n1, ] + prec
         }
         max.lWmix <- max(lWmix)
         Wmix <- exp(lWmix - max.lWmix)
