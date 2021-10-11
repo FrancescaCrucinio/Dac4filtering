@@ -5,8 +5,6 @@ dac_car <- function(xOld, obs, sigmaX, sigmaY, Sigma.det){
   # tree topology
   nchild <- 2
   nlevels <- log2(d)
-  # function returning index of first and last child of node i in level u
-
   # leaves
   # number of variables
   nv <- 1
@@ -46,7 +44,7 @@ dac_car <- function(xOld, obs, sigmaX, sigmaY, Sigma.det){
             lWmix[n1, n2] <- lW[n1, (nchild*(i-1)+1)] + lW[n2, i*nchild] +
               x[n1, ci[1]:(ci[1]+nv-1)]*x[n2, (ci[1]+nv):ci[2]]/(d*sigmaX) -
               (x[n1, ci[1]:(ci[1]+nv-1)]/d)^2/(2*sigmaX) - 
-              x[n1, ci[1]] * sum(xOld[n2, ci[1]:d])/(d^2*sigmaX)
+              x[n1, ci[1]] * sum(xOld[n1, ci[1]:d])/(d^2*sigmaX)
           }
         }
         max.lWmix <- max(lWmix)
@@ -61,7 +59,7 @@ dac_car <- function(xOld, obs, sigmaX, sigmaY, Sigma.det){
             # get last term in mixture weights
             tmp <- 0
             for (i1 in ci[1]:(ci[1]+nv-1)){
-              tmp <- tmp + x[n1, i1] * sum(xOld[n2, i1:d])
+              tmp <- tmp + x[n1, i1] * sum(xOld[n2, i1:d]) # this needs checking
             }
             tmp <- nv*tmp/(d^2*sigmaX)
             lWmix[n1, n2] <- sum(x[n1, ci[1]:(ci[1]+nv-1)])*sum(x[n2, (ci[1]+nv):ci[2]])/(d*sigmaX) -

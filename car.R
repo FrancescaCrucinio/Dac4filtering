@@ -6,7 +6,7 @@ library(LaplacesDemon)
 
 set.seed(1234)
 # dimension
-d <- 4
+d <- 2
 # initial state
 mu0 <- rep(0, times = d)
 Sigma0 <- diag(x = 1, d, d)
@@ -47,7 +47,7 @@ for (t in 1:Time.step){
 
 # precompute determinants of precision matrices
 Sigma.det <- vector(mode = "list", length = log2(d)+1)
-Sigma.det[[1]] <- log(diag(x.error.prec))
+Sigma.det[[1]] <- log(rep(1/sigmaX, times = d))
 # loop over tree levels excluding leaves
 nlevels <- log2(d)
 nchild <- 2
@@ -55,10 +55,10 @@ for (u in 1:nlevels){
   # number of nodes at this level
   nodes <- nchild^(nlevels-u)
   # number of variables in each node
-  nvNew <- nchild^u
+  nv <- nchild^u
   tmp <- rep(0, times = nodes)
   for (i in 1:nodes){
-    ci <- child_indices(i, nvNew)
+    ci <- child_indices(i, nv)
     # determinant of precision of variables in node i at level u
     tmp[i] <- det(x.error.prec[ci[1]:ci[2], ci[1]:ci[2]])
   }
