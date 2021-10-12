@@ -1,5 +1,4 @@
 mult_resample <- function(W, N){
-  dims <- nrow(W)
   W <- c(W)
   # vector to store number of offsprings
   indices <- rep(0, times = N)
@@ -15,9 +14,5 @@ mult_resample <- function(W, N){
     }
     indices[i] <- m
   }
-  # row and column indices
-  r <- indices -  trunc(indices/dims)*dims
-  r[r == 0] <- dims
-  c <- pmin(trunc((indices -1 )/dims)+1, dims)
-  return(cbind(r, c))
+  return(indices)
 }

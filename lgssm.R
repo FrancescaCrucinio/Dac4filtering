@@ -30,7 +30,7 @@ y.error.var <- diag(x = sigmaY, d, d)
 y.coeff <- diag(x = 1, d, d)
 
 # number of time steps
-Time.step <- 10
+Time.step <- 1
 
 # get observations
 y <- lgssm_obs(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step)
@@ -101,7 +101,7 @@ for (j in 1:Nrep){
   m <- matrix(0, nrow = Time.step, ncol = d)
   v <- matrix(0, nrow = Time.step, ncol = d)
   for (t in 1:Time.step) {
-    res_dac <- dac_lgssm(x[, , t], y[t, ], tau, lambda, sigmaY, Sigma.det)
+    res_dac <- dac_lgssm_lightweight(x[, , t], y[t, ], tau, lambda, sigmaY, Sigma.det, 100s0)
     x[, , t+1] <- res_dac[, 1:d]
     lZ[t] <- res_dac[1, d+1]
     m[t, ] <- colMeans(x[, , t+1])
