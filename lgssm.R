@@ -30,7 +30,7 @@ y.error.var <- diag(x = sigmaY, d, d)
 y.coeff <- diag(x = 1, d, d)
 
 # number of time steps
-Time.step <- 1
+Time.step <- 10
 
 # get observations
 y <- lgssm_obs(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step)
@@ -67,30 +67,6 @@ for (u in 1:nlevels){
 # DAC
 Nparticles <- 1000
 Nrep <- 10
-
-# registerDoParallel(3)
-# res <- foreach (j=1:Nrep, .packages= c('MASS', 'resample'), .combine='rbind',
-#                 .multicombine=TRUE, .inorder = FALSE,
-#                 .init=list(list(), list(), vector())) %dopar% {
-#                   x <- array(0, dim = c(Nparticles, d, Time.step+1))
-#                   x[, , 1] <- mvrnorm(n = Nparticles, mu0, Sigma0)
-#                   lZ <- rep(0, times = Time.step)
-#                   m <- matrix(0, nrow = Time.step, ncol = d)
-#                   v <- matrix(0, nrow = Time.step, ncol = d)
-#                   for (t in 1:Time.step) {
-#                     res_dac <- dac_lgssm(x[, , t], y[t, ], tau, lambda, sigmaY, Sigma.det)
-#                     x[, , t+1] <- res_dac[, 1:d]
-#                     lZ[t] <- res_dac[1, d+1]
-#                     m[t, ] <- colMeans(x[, , t+1])
-#                     v[t, ] <- colVars(x[, , t+1])
-#                   }
-#                   list((m - t(true_means))^2, (v - true_variances)^2, sum(lZ))
-#                 }
-# mse <- apply(array(unlist(res[, 1]), dim = c(Time.step, d, Nrep)), c(1,2), mean)
-# vmse <- apply(array(unlist(res[, 2]), dim = c(Time.step, d, Nrep)), c(1,2), mean)
-# boxplot(unlist(res[, 3]))
-# abline(h = true_ll, col = "red")
-
 se <- array(0, dim = c(Time.step, d, Nrep))
 vse <- array(0, dim = c(Time.step, d, Nrep))
 Zrep <- rep(0, times = Nrep)
@@ -101,7 +77,7 @@ for (j in 1:Nrep){
   m <- matrix(0, nrow = Time.step, ncol = d)
   v <- matrix(0, nrow = Time.step, ncol = d)
   for (t in 1:Time.step) {
-    res_dac <- dac_lgssm_lightweight(x[, , t], y[t, ], tau, lambda, sigmaY, Sigma.det, 100s0)
+    res_dac <- dac_lgssm_lightweight(x[, , t], y[t, ], tau, lambda, sigmaY, Sigma.det, 1000)
     x[, , t+1] <- res_dac[, 1:d]
     lZ[t] <- res_dac[1, d+1]
     m[t, ] <- colMeans(x[, , t+1])
