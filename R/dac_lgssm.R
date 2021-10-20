@@ -105,6 +105,7 @@ dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det, m){
     lW <- -0.5*(obs[i] - x[, i])^2/sigmaY - 0.5*log(2*pi*sigmaY)
     max.lW <- max(lW)
     W[, i] <- exp(lW - max.lW)
+    W[, i] <- W[, i]/sum(W[, i])
     lZ[i] <- log(mean(W[, i])) + max.lW
   }
 
@@ -128,11 +129,11 @@ dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det, m){
       ci <- child_indices(i, nvNew)
       # resample on each children
       # child 1
-      indices1 <- mult_resample(W[, nchild*(i-1)+1]/sum(W[, nchild*(i-1)+1]), m*Nparticles)
+      indices1 <- mult_resample(W[, nchild*(i-1)+1], m*Nparticles)
       xTmp[, ci[1]:(ci[1]+nv-1)] <- x[indices1, ci[1]:(ci[1]+nv-1)]
       xOld1Tmp[, ci[1]:(ci[1]+nv-1)] <- xOld[indices1, ci[1]:(ci[1]+nv-1)]
       # child 2 (with random permutation)
-      indices2 <- sample(mult_resample(W[, nchild*i]/sum(W[, nchild*i]), m*Nparticles))
+      indices2 <- sample(mult_resample(W[, nchild*i], m*Nparticles))
       xTmp[, (ci[1]+nv):ci[2]] <- x[indices2, (ci[1]+nv):ci[2]]
       xOld2Tmp[, (ci[1]+nv):ci[2]] <- xOld[indices2, (ci[1]+nv):ci[2]]
       # mixture weights
@@ -157,7 +158,7 @@ dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det, m){
     xOld <- xOldNew
     lZ <- lZNew
     nv <- nvNew
-    W <- matrix(1, nrow = Nparticles, ncol = nodes)
+    W <- matrix(1/Nparticles, nrow = Nparticles, ncol = nodes)
   }
   return(cbind(x, lZ))
 }
