@@ -57,7 +57,7 @@ for (u in 1:nlevels){
   Sigma.det[[u+1]] <- log(tmp)
 }
 # DAC
-Nparticles <- 10
+Nparticles <- 1000
 Nrep <- 10
 se <- array(0, dim = c(Time.step, d, Nrep))
 vse <- array(0, dim = c(Time.step, d, Nrep))
