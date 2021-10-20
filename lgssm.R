@@ -1,11 +1,3 @@
-# libraries
-library(MASS)
-library(FKF)
-library(LaplacesDemon)
-library(resample)
-library(foreach)
-library(doParallel)
-
 set.seed(1234)
 # dimension
 d <- 4
@@ -65,7 +57,7 @@ for (u in 1:nlevels){
   Sigma.det[[u+1]] <- log(tmp)
 }
 # DAC
-Nparticles <- 1000
+Nparticles <- 10
 Nrep <- 10
 se <- array(0, dim = c(Time.step, d, Nrep))
 vse <- array(0, dim = c(Time.step, d, Nrep))
@@ -77,7 +69,7 @@ for (j in 1:Nrep){
   m <- matrix(0, nrow = Time.step, ncol = d)
   v <- matrix(0, nrow = Time.step, ncol = d)
   for (t in 1:Time.step) {
-    res_dac <- dac_lgssm_lightweight(x[, , t], y[t, ], tau, lambda, sigmaY, Sigma.det, 1000)
+    res_dac <- dac_lgssm_lightweight(x[, , t], y[t, ], tau, lambda, sigmaY, Sigma.det, 100)
     x[, , t+1] <- res_dac[, 1:d]
     lZ[t] <- res_dac[1, d+1]
     m[t, ] <- colMeans(x[, , t+1])
@@ -94,3 +86,4 @@ abline(h = true_ll, col = "red")
 
 plot(1:Time.step, type = "l", rowMeans(mse))
 plot(1:Time.step, type = "l", rowMeans(vmse))
+
