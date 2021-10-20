@@ -105,8 +105,8 @@ dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det, m){
     lW <- -0.5*(obs[i] - x[, i])^2/sigmaY - 0.5*log(2*pi*sigmaY)
     max.lW <- max(lW)
     W[, i] <- exp(lW - max.lW)
-    W[, i] <- W[, i]/sum(W[, i])
     lZ[i] <- log(mean(W[, i])) + max.lW
+    W[, i] <- W[, i]/sum(W[, i])
   }
 
   # loop over tree levels excluding leaves
@@ -118,10 +118,7 @@ dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det, m){
 
     # updated particles/normalizing constant
     xNew <- matrix(0, nrow = Nparticles, ncol = d)
-    xTmp <- matrix(0, nrow = m*Nparticles, ncol = d)
     xOldNew <- matrix(0, nrow = Nparticles, ncol = d)
-    xOld1Tmp <- matrix(0, nrow = m*Nparticles, ncol = d)
-    xOld2Tmp <- matrix(0, nrow = m*Nparticles, ncol = d)
     lZNew <- rep(0, times = nodes)
 
     for (i in 1:nodes){
@@ -130,29 +127,20 @@ dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det, m){
       # resample on each children
       # child 1
       indices1 <- mult_resample(W[, nchild*(i-1)+1], m*Nparticles)
-      xTmp[, ci[1]:(ci[1]+nv-1)] <- x[indices1, ci[1]:(ci[1]+nv-1)]
-      xOld1Tmp[, ci[1]:(ci[1]+nv-1)] <- xOld[indices1, ci[1]:(ci[1]+nv-1)]
       # child 2 (with random permutation)
       indices2 <- sample(mult_resample(W[, nchild*i], m*Nparticles))
-      xTmp[, (ci[1]+nv):ci[2]] <- x[indices2, (ci[1]+nv):ci[2]]
-      xOld2Tmp[, (ci[1]+nv):ci[2]] <- xOld[indices2, (ci[1]+nv):ci[2]]
       # mixture weights
-      lWmix <- rep(0, times = m*Nparticles)
-      for (n in 1:(m*Nparticles)) {
-        lWmix[n] <- lambda * (xTmp[n, (ci[1]+nv-1)] - 0.5*xOld1Tmp[n, (ci[1]+nv-1)]) * (xTmp[n, (ci[1]+nv)] - 0.5*xOld1Tmp[n, (ci[1]+nv)])
-      }
+      lWmix <- lambda * (x[indices1, (ci[1]+nv-1)] - 0.5*xOld[indices1, (ci[1]+nv-1)]) * 
+        (x[indices2, (ci[1]+nv)] - 0.5*xOld[indices2, (ci[1]+nv)])
       max.lWmix <- max(lWmix)
       Wmix <- exp(lWmix - max.lWmix)
       lZNew[i] <- lZ[(nchild*(i-1)+1)] + lZ[i*nchild] + log(mean(Wmix)) + max.lWmix -
         0.5*Sigma.det[[u]][nchild*(i-1)+1] - 0.5*Sigma.det[[u]][i*nchild] + 0.5*Sigma.det[[u+1]][i]
       # resampling the new population
       indices <- mult_resample(Wmix/sum(Wmix), Nparticles)
-      for(n in 1:Nparticles) {
-        # update particles
-        xNew[n, ci[1]:ci[2]] <- xTmp[indices[n], ci[1]:ci[2]]
-        # update xOld
-        xOldNew[n, ci[1]:ci[2]] <- xOld1Tmp[indices[n], ci[1]:ci[2]]
-        }
+      # update particles
+      xNew[, ci[1]:ci[2]] <- rbind(x[indices1[indices], ci[1]:(ci[1]+nv-1)], x[indices2[indices], (ci[1]+nv):ci[2]])
+      xOldNew[, ci[1]:ci[2]] <- rbind(xOld[indices1[indices], ci[1]:(ci[1]+nv-1)], xOld[indices2[indices], (ci[1]+nv):ci[2]])
       }
     x <- xNew
     xOld <- xOldNew
