@@ -43,8 +43,8 @@ dac_car <- function(xOld, obs, sigmaX, sigmaY, Sigma.det){
           for (n2 in 1:Nparticles) {
             lWmix[n1, n2] <- lW[n1, (nchild*(i-1)+1)] + lW[n2, i*nchild] +
               x[n1, ci[1]:(ci[1]+nv-1)]*x[n2, (ci[1]+nv):ci[2]]/(d*sigmaX) -
-              (x[n1, ci[1]:(ci[1]+nv-1)]/d)^2/(2*sigmaX) - 
-              x[n1, ci[1]] * sum(xOld[n1, ci[1]:d])/(d^2*sigmaX)
+              (x[n1, ci[1]:(ci[1]+nv-1)]/d)^2/(2*sigmaX) -
+              x[n1, ci[1]] * sum(xOld[n1, ci[2]:d])/(d^2*sigmaX)
           }
         }
         max.lWmix <- max(lWmix)
@@ -58,10 +58,10 @@ dac_car <- function(xOld, obs, sigmaX, sigmaY, Sigma.det){
             mx <- c(x[n1, ci[1]:(ci[1]+nv-1)], x[n2, (ci[1]+nv):ci[2]])
             # get last term in mixture weights
             tmp <- 0
-            for (i1 in ci[1]:(ci[1]+nv-1)){
-              tmp <- tmp + x[n1, i1] * sum(xOld[n2, i1:d]) # this needs checking
+            for (h in 1:nv){
+              tmp <- tmp + (nv-h+1)*sum(xOld[n2, (d-h+1):d])
             }
-            tmp <- nv*tmp/(d^2*sigmaX)
+            tmp <- sum(x[n1, ci[1]:(ci[1]+nv-1)])*tmp/(d^2*sigmaX)
             lWmix[n1, n2] <- sum(x[n1, ci[1]:(ci[1]+nv-1)])*sum(x[n2, (ci[1]+nv):ci[2]])/(d*sigmaX) -
               (sum(cumsum(mx[1:(nvNew-1)]/d)^2) - sum(cumsum(x[n1, ci[1]:(ci[1]+nv-1)][1:(nv-1)]/d)^2) -
                  sum(cumsum(x[n2, (ci[1]+nv):ci[2]][1:(nv-1)]/d)^2))/(2*sigmaX) - tmp
@@ -74,7 +74,9 @@ dac_car <- function(xOld, obs, sigmaX, sigmaY, Sigma.det){
       }
       Wmix <- Wmix/sum(Wmix)
       # resampling
-      res <- mult_resample(Wmix, Nparticles)
+      indices <- mult_resample(Wmix, Nparticles)
+      # get row/column indices
+      res <- rc_indices(indices, Nparticles)
       for(n in 1:Nparticles) {
         # update particles
         xNew[n, ci[1]:ci[2]] <- c(x[res[n, 1], ci[1]:(ci[1]+nv-1)], x[res[n, 2], (ci[1]+nv):ci[2]])

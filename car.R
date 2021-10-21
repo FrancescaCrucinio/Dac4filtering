@@ -6,7 +6,7 @@ library(LaplacesDemon)
 
 set.seed(1234)
 # dimension
-d <- 2
+d <- 4
 # initial state
 mu0 <- rep(0, times = d)
 Sigma0 <- diag(x = 1, d, d)
@@ -30,7 +30,7 @@ y.coeff <- diag(1, d, d)
 
 
 # number of time steps
-Time.step <- 1
+Time.step <- 10
 
 # get observations
 y <- lgssm_obs(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step)
