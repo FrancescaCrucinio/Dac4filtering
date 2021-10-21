@@ -130,7 +130,7 @@ dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det, m){
       # child 2 (with random permutation)
       indices2 <- sample(mult_resample(W[, nchild*i], m*Nparticles))
       # mixture weights
-      lWmix <- lambda * (x[indices1, (ci[1]+nv-1)] - 0.5*xOld[indices1, (ci[1]+nv-1)]) * 
+      lWmix <- lambda * (x[indices1, (ci[1]+nv-1)] - 0.5*xOld[indices1, (ci[1]+nv-1)]) *
         (x[indices2, (ci[1]+nv)] - 0.5*xOld[indices2, (ci[1]+nv)])
       max.lWmix <- max(lWmix)
       Wmix <- exp(lWmix - max.lWmix)
@@ -139,8 +139,8 @@ dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det, m){
       # resampling the new population
       indices <- mult_resample(Wmix/sum(Wmix), Nparticles)
       # update particles
-      xNew[, ci[1]:ci[2]] <- rbind(x[indices1[indices], ci[1]:(ci[1]+nv-1)], x[indices2[indices], (ci[1]+nv):ci[2]])
-      xOldNew[, ci[1]:ci[2]] <- rbind(xOld[indices1[indices], ci[1]:(ci[1]+nv-1)], xOld[indices2[indices], (ci[1]+nv):ci[2]])
+      xNew[, ci[1]:ci[2]] <- cbind(x[indices1[indices], ci[1]:(ci[1]+nv-1)], x[indices2[indices], (ci[1]+nv):ci[2]])
+      xOldNew[, ci[1]:ci[2]] <- cbind(xOld[indices1[indices], ci[1]:(ci[1]+nv-1)], xOld[indices2[indices], (ci[1]+nv):ci[2]])
       }
     x <- xNew
     xOld <- xOldNew

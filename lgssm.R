@@ -1,6 +1,6 @@
 set.seed(1234)
 # dimension
-d <- 4
+d <- 16
 # initial state
 mu0 <- rep(0, times = d)
 Sigma0 <- diag(x = 1, d, d)
@@ -22,7 +22,7 @@ y.error.var <- diag(x = sigmaY, d, d)
 y.coeff <- diag(x = 1, d, d)
 
 # number of time steps
-Time.step <- 5
+Time.step <- 10
 
 # get observations
 y <- lgssm_obs(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step)
