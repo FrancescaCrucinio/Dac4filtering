@@ -1,6 +1,6 @@
 set.seed(1234)
 # dimension
-d <- 16
+d <- 4
 # initial state
 mu0 <- rep(0, times = d)
 Sigma0 <- diag(x = 1, d, d)
