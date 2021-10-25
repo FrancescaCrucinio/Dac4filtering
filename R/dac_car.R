@@ -11,6 +11,8 @@ dac_car <- function(xOld, obs, sigmaX, sigmaY, Sigma.det){
   x <- matrix(0, nrow = Nparticles, ncol = d)
   lW <- matrix(0, nrow = Nparticles, ncol = d)
   lZ <- rep(0, times = d)
+  # copies of xOld
+  indicesOld <- matrix(1:Nparticles, nrow = Nparticles, ncol = d)
   for (i in 1:nchild^nlevels){
     # propose
     x[, i] <- rowSums(xOld[, i:d, drop = FALSE])/d + sqrt(sigmaX) * rnorm(Nparticles)
@@ -59,7 +61,7 @@ dac_car <- function(xOld, obs, sigmaX, sigmaY, Sigma.det){
             # get last term in mixture weights
             tmp <- 0
             for (h in 1:nv){
-              tmp <- tmp + (nv-h+1)*sum(xOld[n2, (d-h+1):d])
+              tmp <- tmp + (nv-h+1)*sum(xOld[indicesOld[n2, (d-h+1):d], (d-h+1):d])
             }
             tmp <- sum(x[n1, ci[1]:(ci[1]+nv-1)])*tmp/(d^2*sigmaX)
             lWmix[n1, n2] <- sum(x[n1, ci[1]:(ci[1]+nv-1)])*sum(x[n2, (ci[1]+nv):ci[2]])/(d*sigmaX) -
@@ -81,7 +83,8 @@ dac_car <- function(xOld, obs, sigmaX, sigmaY, Sigma.det){
         # update particles
         xNew[n, ci[1]:ci[2]] <- c(x[res[n, 1], ci[1]:(ci[1]+nv-1)], x[res[n, 2], (ci[1]+nv):ci[2]])
         # update xOld
-        xOldNew[n, ci[1]:ci[2]] <- c(xOld[res[n, 1], ci[1]:(ci[1]+nv-1)], xOld[res[n, 2], (ci[1]+nv):ci[2]])
+        indicesOld[n, ci[1]:(ci[1]+nv-1)] <- res[n, 1]
+        indicesOld[n, (ci[1]+nv):ci[2]] <- res[n, 2]
       }
     }
     x <- xNew
