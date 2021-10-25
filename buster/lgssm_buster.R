@@ -5,10 +5,10 @@ library(LaplacesDemon)
 library(resample)
 library(foreach)
 library(doParallel)
-source("R/utils.R")
-source("R/dac_lgssm.R")
-source("R/mult_resample.R")
-source("R/lgssm_obs.R")
+source("utils.R")
+source("dac_lgssm.R")
+source("mult_resample.R")
+source("lgssm_obs.R")
 
 set.seed(1234)
 # dimension
@@ -73,7 +73,7 @@ Nparticles <- 100*d
 Nrep <- 100
 
 registerDoParallel(10)
-res <- foreach (j=1:Nrep, .packages= c('MASS', 'resample'), .combine='rbind',
+res <- foreach (j=1:Nrep, .packages= c('MASS', 'resample', 'tictoc'), .combine='rbind',
                 .multicombine=TRUE, .inorder = FALSE,
                 .init=list(list(), list(), vector(), list(), list(), vector())) %dopar% {
                   x <- array(0, dim = c(Nparticles, d, Time.step+1))
