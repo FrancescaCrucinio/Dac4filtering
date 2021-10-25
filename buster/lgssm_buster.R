@@ -12,7 +12,7 @@ source("R/lgssm_obs.R")
 
 set.seed(1234)
 # dimension
-d <- 4
+d <- 8
 # initial state
 mu0 <- rep(0, times = d)
 Sigma0 <- diag(x = 1, d, d)
@@ -69,7 +69,7 @@ for (u in 1:nlevels){
   Sigma.det[[u+1]] <- log(tmp)
 }
 # DAC
-Nparticles <- 10*d
+Nparticles <- 100*d
 Nrep <- 4
 
 registerDoParallel(3)
@@ -108,3 +108,12 @@ mse <- apply(array(unlist(res[, 1]), dim = c(Time.step, d, Nrep)), c(1,2), mean)
 vmse <- apply(array(unlist(res[, 2]), dim = c(Time.step, d, Nrep)), c(1,2), mean)
 mselw <- apply(array(unlist(res[, 4]), dim = c(Time.step, d, Nrep)), c(1,2), mean)
 vmselw <- apply(array(unlist(res[, 5]), dim = c(Time.step, d, Nrep)), c(1,2), mean)
+
+df <- data.frame(cbind(mse, mselw))
+write.csv(df, file = "mse.csv", row.names = FALSE)
+
+df <- data.frame(cbind(vmse, vmselw))
+write.csv(df, file = "vmse.csv", row.names = FALSE)
+
+df <- data.frame(cbind(unlist(res[, 3]), unlist(res[, 6])))
+write.csv(df, file = "runtime.csv", row.names = FALSE)
