@@ -5,10 +5,10 @@ library(LaplacesDemon)
 library(resample)
 library(foreach)
 library(doParallel)
-source("utils.R")
-source("dac_lgssm.R")
-source("mult_resample.R")
-source("lgssm_obs.R")
+source("R/utils.R")
+source("R/dac_lgssm.R")
+source("R/mult_resample.R")
+source("R/lgssm_obs.R")
 
 set.seed(1234)
 # dimension
@@ -69,28 +69,42 @@ for (u in 1:nlevels){
   Sigma.det[[u+1]] <- log(tmp)
 }
 # DAC
-Nparticles <- 1000
-Nrep <- 10
+Nparticles <- 10*d
+Nrep <- 4
 
 registerDoParallel(3)
 res <- foreach (j=1:Nrep, .packages= c('MASS', 'resample'), .combine='rbind',
                 .multicombine=TRUE, .inorder = FALSE,
-                .init=list(list(), list(), vector())) %dopar% {
+                .init=list(list(), list(), vector(), list(), list(), vector())) %dopar% {
                   x <- array(0, dim = c(Nparticles, d, Time.step+1))
                   x[, , 1] <- mvrnorm(n = Nparticles, mu0, Sigma0)
-                  lZ <- rep(0, times = Time.step)
                   m <- matrix(0, nrow = Time.step, ncol = d)
                   v <- matrix(0, nrow = Time.step, ncol = d)
+                  xlw <- array(0, dim = c(Nparticles, d, Time.step+1))
+                  xlw[, , 1] <- mvrnorm(n = Nparticles, mu0, Sigma0)
+                  mlw <- matrix(0, nrow = Time.step, ncol = d)
+                  vlw <- matrix(0, nrow = Time.step, ncol = d)
+                  runt <- 0
+                  runtlw <- 0
                   for (t in 1:Time.step) {
+                    tic()
                     res_dac <- dac_lgssm(x[, , t], y[t, ], tau, lambda, sigmaY, Sigma.det)
+                    runtime <- toc()
+                    runt <- runt + runtime$toc - runtime$tic
                     x[, , t+1] <- res_dac[, 1:d]
-                    lZ[t] <- res_dac[1, d+1]
                     m[t, ] <- colMeans(x[, , t+1])
                     v[t, ] <- colVars(x[, , t+1])
+                    tic()
+                    res_dac_lw <- dac_lgssm_lightweight(x[, , t], y[t, ], tau, lambda, sigmaY, Sigma.det, ceiling(sqrt(Nparticles)))
+                    runtime <- toc()
+                    runtlw <- runtlw + runtime$toc - runtime$tic
+                    xlw[, , t+1] <- res_dac_lw[, 1:d]
+                    mlw[t, ] <- colMeans(xlw[, , t+1])
+                    vlw[t, ] <- colVars(xlw[, , t+1])
                   }
-                  list((m - t(true_means))^2, (v - true_variances)^2, sum(lZ))
+                  list((m - t(true_means))^2, (v - true_variances)^2, runt, (mlw - t(true_means))^2, (vlw - true_variances)^2, runtlw)
                 }
 mse <- apply(array(unlist(res[, 1]), dim = c(Time.step, d, Nrep)), c(1,2), mean)
 vmse <- apply(array(unlist(res[, 2]), dim = c(Time.step, d, Nrep)), c(1,2), mean)
-boxplot(unlist(res[, 3]))
-abline(h = true_ll, col = "red")
+mselw <- apply(array(unlist(res[, 4]), dim = c(Time.step, d, Nrep)), c(1,2), mean)
+vmselw <- apply(array(unlist(res[, 5]), dim = c(Time.step, d, Nrep)), c(1,2), mean)

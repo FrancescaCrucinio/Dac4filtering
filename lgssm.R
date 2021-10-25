@@ -110,12 +110,10 @@ mse <- apply(se, c(1,2), mean)
 vmse <- apply(vse, c(1,2), mean)
 mselw <- apply(selw, c(1,2), mean)
 vmselw <- apply(vselw, c(1,2), mean)
-boxplot(Zrep)
-abline(h = true_ll, col = "red")
 
 # MSE
 plot(1:Time.step, type = "l", rowMeans(mse), col = "blue", xlab=" ", ylab=" ",
-     ylim = c(0, max(rowMeans(mse), rowMeans(mselw))))
+     ylim = c(0, max(rowMeans(mse), rowMeans(mselw))), cex = 1.5)
 lines(1:Time.step, rowMeans(mselw), col = "red")
 legend(1, 0.001, legend = c("dac", "dac-lw"), col=c("red", "blue"), lty=1, cex=0.8)
 
