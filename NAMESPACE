@@ -1,2 +1,2 @@
 exportPattern("^[[:alpha:]]+")
-import(MASS, FKF, LaplacesDemon, resample)
+import(MASS, FKF, LaplacesDemon, resample, tictoc)

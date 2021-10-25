@@ -1,9 +1,3 @@
-# libraries
-library(MASS)
-library(FKF)
-library(resample)
-library(LaplacesDemon)
-
 set.seed(1234)
 # dimension
 d <- 4
@@ -79,7 +73,7 @@ for (j in 1:Nrep){
   m <- matrix(0, nrow = Time.step, ncol = d)
   v <- matrix(0, nrow = Time.step, ncol = d)
   for (t in 1:Time.step) {
-    res_dac <- dac_car(x[, , t], y[t, ], sigmaX, sigmaY, Sigma.det)
+    res_dac <- dac_car_lightweight(x[, , t], y[t, ], sigmaX, sigmaY, Sigma.det, 100)
     x[, , t+1] <- res_dac[, 1:d]
     lZ[t] <- res_dac[1, d+1]
     m[t, ] <- colMeans(x[, , t+1])
