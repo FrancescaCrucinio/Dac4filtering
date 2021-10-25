@@ -70,9 +70,9 @@ for (u in 1:nlevels){
 }
 # DAC
 Nparticles <- 100*d
-Nrep <- 4
+Nrep <- 100
 
-registerDoParallel(3)
+registerDoParallel(10)
 res <- foreach (j=1:Nrep, .packages= c('MASS', 'resample'), .combine='rbind',
                 .multicombine=TRUE, .inorder = FALSE,
                 .init=list(list(), list(), vector(), list(), list(), vector())) %dopar% {
