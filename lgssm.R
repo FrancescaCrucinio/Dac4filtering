@@ -1,6 +1,6 @@
 set.seed(1234)
 # dimension
-d <- 4
+d <- 8
 # initial state
 mu0 <- rep(0, times = d)
 Sigma0 <- diag(x = 1, d, d)
@@ -57,33 +57,63 @@ for (u in 1:nlevels){
   Sigma.det[[u+1]] <- log(tmp)
 }
 # DAC
-Nparticles <- 1000
+Nparticles <- 100*d
 Nrep <- 10
 se <- array(0, dim = c(Time.step, d, Nrep))
 vse <- array(0, dim = c(Time.step, d, Nrep))
 Zrep <- rep(0, times = Nrep)
+tRep <- rep(0, times = Nrep)
+selw <- array(0, dim = c(Time.step, d, Nrep))
+vselw <- array(0, dim = c(Time.step, d, Nrep))
+Zreplw <- rep(0, times = Nrep)
+tReplw <- rep(0, times = Nrep)
 for (j in 1:Nrep){
   x <- array(0, dim = c(Nparticles, d, Time.step+1))
   x[, , 1] <- mvrnorm(n = Nparticles, mu0, Sigma0)
   lZ <- rep(0, times = Time.step)
   m <- matrix(0, nrow = Time.step, ncol = d)
   v <- matrix(0, nrow = Time.step, ncol = d)
+  xlw <- array(0, dim = c(Nparticles, d, Time.step+1))
+  xlw[, , 1] <- mvrnorm(n = Nparticles, mu0, Sigma0)
+  lZlw <- rep(0, times = Time.step)
+  mlw <- matrix(0, nrow = Time.step, ncol = d)
+  vlw <- matrix(0, nrow = Time.step, ncol = d)
   for (t in 1:Time.step) {
-    res_dac <- dac_lgssm_lightweight(x[, , t], y[t, ], tau, lambda, sigmaY, Sigma.det, 100)
+    # dac
+    tic()
+    res_dac <- dac_lgssm(x[, , t], y[t, ], tau, lambda, sigmaY, Sigma.det)
+    runtime <- toc()
+    tRep[j] <- tRep[j] + runtime$toc - runtime$tic
     x[, , t+1] <- res_dac[, 1:d]
     lZ[t] <- res_dac[1, d+1]
     m[t, ] <- colMeans(x[, , t+1])
     v[t, ] <- colVars(x[, , t+1])
+
+    # ligthweight dac
+    tic()
+    res_dac_lw <- dac_lgssm_lightweight(x[, , t], y[t, ], tau, lambda, sigmaY, Sigma.det, ceiling(sqrt(Nparticles)))
+    runtime <- toc()
+    tReplw[j] <- tReplw[j] + runtime$toc - runtime$tic
+    xlw[, , t+1] <- res_dac_lw[, 1:d]
+    lZlw[t] <- res_dac_lw[1, d+1]
+    mlw[t, ] <- colMeans(xlw[, , t+1])
+    vlw[t, ] <- colVars(xlw[, , t+1])
   }
   Zrep[j] <- sum(lZ)
   se[, , j] <- (m - t(true_means))^2
   vse[, , j] <- (v - true_variances)^2
+  Zreplw[j] <- sum(lZlw)
+  selw[, , j] <- (mlw - t(true_means))^2
+  vselw[, , j] <- (vlw - true_variances)^2
 }
 mse <- apply(se, c(1,2), mean)
 vmse <- apply(vse, c(1,2), mean)
-boxplot(Zrep)
-abline(h = true_ll, col = "red")
+mselw <- apply(selw, c(1,2), mean)
+vmselw <- apply(vselw, c(1,2), mean)
 
-plot(1:Time.step, type = "l", rowMeans(mse))
-plot(1:Time.step, type = "l", rowMeans(vmse))
+# MSE
+plot(1:Time.step, type = "l", rowMeans(mse), col = "blue", xlab=" ", ylab=" ",
+     ylim = c(0, max(rowMeans(mse), rowMeans(mselw))), cex = 1.5)
+lines(1:Time.step, rowMeans(mselw), col = "red")
+legend(1, 0.001, legend = c("dac", "dac-lw"), col=c("red", "blue"), lty=1, cex=0.8)
 
