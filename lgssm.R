@@ -1,6 +1,6 @@
 set.seed(1234)
 # dimension
-d <- 16
+d <- 4
 # initial state
 mu0 <- rep(0, times = d)
 Sigma0 <- diag(x = 1, d, d)
@@ -69,7 +69,7 @@ for (j in 1:Nrep){
   m <- matrix(0, nrow = Time.step, ncol = d)
   v <- matrix(0, nrow = Time.step, ncol = d)
   for (t in 1:Time.step) {
-    res_dac <- dac_lgssm_lightweight(x[, , t], y[t, ], tau, lambda, sigmaY, Sigma.det, 100)
+    res_dac <- dac_lgssm_lightweight(x[, , t], y[t, ], tau, lambda, sigmaY, Sigma.det, 1000)
     x[, , t+1] <- res_dac[, 1:d]
     lZ[t] <- res_dac[1, d+1]
     m[t, ] <- colMeans(x[, , t+1])
