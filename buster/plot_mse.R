@@ -13,3 +13,6 @@ legend(1, 0.001, legend = c("dac", "dac-lw"), col=c("red", "blue"), lty=1, cex=1
 # relative MSE
 lgssm8_mse[, 1:d]/true_variances
 lgssm8_mse[, (d+1):(2*d)]/true_variances
+
+# runtime
+colMeans(lgssm8_runtime)[1]/colMeans(lgssm8_runtime)[2]
