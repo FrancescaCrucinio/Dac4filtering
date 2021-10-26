@@ -9,3 +9,7 @@ plot(1:Time.step, type = "l", rowMeans(lgssm8_mse[, 1:d]), col = "blue", xlab=" 
      ylim = c(0, max(rowMeans(lgssm8_mse))), cex = 2)
 lines(1:Time.step, rowMeans(lgssm8_mse[, (d+1):(2*d)]), col = "red")
 legend(1, 0.001, legend = c("dac", "dac-lw"), col=c("red", "blue"), lty=1, cex=1.5)
+
+# relative MSE
+lgssm8_mse[, 1:d]/true_variances
+lgssm8_mse[, (d+1):(2*d)]/true_variances
