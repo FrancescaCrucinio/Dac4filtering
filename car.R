@@ -1,6 +1,6 @@
 set.seed(1234)
 # dimension
-d <- 4
+d <- 2
 # initial state
 mu0 <- rep(0, times = d)
 Sigma0 <- diag(x = 1, d, d)
@@ -60,8 +60,8 @@ for (u in 1:nlevels){
 }
 
 # DAC
-Nparticles <- 100*d
-Nrep <- 10
+Nparticles <- 1000
+Nrep <- 50
 se <- array(0, dim = c(Time.step, d, Nrep))
 vse <- array(0, dim = c(Time.step, d, Nrep))
 Zrep <- rep(0, times = Nrep)
