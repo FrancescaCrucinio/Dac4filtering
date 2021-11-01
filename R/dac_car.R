@@ -60,12 +60,12 @@ dac_car <- function(xOld, obs, sigmaX, sigmaY, Sigma.det){
             # get last term in mixture weights
             tmp <- 0
             for (h in 1:nv){
-              tmp <- tmp + (nv-h+1)*sum(xOld[indicesOld[n2, (d-h+1):d], (d-h+1):d])
+              tmp <- tmp + (nv-h+1)*xOld[indicesOld[n2, d-h+1], d-h+1]
             }
             tmp <- sum(x[n1, ci[1]:(ci[1]+nv-1)])*tmp/(d^2*sigmaX)
             lWmix[n1, n2] <- sum(x[n1, ci[1]:(ci[1]+nv-1)])*sum(x[n2, (ci[1]+nv):ci[2]])/(d*sigmaX) -
-              (sum(cumsum(mx[1:(nvNew-1)]/d)^2) - sum(cumsum(x[n1, ci[1]:(ci[1]+nv-1)][1:(nv-1)]/d)^2) -
-                 sum(cumsum(x[n2, (ci[1]+nv):ci[2]][1:(nv-1)]/d)^2))/(2*sigmaX) - tmp
+              (sum(cumsum(mx[1:(nvNew-1)]/d)^2) - sum(cumsum(x[n1, ci[1]:(ci[1]+nv-1)][seq(length.out = (nv-1))]/d)^2) -
+                 sum(cumsum(x[n2, (ci[1]+nv):ci[2]][seq(length.out = (nv-1))]/d)^2))/(2*sigmaX) - tmp
           }
         }
         max.lWmix <- max(lWmix)
@@ -147,12 +147,12 @@ dac_car_lightweight <- function(xOld, obs, sigmaX, sigmaY, Sigma.det, m){
         # get last term in mixture weights
         tmp <- 0
         for (h in 1:nv){
-          tmp <- tmp + (nv-h+1)*sum(xOld[indicesOld[indices2[n], (d-h+1):d], (d-h+1):d])
+          tmp <- tmp + (nv-h+1)*xOld[indicesOld[indices2[n], d-h+1], d-h+1]
         }
         tmp <- sum(x[indices1[n], ci[1]:(ci[1]+nv-1)])*tmp/(d^2*sigmaX)
         lWmix[n] <- sum(x[indices1[n], ci[1]:(ci[1]+nv-1)])*sum(x[indices2[n], (ci[1]+nv):ci[2]])/(d*sigmaX) -
-          (sum(cumsum(mx[1:(nvNew-1)]/d)^2) - sum(cumsum(x[indices1[n], ci[1]:(ci[1]+nv-1)][1:(nv-1)]/d)^2) -
-             sum(cumsum(x[indices2[n], (ci[1]+nv):ci[2]][1:(nv-1)]/d)^2))/(2*sigmaX) - tmp
+          (sum(cumsum(mx[1:(nvNew-1)]/d)^2) - sum(cumsum(x[indices1[n], ci[1]:(ci[1]+nv-1)][seq(length.out = (nv-1))]/d)^2) -
+             sum(cumsum(x[indices2[n], (ci[1]+nv):ci[2]][seq(length.out = (nv-1))]/d)^2))/(2*sigmaX) - tmp
       }
       max.lWmix <- max(lWmix)
       Wmix <- exp(lWmix - max.lWmix)
