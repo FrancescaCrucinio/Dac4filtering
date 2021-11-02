@@ -11,9 +11,15 @@ stpf_car <- function(xOld, obs, sigmaX, sigmaY){
     # loop over dimension
     for(j in 1:d){
       # propose
-      x[i, , j] <- rowSums(xOld[i, , j:d, drop = FALSE], dims = 2)/d +
-        rowSums(x[i, , seq(length.out = j-1), drop = FALSE], dims = 2)/d +
-        sqrt(sigmaX) * rnorm(M)
+      if(j == d){
+        x[i, , j] <- sum(xOld[i, , d])/d +
+          rowSums(x[i, , seq(length.out = j-1), drop = FALSE], dims = 2)/d +
+          sqrt(sigmaX) * rnorm(M)
+      } else{
+        x[i, , j] <- rowSums(xOld[i, , j:d])/d +
+          rowSums(x[i, , seq(length.out = j-1), drop = FALSE], dims = 2)/d +
+          sqrt(sigmaX) * rnorm(M)
+      }
       # weights
       lW <- -0.5*(obs[j] - x[i, , j])^2/sigmaY - 0.5*log(2*pi*sigmaY)
       max.lW <- max(lW)
