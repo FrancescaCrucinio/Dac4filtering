@@ -75,9 +75,9 @@ dac_car <- function(xOld, obs, sigmaX, sigmaY, Sigma.det){
       }
       Wmix <- Wmix/sum(Wmix)
       # resampling
-      indices <- mult_resample(Wmix, Nparticles)
+      ancestors <- mult_resample(Wmix, Nparticles)
       # get row/column indices
-      res <- rc_indices(indices, Nparticles)
+      res <- rc_indices(ancestors, Nparticles)
       for(n in 1:Nparticles) {
         # update particles
         xNew[n, ci[1]:ci[2]] <- c(x[res[n, 1], ci[1]:(ci[1]+nv-1)], x[res[n, 2], (ci[1]+nv):ci[2]])
@@ -159,12 +159,12 @@ dac_car_lightweight <- function(xOld, obs, sigmaX, sigmaY, Sigma.det, m){
       lZNew[i] <- lZ[(nchild*(i-1)+1)] + lZ[i*nchild] + log(mean(Wmix)) + max.lWmix -
         0.5*Sigma.det[[u]][nchild*(i-1)+1] - 0.5*Sigma.det[[u]][i*nchild] + 0.5*Sigma.det[[u+1]][i]
       # resampling the new population
-      indices <- mult_resample(Wmix/sum(Wmix), Nparticles)
+      ancestors <- mult_resample(Wmix/sum(Wmix), Nparticles)
       # update particles
-      xNew[, ci[1]:ci[2]] <- cbind(x[indices1[indices], ci[1]:(ci[1]+nv-1)], x[indices2[indices], (ci[1]+nv):ci[2]])
+      xNew[, ci[1]:ci[2]] <- cbind(x[indices1[ancestors], ci[1]:(ci[1]+nv-1)], x[indices2[ancestors], (ci[1]+nv):ci[2]])
       # update xOld
-      indicesOld[, ci[1]:(ci[1]+nv-1)] <- indices1[indices]
-      indicesOld[, (ci[1]+nv):ci[2]] <- indices2[indices]
+      indicesOld[, ci[1]:(ci[1]+nv-1)] <- indices1[ancestors]
+      indicesOld[, (ci[1]+nv):ci[2]] <- indices2[ancestors]
     }
     x <- xNew
     lZ <- lZNew
