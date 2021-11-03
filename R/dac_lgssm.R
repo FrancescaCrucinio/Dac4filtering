@@ -156,3 +156,73 @@ dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det, m){
   }
   return(cbind(x, lZ))
 }
+
+dac_lgssm_lc <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det){
+  # dimension and number of particles
+  d <- ncol(xOld)
+  Nparticles <- nrow(xOld)
+  # tree topology
+  nchild <- 2
+  nlevels <- log2(d)
+  # leaves
+  # number of variables
+  nv <- 1
+  x <- matrix(0, nrow = Nparticles, ncol = d)
+  W <- matrix(0, nrow = Nparticles, ncol = d)
+  lZ <- rep(0, times = d)
+  # copies of xOld
+  indicesOld <- matrix(1:Nparticles, nrow = Nparticles, ncol = d)
+  for (i in 1:nchild^nlevels){
+    if (i == 1 | i == d) {
+      x[, i] <- 0.5*xOld[, i] + rnorm(Nparticles)/sqrt(tau+lambda)
+    } else {
+      x[, i] <- 0.5*xOld[, i] + rnorm(Nparticles)/sqrt(tau+2*lambda)
+    }
+    lW <- -0.5*(obs[i] - x[, i])^2/sigmaY - 0.5*log(2*pi*sigmaY)
+    max.lW <- max(lW)
+    W[, i] <- exp(lW - max.lW)
+    lZ[i] <- log(mean(W[, i])) + max.lW
+    W[, i] <- W[, i]/sum(W[, i])
+  }
+
+  # loop over tree levels excluding leaves
+  for (u in 1:nlevels){
+    # number of nodes at this level
+    nodes <- nchild^(nlevels-u)
+    # number of variables in each node
+    nvNew <- nchild^u
+
+    # updated particles/normalizing constant
+    xNew <- matrix(0, nrow = Nparticles, ncol = d)
+    xOldNew <- matrix(0, nrow = Nparticles, ncol = d)
+    lZNew <- rep(0, times = nodes)
+    WNew <- matrix(0, nrow = Nparticles, ncol = nodes)
+
+    for (i in 1:nodes){
+      # get children indices
+      ci <- child_indices(i, nvNew)
+      # resample on each children
+      # child 1
+      indices1 <- mult_resample(W[, nchild*(i-1)+1], Nparticles)
+      # child 2 (with random permutation)
+      indices2 <- sample(mult_resample(W[, nchild*i], Nparticles))
+      # mixture weights
+      lW <- lambda * (x[indices1, (ci[1]+nv-1)] - 0.5*xOld[indicesOld[indices1, (ci[1]+nv-1)], (ci[1]+nv-1)]) *
+        (x[indices2, (ci[1]+nv)] - 0.5*xOld[indicesOld[indices2, (ci[1]+nv)], (ci[1]+nv)])
+      max.lW <- max(lW)
+      WNew[, i] <- exp(lWmix - max.lWmix)
+      lZNew[i] <- lZ[(nchild*(i-1)+1)] + lZ[i*nchild] + log(mean(WNew)) + max.lW -
+        0.5*Sigma.det[[u]][nchild*(i-1)+1] - 0.5*Sigma.det[[u]][i*nchild] + 0.5*Sigma.det[[u+1]][i]
+      # update particles
+      xNew[, ci[1]:ci[2]] <- cbind(x[indices1, ci[1]:(ci[1]+nv-1)], x[indices2, (ci[1]+nv):ci[2]])
+      # update xOld
+      indicesOld[, ci[1]:(ci[1]+nv-1)] <- indices1
+      indicesOld[, (ci[1]+nv):ci[2]] <- indices2
+    }
+    x <- xNew
+    lZ <- lZNew
+    nv <- nvNew
+    W <- WNew
+  }
+  return(cbind(x, lZ))
+}

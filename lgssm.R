@@ -22,7 +22,7 @@ y.error.var <- diag(x = sigmaY, d, d)
 y.coeff <- diag(x = 1, d, d)
 
 # number of time steps
-Time.step <- 1
+Time.step <- 50
 
 # get observations
 y <- lgssm_obs(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step)
@@ -58,7 +58,7 @@ for (u in 1:nlevels){
 }
 # DAC
 Nparticles <- 100*d
-Nrep <- 10
+Nrep <- 1
 se <- array(0, dim = c(Time.step, d, Nrep))
 vse <- array(0, dim = c(Time.step, d, Nrep))
 Zrep <- rep(0, times = Nrep)
@@ -117,7 +117,7 @@ plot(1:Time.step, type = "l", rowMeans(mse), col = "blue", xlab=" ", ylab=" ",
 lines(1:Time.step, rowMeans(mselw), col = "red")
 legend(1, 0.001, legend = c("dac", "dac-lw"), col=c("red", "blue"), lty=1, cex=0.8)
 
-Nparticles <- 1000
-M <- ceiling(sqrt(Nparticles))
-x_stpf <- array(mvrnorm(n = Nparticles*M, mu0, Sigma0), dim = c(Nparticles, M, d))
-res_stpf <- stpf_lgssm(x_stpf, obs, tau, lambda, sigmaY)
+# Nparticles <- 1000
+# M <- ceiling(sqrt(Nparticles))
+# x_stpf <- array(mvrnorm(n = Nparticles*M, mu0, Sigma0), dim = c(Nparticles, M, d))
+# res_stpf <- stpf_lgssm(x_stpf, obs, tau, lambda, sigmaY)
