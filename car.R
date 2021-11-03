@@ -1,6 +1,6 @@
 set.seed(1234)
 # dimension
-d <- 4
+d <- 8
 # initial state
 mu0 <- rep(0, times = d)
 Sigma0 <- diag(x = 1, d, d)
@@ -24,7 +24,7 @@ y.coeff <- diag(1, d, d)
 
 
 # number of time steps
-Time.step <- 1
+Time.step <- 20
 
 # get observations
 y <- lgssm_obs(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step)
@@ -106,20 +106,19 @@ for (j in 1:Nrep){
     v_stpf[t, ] <- colVars(tmp_x)
   }
   # Zrep[j] <- sum(lZ)
-  # se[, , j] <- (m - t(true_means))^2
+  se[, , j] <- (m_dac - t(true_means))^2
   # vse[, , j] <- (v - true_variances)^2
   # Zreplw[j] <- sum(lZlw)
   # selw[, , j] <- (mlw - t(true_means))^2
   # vselw[, , j] <- (vlw - true_variances)^2
 }
-# mse <- apply(se, c(1,2), mean)
+mse <- apply(se, c(1,2), mean)
 # vmse <- apply(vse, c(1,2), mean)
 # mselw <- apply(selw, c(1,2), mean)
 # vmselw <- apply(vselw, c(1,2), mean)
 #
 # # MSE
-# plot(1:Time.step, type = "l", rowMeans(mse), col = "blue", xlab=" ", ylab=" ",
-#      ylim = c(0, max(rowMeans(mse), rowMeans(mselw))), cex = 1.5)
+plot(1:Time.step, type = "l", rowMeans(mse), col = "blue", xlab=" ", ylab=" ", cex = 1.5)
 # lines(1:Time.step, rowMeans(mselw), col = "red")
 # legend(1, 0.001, legend = c("dac", "dac-lw"), col=c("red", "blue"), lty=1, cex=0.8)
 #
