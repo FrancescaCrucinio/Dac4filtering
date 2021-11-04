@@ -1,4 +1,4 @@
-dac_time_lgssm <- function(mu0, Sigma0, tau, lambda, sigmaY, Nparticles, x0, y, method = "light", m = NULL){
+dac_time_lgssm <- function(tau, lambda, sigmaY, Nparticles, x0, y, method = "light", M = NULL){
   # dimension
   d <- ncol(y)
   # time interval
@@ -6,6 +6,8 @@ dac_time_lgssm <- function(mu0, Sigma0, tau, lambda, sigmaY, Nparticles, x0, y, 
   lZ <- rep(0, times = Time.step)
   m <- matrix(0, nrow = Time.step, ncol = d)
   v <- matrix(0, nrow = Time.step, ncol = d)
+  # initial value
+  x <- x0
 
   # precompute determinants of precision matrices
   Sigma.det <- vector(mode = "list", length = log2(d)+1)
@@ -28,7 +30,7 @@ dac_time_lgssm <- function(mu0, Sigma0, tau, lambda, sigmaY, Nparticles, x0, y, 
   }
 
   # parameter for lightweight mixture
-  m <- ceiling(sqrt(Nparticles))
+  M <- ceiling(sqrt(Nparticles))
 
   for (t in 1:Time.step) {
     switch(method,
@@ -41,7 +43,7 @@ dac_time_lgssm <- function(mu0, Sigma0, tau, lambda, sigmaY, Nparticles, x0, y, 
              res_dac <- dac_lgssm(x, y[t, ], tau, lambda, sigmaY, Sigma.det)
            }, # dac with lightweight mixture weights
            {
-             res_dac <- dac_lgssm_lightweight(x, y[t, ], tau, lambda, sigmaY, Sigma.det, m)
+             res_dac <- dac_lgssm_lightweight(x, y[t, ], tau, lambda, sigmaY, Sigma.det, M)
            }
     )
     x <- res_dac[, 1:d]

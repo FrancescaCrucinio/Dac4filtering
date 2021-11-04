@@ -2,7 +2,7 @@
 set.seed(1234)
 
 # dimension
-d <- 8
+d <- 4
 # initial state
 mu0 <- rep(0, times = d)
 Sigma0 <- diag(x = 1, d, d)
@@ -43,8 +43,55 @@ for (t in 1:Time.step){
 
 ### DAC
 Nparticles <- 100*d
-Nrep <- 5
+Nrep <- 10
 se <- rep(list(array(0, dim = c(Time.step, d, Nrep))), times = 3)
 vse <- rep(list(array(0, dim = c(Time.step, d, Nrep))), times = 3)
 Zrep <- matrix(0, nrow = Nrep, ncol = 3)
-tRep <- matrix(0, nrow = Nrep, ncol = 3)
+trep <- matrix(0, nrow = Nrep, ncol = 3)
+
+for (j in 1:Nrep){
+  x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
+  # dac linear cost
+  tic()
+  res_dac <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "lc")
+  runtime <- toc()
+  trep[j, 1] <- runtime$toc - runtime$tic
+  Zrep[j, 1] <- sum(res_dac[, 2*d+1])
+  se[1][[1]][, , j] <- (res_dac[, 1:d] - t(true_means))^2
+  vse[1][[1]][, , j] <- (res_dac[, (d+1):(2*d)] - true_variances)^2
+
+  # dac with mixture weights
+  tic()
+  res_dac_mix <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "mix")
+  runtime <- toc()
+  trep[j, 2] <- runtime$toc - runtime$tic
+  Zrep[j, 2] <- sum(res_dac_mix[, 2*d+1])
+  se[2][[1]][, , j] <- (res_dac_mix[, 1:d] - t(true_means))^2
+  vse[2][[1]][, , j] <- (res_dac_mix[, (d+1):(2*d)] - true_variances)^2
+
+  # dac with lightweight mixture weighting
+  tic()
+  res_dac_light <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "light")
+  runtime <- toc()
+  trep[j, 3] <- runtime$toc - runtime$tic
+  Zrep[j, 3] <- sum(res_dac_light[, 2*d+1])
+  se[3][[1]][, , j] <- (res_dac_light[, 1:d] - t(true_means))^2
+  vse[3][[1]][, , j] <- (res_dac_light[, (d+1):(2*d)] - true_variances)^2
+}
+mse <- array(0, dim = c(Time.step, d, 3))
+vmse <- array(0, dim = c(Time.step, d, 3))
+for (j in 1:3) {
+  mse[, , j] <- apply(se[j][[1]], c(1,2), mean)
+  vmse[, , j] <- apply(vse[j][[1]], c(1,2), mean)
+}
+
+plot(1:Time.step, type = "l", rowMeans(mse[, , 1]), col = "blue", xlab=" ", ylab=" ", cex = 1.5,
+     ylim = c(0, max(mse[, , 1])))
+lines(1:Time.step, rowMeans(mse[, , 2]), col = "red")
+lines(1:Time.step, rowMeans(mse[, , 3]), col = "gray")
+legend(1, 0.001, legend = c("dac", "dac-lw"), col=c("red", "blue"), lty=1, cex=0.8)
+
+plot(1:Time.step, type = "l", rowMeans(mse[, , 1]/true_variances), col = "blue", xlab=" ", ylab=" ", cex = 1.5,
+     ylim = c(0, max(mse[, , 1]/true_variances)))
+lines(1:Time.step, rowMeans(mse[, , 2]/true_variances), col = "red")
+lines(1:Time.step, rowMeans(mse[, , 3]/true_variances), col = "gray")

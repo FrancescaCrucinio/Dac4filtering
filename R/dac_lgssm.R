@@ -210,7 +210,7 @@ dac_lgssm_lc <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det){
       lW <- lambda * (x[indices1, (ci[1]+nv-1)] - 0.5*xOld[indicesOld[indices1, (ci[1]+nv-1)], (ci[1]+nv-1)]) *
         (x[indices2, (ci[1]+nv)] - 0.5*xOld[indicesOld[indices2, (ci[1]+nv)], (ci[1]+nv)])
       max.lW <- max(lW)
-      WNew[, i] <- exp(lWmix - max.lWmix)
+      WNew[, i] <- exp(lW - max.lW)
       lZNew[i] <- lZ[(nchild*(i-1)+1)] + lZ[i*nchild] + log(mean(WNew)) + max.lW -
         0.5*Sigma.det[[u]][nchild*(i-1)+1] - 0.5*Sigma.det[[u]][i*nchild] + 0.5*Sigma.det[[u+1]][i]
       # update particles
