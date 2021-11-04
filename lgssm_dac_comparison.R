@@ -99,5 +99,5 @@ df <- data.frame(x = rep(1:Time.step, times = 3), y = c(rowMeans(mse[, , 1]/true
 ggplot(data = df, aes(x = x, y= y, group = g)) +
   geom_line(aes(x = x, y= y, color = g), size = 2) +
   scale_y_continuous(trans='log10') +
-  theme(axis.title.x=element_blank(), axis.title.y=element_blank(),,
+  theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=15))
