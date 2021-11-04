@@ -42,7 +42,7 @@ for (t in 1:Time.step){
 
 
 ### DAC
-Nparticles <- 100*d
+Nparticles <- 1000
 Nrep <- 10
 se <- rep(list(array(0, dim = c(Time.step, d, Nrep))), times = 3)
 vse <- rep(list(array(0, dim = c(Time.step, d, Nrep))), times = 3)
@@ -85,13 +85,19 @@ for (j in 1:3) {
   vmse[, , j] <- apply(vse[j][[1]], c(1,2), mean)
 }
 
-plot(1:Time.step, type = "l", rowMeans(mse[, , 1]), col = "blue", xlab=" ", ylab=" ", cex = 1.5,
-     ylim = c(0, max(mse[, , 1])))
-lines(1:Time.step, rowMeans(mse[, , 2]), col = "red")
-lines(1:Time.step, rowMeans(mse[, , 3]), col = "gray")
-legend(1, 0.001, legend = c("dac", "dac-lw"), col=c("red", "blue"), lty=1, cex=0.8)
-
-plot(1:Time.step, type = "l", rowMeans(mse[, , 1]/true_variances), col = "blue", xlab=" ", ylab=" ", cex = 1.5,
-     ylim = c(0, max(mse[, , 1]/true_variances)))
-lines(1:Time.step, rowMeans(mse[, , 2]/true_variances), col = "red")
-lines(1:Time.step, rowMeans(mse[, , 3]/true_variances), col = "gray")
+g <- as.factor(rep(c("dac", "mix", "light"), each = Time.step))
+# MSE
+df <- data.frame(x = rep(1:Time.step, times = 3), y = c(rowMeans(mse[, , 1]), rowMeans(mse[, , 2]), rowMeans(mse[, , 3])), g)
+ggplot(data = df, aes(x = x, y= y, group = g)) +
+  geom_line(aes(x = x, y= y, color = g), size = 2) +
+  scale_y_continuous(trans='log10') +
+  theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
+        legend.title = element_blank(), legend.text=element_text(size=15))
+# RMSE
+df <- data.frame(x = rep(1:Time.step, times = 3), y = c(rowMeans(mse[, , 1]/true_variances),
+                                                        rowMeans(mse[, , 2]/true_variances), rowMeans(mse[, , 3]/true_variances)), g)
+ggplot(data = df, aes(x = x, y= y, group = g)) +
+  geom_line(aes(x = x, y= y, color = g), size = 2) +
+  scale_y_continuous(trans='log10') +
+  theme(axis.title.x=element_blank(), axis.title.y=element_blank(),,
+        legend.title = element_blank(), legend.text=element_text(size=15))
