@@ -101,3 +101,37 @@ ggplot(data = df, aes(x = x, y= y, group = g)) +
   scale_y_continuous(trans='log10') +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=15))
+
+df_dac <- data.frame()
+df_dac_mix <- data.frame()
+df_dac_light <- data.frame()
+
+res <- bench::mark("dac" = {
+  x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
+  res_dac <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "lc")
+  lZ <- res_dac[, 2*d+1]
+  se <- (res_dac[, 1:d] - t(true_means))^2
+  vse <- (res_dac[, (d+1):(2*d)] - true_variances)^2
+  df_dac <- data.frame(rbind(df_dac, cbind(se, vse, lZ)))
+  df_dac
+},
+"mix" = {
+  x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
+  res_dac_mix <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "mix")
+  lZ <- res_dac_mix[, 2*d+1]
+  se <- (res_dac_mix[, 1:d] - t(true_means))^2
+  vse <- (res_dac_mix[, (d+1):(2*d)] - true_variances)^2
+  df_dac_mix <- data.frame(rbind(df_dac_mix, cbind(se, vse, lZ)))
+},
+"light" = {
+  x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
+  res_dac_light <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "light")
+  lZ <- res_dac_light[, 2*d+1]
+  se <- (res_dac_light[, 1:d] - t(true_means))^2
+  vse <- (res_dac_light[, (d+1):(2*d)] - true_variances)^2
+  df_dac_light <- data.frame(rbind(df_dac_light, cbind(se, vse, lZ)))
+},
+memory = capabilities("profmem"),
+check = FALSE,
+iterations = 9,
+filter_gc = TRUE)
