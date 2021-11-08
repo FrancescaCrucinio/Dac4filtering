@@ -39,10 +39,8 @@ for (t in 1:Time.step){
   true_variances[t, ] <- diag(res_KF$Ptt[, , t])
 }
 
-
-
 ### DAC
-Nparticles <- 100
+Nparticles <- 1000
 Nrep <- 10
 df_dac <- data.frame()
 df_dac_mix <- data.frame()
@@ -104,5 +102,6 @@ ggplot(data = df, aes(x = x1, y = y, group = g, fill = g)) +
 ggplot(data = df, aes(x = x2, y = y, group = g, fill = g)) +
   geom_boxplot(aes(x = x2, y= y), coef = 6) +
   scale_y_continuous(trans='log10') +
+  scale_x_continuous(trans='log10') +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=15))
