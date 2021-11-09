@@ -22,7 +22,7 @@ y.error.var <- diag(x = sigmaY, d, d)
 y.coeff <- diag(x = 1, d, d)
 
 # number of time steps
-Time.step <- 100
+Time.step <- 1
 
 # get observations
 y <- lgssm_obs(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step)
@@ -56,68 +56,42 @@ for (u in 1:nlevels){
   }
   Sigma.det[[u+1]] <- log(tmp)
 }
-# DAC
+
+
 Nparticles <- 100*d
+M <- d
 Nrep <- 1
-se <- array(0, dim = c(Time.step, d, Nrep))
-vse <- array(0, dim = c(Time.step, d, Nrep))
-Zrep <- rep(0, times = Nrep)
-tRep <- rep(0, times = Nrep)
-selw <- array(0, dim = c(Time.step, d, Nrep))
-vselw <- array(0, dim = c(Time.step, d, Nrep))
-Zreplw <- rep(0, times = Nrep)
-tReplw <- rep(0, times = Nrep)
+se_dac <- array(0, dim = c(Time.step, d, Nrep))
+vse_dac <- array(0, dim = c(Time.step, d, Nrep))
+Zrep_dac <- rep(0, times = Nrep)
+trep_dac <- rep(0, times = Nrep)
+se_stpf <- array(0, dim = c(Time.step, d, Nrep))
+vse_stpf <- array(0, dim = c(Time.step, d, Nrep))
+Zrep_stpf <- rep(0, times = Nrep)
+trep_stpf <- rep(0, times = Nrep)
 for (j in 1:Nrep){
-  x <- array(0, dim = c(Nparticles, d, Time.step+1))
-  x[, , 1] <- mvrnorm(n = Nparticles, mu0, Sigma0)
-  lZ <- rep(0, times = Time.step)
-  m <- matrix(0, nrow = Time.step, ncol = d)
-  v <- matrix(0, nrow = Time.step, ncol = d)
-  xlw <- array(0, dim = c(Nparticles, d, Time.step+1))
-  xlw[, , 1] <- mvrnorm(n = Nparticles, mu0, Sigma0)
-  lZlw <- rep(0, times = Time.step)
-  mlw <- matrix(0, nrow = Time.step, ncol = d)
-  vlw <- matrix(0, nrow = Time.step, ncol = d)
-  for (t in 1:Time.step) {
-    # dac
-    tic()
-    res_dac <- dac_lgssm(x[, , t], y[t, ], tau, lambda, sigmaY, Sigma.det)
-    runtime <- toc()
-    tRep[j] <- tRep[j] + runtime$toc - runtime$tic
-    x[, , t+1] <- res_dac[, 1:d]
-    lZ[t] <- res_dac[1, d+1]
-    m[t, ] <- colMeans(x[, , t+1])
-    v[t, ] <- colVars(x[, , t+1])
+  x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
+  # dac (lightweight)
+  tic()
+  res_dac_light <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "light")
+  runtime <- toc()
+  trep_dac <- runtime$toc - runtime$tic
+  Zrep_dac[j] <- res_dac_light[, 2*d+1]
+  se_dac[, , j] <- (res_dac_light[, 1:d] - t(true_means))^2
+  vse_dac[, , j] <- (res_dac_light[, (d+1):(2*d)] - true_variances)^2
 
-    # ligthweight dac
-    tic()
-    res_dac_lw <- dac_lgssm_lightweight(x[, , t], y[t, ], tau, lambda, sigmaY, Sigma.det, ceiling(sqrt(Nparticles)))
-    runtime <- toc()
-    tReplw[j] <- tReplw[j] + runtime$toc - runtime$tic
-    xlw[, , t+1] <- res_dac_lw[, 1:d]
-    lZlw[t] <- res_dac_lw[1, d+1]
-    mlw[t, ] <- colMeans(xlw[, , t+1])
-    vlw[t, ] <- colVars(xlw[, , t+1])
-  }
-  Zrep[j] <- sum(lZ)
-  se[, , j] <- (m - t(true_means))^2
-  vse[, , j] <- (v - true_variances)^2
-  Zreplw[j] <- sum(lZlw)
-  selw[, , j] <- (mlw - t(true_means))^2
-  vselw[, , j] <- (vlw - true_variances)^2
+  # stpf
+  x0 <- array(mvrnorm(n = Nparticles*M, mu0, Sigma0), dim = c(Nparticles, M, d))
+  tic()
+  res_dac_light <- stpf_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y)
+  runtime <- toc()
+  trep_stpf <- runtime$toc - runtime$tic
+  Zrep_stpf[j] <- res_dac_light[, 2*d+1]
+  se_stpf[, , j] <- (res_dac_light[, 1:d] - t(true_means))^2
+  vse_stpf[, , j] <- (res_dac_light[, (d+1):(2*d)] - true_variances)^2
 }
-mse <- apply(se, c(1,2), mean)
-vmse <- apply(vse, c(1,2), mean)
-mselw <- apply(selw, c(1,2), mean)
-vmselw <- apply(vselw, c(1,2), mean)
+mse_dac <- apply(se_dac, c(1,2), mean)
+vmse_dac <- apply(vse_dac, c(1,2), mean)
+mse_stpf <- apply(se_stpf, c(1,2), mean)
+vmse_stpf <- apply(vse_stpf, c(1,2), mean)
 
-# MSE
-plot(1:Time.step, type = "l", rowMeans(mse), col = "blue", xlab=" ", ylab=" ",
-     ylim = c(0, max(rowMeans(mse), rowMeans(mselw))), cex = 1.5)
-lines(1:Time.step, rowMeans(mselw), col = "red")
-legend(1, 0.001, legend = c("dac", "dac-lw"), col=c("red", "blue"), lty=1, cex=0.8)
-
-# Nparticles <- 1000
-# M <- ceiling(sqrt(Nparticles))
-# x_stpf <- array(mvrnorm(n = Nparticles*M, mu0, Sigma0), dim = c(Nparticles, M, d))
-# res_stpf <- stpf_lgssm(x_stpf, obs, tau, lambda, sigmaY)
