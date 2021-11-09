@@ -28,10 +28,10 @@ dac_time_lgssm <- function(tau, lambda, sigmaY, Nparticles, x0, y, method = "lig
     }
     Sigma.det[[u+1]] <- log(tmp)
   }
-
-  # parameter for lightweight mixture
-  M <- ceiling(sqrt(Nparticles))
-
+  if(is.null(M)) {
+    # parameter for lightweight mixture
+    M <- ceiling(sqrt(Nparticles))
+  }
   for (t in 1:Time.step) {
     switch(method,
            lc={

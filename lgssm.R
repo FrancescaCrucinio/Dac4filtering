@@ -59,8 +59,8 @@ for (u in 1:nlevels){
 
 
 Nparticles <- 100*d
-M <- d
-Nrep <- 1
+M <- 2*d
+Nrep <- 2
 se_dac <- array(0, dim = c(Time.step, d, Nrep))
 vse_dac <- array(0, dim = c(Time.step, d, Nrep))
 Zrep_dac <- rep(0, times = Nrep)
@@ -83,12 +83,12 @@ for (j in 1:Nrep){
   # stpf
   x0 <- array(mvrnorm(n = Nparticles*M, mu0, Sigma0), dim = c(Nparticles, M, d))
   tic()
-  res_dac_light <- stpf_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y)
+  res_dac_stpf <- stpf_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y)
   runtime <- toc()
   trep_stpf <- runtime$toc - runtime$tic
-  Zrep_stpf[j] <- res_dac_light[, 2*d+1]
-  se_stpf[, , j] <- (res_dac_light[, 1:d] - t(true_means))^2
-  vse_stpf[, , j] <- (res_dac_light[, (d+1):(2*d)] - true_variances)^2
+  Zrep_stpf[j] <- res_dac_stpf[, 2*d+1]
+  se_stpf[, , j] <- (res_dac_stpf[, 1:d] - t(true_means))^2
+  vse_stpf[, , j] <- (res_dac_stpf[, (d+1):(2*d)] - true_variances)^2
 }
 mse_dac <- apply(se_dac, c(1,2), mean)
 vmse_dac <- apply(vse_dac, c(1,2), mean)
