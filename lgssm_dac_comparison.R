@@ -2,7 +2,7 @@
 set.seed(1234)
 
 # dimension
-d <- 4
+d <- 8
 # initial state
 mu0 <- rep(0, times = d)
 Sigma0 <- diag(x = 1, d, d)
@@ -33,7 +33,7 @@ y <- lgssm_obs(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.st
 res_KF <- fkf(a0 = mu0, P0 = 0.5^2*Sigma0 + x.error.var, dt = as.matrix(rep(0, times = d)),
               ct = as.matrix(rep(0, times = d)), Tt = x.coeff, Zt = y.coeff, HHt = x.error.var, GGt = y.error.var, yt = t(y))
 true_ll <- res_KF$logLik
-true_means <- res_KF$att
+true_means <- t(res_KF$att)
 true_variances <- matrix(0, ncol = d, nrow = Time.step)
 for (t in 1:Time.step){
   true_variances[t, ] <- diag(res_KF$Ptt[, , t])
@@ -49,26 +49,26 @@ df_dac_light <- data.frame()
 res <- bench::mark("dac" = {
   x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
   res_dac <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "lc")
-  lZ <- res_dac[, 2*d+1]
-  se <- (res_dac[, 1:d] - t(true_means))^2
-  vse <- (res_dac[, (d+1):(2*d)] - true_variances)^2
+  lZ <- res_dac[1, d+1]
+  se <- (colMeans(res_dac[, 1:d]) - true_means)^2
+  vse <- (colVars(res_dac[, 1:d]) - true_variances)^2
   df_dac <- data.frame(rbind(df_dac, cbind(se, vse, lZ)))
   df_dac
 },
 "mix" = {
   x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
   res_dac_mix <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "mix")
-  lZ <- res_dac_mix[, 2*d+1]
-  se <- (res_dac_mix[, 1:d] - t(true_means))^2
-  vse <- (res_dac_mix[, (d+1):(2*d)] - true_variances)^2
+  lZ <- res_dac_mix[1, d+1]
+  se <- (colMeans(res_dac_mix[, 1:d]) - true_means)^2
+  vse <- (colVars(res_dac_mix[, 1:d]) - true_variances)^2
   df_dac_mix <- data.frame(rbind(df_dac_mix, cbind(se, vse, lZ)))
 },
 "light" = {
   x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
   res_dac_light <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "light")
-  lZ <- res_dac_light[, 2*d+1]
-  se <- (res_dac_light[, 1:d] - t(true_means))^2
-  vse <- (res_dac_light[, (d+1):(2*d)] - true_variances)^2
+  lZ <- res_dac_light[1, d+1]
+  se <- (colMeans(res_dac_light[, 1:d]) - true_means)^2
+  vse <- (colVars(res_dac_light[, 1:d]) - true_variances)^2
   df_dac_light <- data.frame(rbind(df_dac_light, cbind(se, vse, lZ)))
 },
 memory = capabilities("profmem"),

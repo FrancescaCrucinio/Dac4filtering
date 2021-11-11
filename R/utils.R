@@ -9,3 +9,11 @@ rc_indices <- function(indices, dims){
   c <- pmin(trunc((indices -1 )/dims)+1, dims)
   return(cbind(r, c))
 }
+# KS distance
+ks_dist <- function(x, N){
+  ks.test(x[1:N], x[N:length(x)])$statistic
+}
+# Wasserstein-1 distance
+w1_dist <- function(x, N){
+  wasserstein1d(x[1:N], x[N:length(x)])
+}
