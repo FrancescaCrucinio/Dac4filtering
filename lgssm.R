@@ -84,24 +84,26 @@ for (j in 1:Nrep){
   x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
   # dac (lightweight)
   tic()
-  res_dac_light <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "light")
+  res_dac_light <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "light", marginals = marginals)
   runtime <- toc()
   trep_dac <- runtime$toc - runtime$tic
-  Zrep_dac[, j] <- res_dac_light[1, d+1]
-  #se_dac[, , j] <- (colMeans(res_dac_light[, 1:d]) - true_means)^2
-  #vse_dac[, , j] <- (colVars(res_dac_light[, 1:d]) - true_variances)^2
-  ks_dac[, j] <- apply(rbind(res_dac_light[, 1:d], marginals), ks_dist, N = Nparticles, MARGIN = 2)
-  w1_dac[, j] <- apply(rbind(res_dac_light[, 1:d], marginals), w1_dist, N = Nparticles, MARGIN = 2)
+  Zrep_dac[, j] <- res_dac_light$lZ
+  se_dac[, , j] <- (res_dac_light$m - true_means)^2
+  vse_dac[, , j] <- (res_dac_light$v - true_variances)^2
+  ks_dac[, j] <- res_dac_light$ks
+  w1_dac[, j] <- res_dac_light$w1
 
   # stpf
   x0 <- array(mvrnorm(n = Nparticles*M, mu0, Sigma0), dim = c(Nparticles, M, d))
   tic()
-  res_stpf <- stpf_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y)
+  res_stpf <- stpf_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, marginals = marginals)
   runtime <- toc()
   trep_stpf <- runtime$toc - runtime$tic
-  Zrep_stpf[, j] <- res_stpf[2][[1]]
-  #se_stpf[, , j] <- (res_stpf[, 1:d] - true_means)^2
-  #vse_stpf[, , j] <- (res_stpf[, (d+1):(2*d)] - true_variances)^2
+  Zrep_stpf[, j] <- res_stpf$lZ
+  se_stpf[, , j] <- (res_stpf$m - true_means)^2
+  vse_stpf[, , j] <- (res_stpf$v - true_variances)^2
+  ks_stpf[, j] <- res_stpf$ks
+  w1_stpf[, j] <- res_stpf$w1
 }
 mse_dac <- apply(se_dac, c(1,2), mean)
 vmse_dac <- apply(vse_dac, c(1,2), mean)
