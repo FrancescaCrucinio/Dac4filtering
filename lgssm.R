@@ -63,7 +63,7 @@ for (u in 1:nlevels){
 }
 
 
-Nparticles <- 100*d
+Nparticles <- 5
 M <- 2*d
 Nrep <- 1
 # dac
