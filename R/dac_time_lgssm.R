@@ -56,6 +56,10 @@ dac_time_lgssm <- function(tau, lambda, sigmaY, Nparticles, x0, y, method = "lig
     ks_dac <- apply(rbind(x, marginals), ks_dist, N = Nparticles, MARGIN = 2)
     w1_dac <- apply(rbind(x, marginals), w1_dist, N = Nparticles, MARGIN = 2)
   }
+  else{
+    ks_dac <- NULL
+    w1_dac <- NULL
+  }
   out <- list("m" = m, "v" = v, "lZ" = lZ, "ks" = ks_dac, "w1" = w1_dac)
   return(out)
 }

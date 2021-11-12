@@ -129,10 +129,18 @@ dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det, m){
       # get children indices
       ci <- child_indices(i, nvNew)
       # resample on each children
-      # child 1
-      indices1 <- mult_resample(W[, nchild*(i-1)+1], m*Nparticles)
-      # child 2 (with random permutation)
-      indices2 <- sample(mult_resample(W[, nchild*i], m*Nparticles))
+      if(u == 1){
+        # child 1
+        indices1 <- mult_resample(W[, nchild*(i-1)+1], m*Nparticles)
+        # child 2 (with random permutation)
+        indices2 <- sample(mult_resample(W[, nchild*i], m*Nparticles))
+      }
+     else{
+       # child 1
+       indices1 <- sample.int(Nparticles, size = m*Nparticles, replace = TRUE)
+       # child 2
+       indices2 <- sample.int(Nparticles, size = m*Nparticles, replace = TRUE)
+     }
       # mixture weights
       lWmix <- lambda * (x[indices1, (ci[1]+nv-1)] - 0.5*xOld[indicesOld[indices1, (ci[1]+nv-1)], (ci[1]+nv-1)]) *
         (x[indices2, (ci[1]+nv)] - 0.5*xOld[indicesOld[indices2, (ci[1]+nv)], (ci[1]+nv)])
@@ -152,7 +160,6 @@ dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det, m){
     x <- xNew
     lZ <- lZNew
     nv <- nvNew
-    W <- matrix(1/Nparticles, nrow = Nparticles, ncol = nodes)
   }
   return(cbind(x, lZ))
 }

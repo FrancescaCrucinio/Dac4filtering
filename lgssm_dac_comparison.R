@@ -40,7 +40,7 @@ for (t in 1:Time.step){
 }
 
 ### DAC
-Nparticles <- 1000
+Nparticles <- 100
 Nrep <- 10
 df_dac <- data.frame()
 df_dac_mix <- data.frame()
@@ -49,7 +49,7 @@ df_dac_light <- data.frame()
 res <- bench::mark("dac" = {
   x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
   res_dac <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "lc")
-  lZ <- rres_dac$lZ
+  lZ <- res_dac$lZ
   se <- (res_dac$m - true_means)^2
   vse <- (res_dac$v - true_variances)^2
   df_dac <- data.frame(rbind(df_dac, cbind(se, vse, lZ)))
