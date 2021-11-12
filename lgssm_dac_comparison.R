@@ -49,26 +49,26 @@ df_dac_light <- data.frame()
 res <- bench::mark("dac" = {
   x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
   res_dac <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "lc")
-  lZ <- res_dac[1, d+1]
-  se <- (colMeans(res_dac[, 1:d]) - true_means)^2
-  vse <- (colVars(res_dac[, 1:d]) - true_variances)^2
+  lZ <- rres_dac$lZ
+  se <- (res_dac$m - true_means)^2
+  vse <- (res_dac$v - true_variances)^2
   df_dac <- data.frame(rbind(df_dac, cbind(se, vse, lZ)))
   df_dac
 },
 "mix" = {
   x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
   res_dac_mix <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "mix")
-  lZ <- res_dac_mix[1, d+1]
-  se <- (colMeans(res_dac_mix[, 1:d]) - true_means)^2
-  vse <- (colVars(res_dac_mix[, 1:d]) - true_variances)^2
+  lZ <- res_dac_mix$lZ
+  se <- (res_dac_mix$m - true_means)^2
+  vse <- (res_dac_mix$v - true_variances)^2
   df_dac_mix <- data.frame(rbind(df_dac_mix, cbind(se, vse, lZ)))
 },
 "light" = {
   x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
   res_dac_light <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "light")
-  lZ <- res_dac_light[1, d+1]
-  se <- (colMeans(res_dac_light[, 1:d]) - true_means)^2
-  vse <- (colVars(res_dac_light[, 1:d]) - true_variances)^2
+  lZ <- res_dac_light$lZ
+  se <- (res_dac_light$m - true_means)^2
+  vse <- (res_dac_light$v - true_variances)^2
   df_dac_light <- data.frame(rbind(df_dac_light, cbind(se, vse, lZ)))
 },
 memory = capabilities("profmem"),
