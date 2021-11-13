@@ -22,7 +22,7 @@ y.error.var <- diag(x = sigmaY, d, d)
 y.coeff <- diag(x = 1, d, d)
 
 # number of time steps
-Time.step <- 10
+Time.step <- 1
 
 # get observations
 y <- lgssm_obs(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step)
@@ -63,7 +63,7 @@ for (u in 1:nlevels){
 }
 
 
-Nparticles <- 5
+Nparticles <- 1000
 M <- 2*d
 Nrep <- 1
 # dac
