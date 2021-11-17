@@ -22,7 +22,7 @@ nsmc_lgssm <- function(xOld, obs, tau, lambda, sigmaY, M){
   for(i in 1:Nparticles){
     x[i, d] <- q[[i]]$x[sample.int(M, 1), d]
     for (j in (d-1):1){
-      lW <- -0.5*(x[i, j+1] - q[[i]]$x[, j])^2/sigmaY - 0.5*log(2*pi*sigmaY)
+      lW <- -0.5*lambda*(x[i, j+1] - q[[i]]$x[, j])^2
       W <- exp(lW - max(lW))
       # resampling
       x[i, j] <- q[[i]]$x[mult_resample(W/sum(W), 1), j]
