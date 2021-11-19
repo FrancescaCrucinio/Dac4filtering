@@ -9,12 +9,14 @@ tau <- 1
 lambda <- 1
 sigmaY <- 0.5^2
 # coefficient and precision of the state equation
-x.coeff <- diag(x = 0.5, d, d)
-x.error.prec <- diag(x = (tau + 2*lambda), d, d)
-x.error.prec[row(x.error.prec) - col(x.error.prec) == 1] <- -lambda
-x.error.prec[row(x.error.prec) - col(x.error.prec) == -1] <- -lambda
-x.error.prec[1, 1] <- x.error.prec[1, 1] - lambda
-x.error.prec[d, d] <- x.error.prec[d, d] - lambda
+m1 <- diag(x = tau, d, d)
+m1[1, 1] <- tau + lambda
+m2 <- diag(x = tau+lambda, d, d)
+m2[row(m2) - col(m2) == 1] <- -lambda
+m3 <- diag(x = tau+lambda, d, d)
+m3[1, 1] <- tau
+x.coeff <- 0.5*m1%*%solve(m2)
+x.error.prec <- (t(m2)%*%m3%*%m2)/(tau+lambda)^2
 x.error.var <- solve(x.error.prec)
 
 # coefficient and covariance of the observation equation
@@ -28,7 +30,7 @@ Time.step <- 10
 y <- lgssm_obs(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step)
 
 # Kalman filter
-res_KF <- fkf(a0 = mu0, P0 = 0.5^2*Sigma0 + x.error.var, dt = as.matrix(rep(0, times = d)),
+res_KF <- fkf(a0 = mu0, P0 = 0.5^2*t(x.coeff)%*%Sigma0%*%x.coeff + x.error.var, dt = as.matrix(rep(0, times = d)),
               ct = as.matrix(rep(0, times = d)), Tt = x.coeff, Zt = y.coeff, HHt = x.error.var, GGt = y.error.var, yt = t(y))
 true_ll <- res_KF$logLik
 true_means <- t(res_KF$att)
@@ -65,7 +67,7 @@ for (u in 1:nlevels){
 
 Nparticles <- 1000
 M <- 2*d
-Nrep <- 1
+Nrep <- 10
 # dac
 se_dac <- array(0, dim = c(Time.step, d, Nrep))
 vse_dac <- array(0, dim = c(Time.step, d, Nrep))
@@ -80,6 +82,13 @@ Zrep_stpf <- matrix(0, nrow = Time.step, ncol = Nrep)
 trep_stpf <- rep(0, times = Nrep)
 ks_stpf <- matrix(0, nrow = d, ncol = Nrep)
 w1_stpf <- matrix(0, nrow = d, ncol = Nrep)
+# nsmc
+se_nsmc <- array(0, dim = c(Time.step, d, Nrep))
+vse_nsmc <- array(0, dim = c(Time.step, d, Nrep))
+Zrep_nsmc <- matrix(0, nrow = Time.step, ncol = Nrep)
+trep_nsmc <- rep(0, times = Nrep)
+ks_nsmc <- matrix(0, nrow = d, ncol = Nrep)
+w1_nsmc <- matrix(0, nrow = d, ncol = Nrep)
 for (j in 1:Nrep){
   x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
   # dac (lightweight)
@@ -92,6 +101,17 @@ for (j in 1:Nrep){
   vse_dac[, , j] <- (res_dac_light$v - true_variances)^2
   ks_dac[, j] <- res_dac_light$ks
   w1_dac[, j] <- res_dac_light$w1
+
+  # nsmc
+  tic()
+  res_nsmc <- nsmc_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, M = M, marginals = marginals)
+  runtime <- toc()
+  trep_nsmc <- runtime$toc - runtime$tic
+  Zrep_nsmc[, j] <- res_nsmc$lZ
+  se_nsmc[, , j] <- (res_nsmc$m - true_means)^2
+  vse_nsmc[, , j] <- (res_nsmc$v - true_variances)^2
+  ks_nsmc[, j] <- res_nsmc$ks
+  w1_nsmc[, j] <- res_nsmc$w1
 
   # stpf
   x0 <- array(mvrnorm(n = Nparticles*M, mu0, Sigma0), dim = c(Nparticles, M, d))
@@ -109,4 +129,9 @@ mse_dac <- apply(se_dac, c(1,2), mean)
 vmse_dac <- apply(vse_dac, c(1,2), mean)
 mse_stpf <- apply(se_stpf, c(1,2), mean)
 vmse_stpf <- apply(vse_stpf, c(1,2), mean)
+mse_nsmc <- apply(se_nsmc, c(1,2), mean)
+vmse_nsmc <- apply(vse_nsmc, c(1,2), mean)
 
+plot(1:Time.step, type = "l", rowMeans(mse_dac/true_variances), col = "blue", xlab=" ", ylab=" ", cex = 1.5, ylim = c(0, 0.3))
+lines(1:Time.step, rowMeans(mse_nsmc/true_variances), col = "red")
+lines(1:Time.step, rowMeans(mse_stpf/true_variances), col = "green")

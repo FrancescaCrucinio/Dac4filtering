@@ -14,10 +14,10 @@ dac_lgssm <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det){
   # copies of xOld
   indicesOld <- matrix(1:Nparticles, nrow = Nparticles, ncol = d)
   for (i in 1:nchild^nlevels){
-    if (i == 1 | i == d) {
-      x[, i] <- 0.5*xOld[, i] + rnorm(Nparticles)/sqrt(tau+lambda)
+    if (i == 1) {
+      x[, i] <- 0.5*xOld[, i] + rnorm(Nparticles)/sqrt(tau)
     } else {
-      x[, i] <- 0.5*xOld[, i] + rnorm(Nparticles)/sqrt(tau+2*lambda)
+      x[, i] <- 0.5*tau*xOld[, i]/(tau+lambda) + rnorm(Nparticles)/sqrt(tau+lambda)
     }
     lW[, i] <- -0.5*(obs[i] - x[, i])^2/sigmaY - 0.5*log(2*pi*sigmaY)
     max.lW <- max(lW[, i])
@@ -45,8 +45,10 @@ dac_lgssm <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det){
       if(u == 1){
         for (n1 in 1:Nparticles) {
           for (n2 in 1:Nparticles) {
-            lWmix[n1, n2] <- lW[n1, (nchild*(i-1)+1)] + lW[n2, i*nchild] +
-              lambda * (x[n1, (ci[1]+nv-1)] - 0.5*xOld[n1, (ci[1]+nv-1)]) * (x[n2, (ci[1]+nv)] - 0.5*xOld[n2, (ci[1]+nv)])
+            lWmix[n1, n2] <- lW[n1, (nchild*(i-1)+1)] + lW[n2, i*nchild] -
+              0.5*lambda * (lambda *x[n1, (ci[1]+nv-1)]^2 -
+                2*x[n1, (ci[1]+nv-1)] * (x[n2, (ci[1]+nv)] - 0.5*tau*xOld[n2, (ci[1]+nv)])
+                )
           }
         }
         max.lWmix <- max(lWmix)
@@ -56,8 +58,9 @@ dac_lgssm <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det){
       } else {
         for (n1 in 1:Nparticles) {
           for (n2 in 1:Nparticles) {
-            lWmix[n1, n2] <- lambda * (x[n1, (ci[1]+nv-1)] - 0.5*xOld[indicesOld[n1, (ci[1]+nv-1)], (ci[1]+nv-1)]) *
-              (x[n2, (ci[1]+nv)] - 0.5*xOld[indicesOld[n2, (ci[1]+nv)], (ci[1]+nv)])
+            lWmix[n1, n2] <- -0.5*lambda * (lambda *x[n1, (ci[1]+nv-1)]^2 -
+                              2*x[n1, (ci[1]+nv-1)] * (x[n2, (ci[1]+nv)] - 0.5*tau*xOld[n2, (ci[1]+nv)])
+                              )
           }
         }
         max.lWmix <- max(lWmix)
@@ -101,10 +104,10 @@ dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det, m){
   # copies of xOld
   indicesOld <- matrix(1:Nparticles, nrow = Nparticles, ncol = d)
   for (i in 1:nchild^nlevels){
-    if (i == 1 | i == d) {
-      x[, i] <- 0.5*xOld[, i] + rnorm(Nparticles)/sqrt(tau+lambda)
+    if (i == 1) {
+      x[, i] <- 0.5*xOld[, i] + rnorm(Nparticles)/sqrt(tau)
     } else {
-      x[, i] <- 0.5*xOld[, i] + rnorm(Nparticles)/sqrt(tau+2*lambda)
+      x[, i] <- 0.5*tau*xOld[, i]/(tau+lambda) + rnorm(Nparticles)/sqrt(tau+lambda)
     }
     lW <- -0.5*(obs[i] - x[, i])^2/sigmaY - 0.5*log(2*pi*sigmaY)
     max.lW <- max(lW)
@@ -142,8 +145,9 @@ dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det, m){
        indices2 <- sample.int(Nparticles, size = m*Nparticles, replace = TRUE)
      }
       # mixture weights
-      lWmix <- lambda * (x[indices1, (ci[1]+nv-1)] - 0.5*xOld[indicesOld[indices1, (ci[1]+nv-1)], (ci[1]+nv-1)]) *
-        (x[indices2, (ci[1]+nv)] - 0.5*xOld[indicesOld[indices2, (ci[1]+nv)], (ci[1]+nv)])
+      lWmix <- -0.5*lambda * (lambda *x[indices1, (ci[1]+nv-1)]^2 -
+                        2*x[indices1, (ci[1]+nv-1)] * (x[indices2, (ci[1]+nv)] - 0.5*tau*xOld[indicesOld[indices2, (ci[1]+nv)], (ci[1]+nv)])
+                )
       max.lWmix <- max(lWmix)
       Wmix <- exp(lWmix - max.lWmix)
       lZNew[i] <- lZ[(nchild*(i-1)+1)] + lZ[i*nchild] + log(mean(Wmix)) + max.lWmix -
@@ -180,10 +184,10 @@ dac_lgssm_lc <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det){
   # copies of xOld
   indicesOld <- matrix(1:Nparticles, nrow = Nparticles, ncol = d)
   for (i in 1:nchild^nlevels){
-    if (i == 1 | i == d) {
-      x[, i] <- 0.5*xOld[, i] + rnorm(Nparticles)/sqrt(tau+lambda)
+    if (i == 1) {
+      x[, i] <- 0.5*xOld[, i] + rnorm(Nparticles)/sqrt(tau)
     } else {
-      x[, i] <- 0.5*xOld[, i] + rnorm(Nparticles)/sqrt(tau+2*lambda)
+      x[, i] <- 0.5*tau*xOld[, i]/(tau+lambda) + rnorm(Nparticles)/sqrt(tau+lambda)
     }
     lW <- -0.5*(obs[i] - x[, i])^2/sigmaY - 0.5*log(2*pi*sigmaY)
     max.lW <- max(lW)
@@ -213,9 +217,10 @@ dac_lgssm_lc <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det){
       indices1 <- mult_resample(W[, nchild*(i-1)+1], Nparticles)
       # child 2 (with random permutation)
       indices2 <- sample(mult_resample(W[, nchild*i], Nparticles))
-      # mixture weights
-      lW <- lambda * (x[indices1, (ci[1]+nv-1)] - 0.5*xOld[indicesOld[indices1, (ci[1]+nv-1)], (ci[1]+nv-1)]) *
-        (x[indices2, (ci[1]+nv)] - 0.5*xOld[indicesOld[indices2, (ci[1]+nv)], (ci[1]+nv)])
+      # weights
+      lW <- -0.5*lambda * (lambda *x[indices1, (ci[1]+nv-1)]^2 -
+                             2*x[indices1, (ci[1]+nv-1)] * (x[indices2, (ci[1]+nv)] - 0.5*tau*xOld[indicesOld[indices2, (ci[1]+nv)], (ci[1]+nv)])
+                          )
       max.lW <- max(lW)
       WNew[, i] <- exp(lW - max.lW)
       lZNew[i] <- lZ[(nchild*(i-1)+1)] + lZ[i*nchild] + log(mean(WNew)) + max.lW -
