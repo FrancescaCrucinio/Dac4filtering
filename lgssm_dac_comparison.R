@@ -2,7 +2,7 @@
 set.seed(1234)
 
 # dimension
-d <- 8
+d <- 4
 # initial state
 mu0 <- rep(0, times = d)
 Sigma0 <- diag(x = 1, d, d)
@@ -49,59 +49,34 @@ df_dac_light <- data.frame()
 res <- bench::mark("dac" = {
   x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
   res_dac <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "lc")
-  lZ <- res_dac$lZ
-  se <- (res_dac$m - true_means)^2
-  vse <- (res_dac$v - true_variances)^2
-  df_dac <- data.frame(rbind(df_dac, cbind(se, vse, lZ)))
+  # lZ <- res_dac$lZ
+  se <- (res_dac$m[Time.step, ] - true_means[Time.step, ])^2
+ # vse <- (res_dac$v - true_variances)^2
+  df_dac <- data.frame(rbind(df_dac, t(se)))
   df_dac
 },
 "mix" = {
   x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
   res_dac_mix <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "mix")
-  lZ <- res_dac_mix$lZ
-  se <- (res_dac_mix$m - true_means)^2
-  vse <- (res_dac_mix$v - true_variances)^2
-  df_dac_mix <- data.frame(rbind(df_dac_mix, cbind(se, vse, lZ)))
+  # lZ <- res_dac_mix$lZ
+  se <- (res_dac_mix$m[Time.step, ] - true_means[Time.step, ])^2
+  # vse <- (res_dac_mix$v - true_variances)^2
+  df_dac_mix <- data.frame(rbind(df_dac_mix, t(se)))
 },
 "light" = {
   x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
   res_dac_light <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "light")
-  lZ <- res_dac_light$lZ
-  se <- (res_dac_light$m - true_means)^2
-  vse <- (res_dac_light$v - true_variances)^2
-  df_dac_light <- data.frame(rbind(df_dac_light, cbind(se, vse, lZ)))
+  # lZ <- res_dac_light$lZ
+  se <- (res_dac_light$m[Time.step, ] - true_means[Time.step, ])^2
+  # vse <- (res_dac_light$v - true_variances)^2
+  df_dac_light <- data.frame(rbind(df_dac_light, t(se)))
 },
 memory = capabilities("profmem"),
 check = FALSE,
-iterations = Nrep,
+iterations = Nrep-1,
 filter_gc = TRUE)
 
-mse <- rep(0, times = 3*Nrep)
-rmse <- rep(0, times = 3*Nrep)
-for (j in 1:Nrep) {
-  mse[j] <- rowMeans(df_dac[j*Time.step, 1:d])
-  rmse[j] <- rowMeans(df_dac[j*Time.step, 1:d]/true_variances)
-  mse[Nrep+j] <- rowMeans(df_dac_mix[j*Time.step, 1:d])
-  rmse[Nrep+j] <- rowMeans(df_dac_mix[j*Time.step, 1:d]/true_variances)
-  mse[2*Nrep+j] <- rowMeans(df_dac_light[j*Time.step, 1:d])
-  rmse[2*Nrep+j] <- rowMeans(df_dac_light[j*Time.step, 1:d]/true_variances)
-}
-
-g <- as.factor(rep(c("dac", "mix", "light"), each = Nrep))
-times <- rep(res$total_time/res$n_itr, each = Nrep)
-memory <- rep(res$mem_alloc/1e6, each = Nrep)
-# time
-df <- data.frame(x1 = times, x2 = memory, y = mse, g)
-ggplot(data = df, aes(x = x1, y = y, group = g, fill = g)) +
-  geom_boxplot(aes(x = x1, y= y), coef = 6) +
-  scale_y_continuous(trans='log10') +
-  scale_x_continuous(trans='log10') +
-  theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
-        legend.title = element_blank(), legend.text=element_text(size=15))
-# memory
-ggplot(data = df, aes(x = x2, y = y, group = g, fill = g)) +
-  geom_boxplot(aes(x = x2, y= y), coef = 6) +
-  scale_y_continuous(trans='log10') +
-  scale_x_continuous(trans='log10') +
-  theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
-        legend.title = element_blank(), legend.text=element_text(size=15))
+df <- rbind(df_dac, df_dac_mix, df_dac_light)
+df$algo <- as.factor(rep(c("dac", "mix", "light"), each = Nrep))
+df$runtime <- rep(res$total_time/res$n_itr, each = Nrep)
+df$memory <-  rep(res$mem_alloc/1e6, each = Nrep)
