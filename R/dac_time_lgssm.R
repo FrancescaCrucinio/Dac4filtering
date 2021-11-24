@@ -28,10 +28,7 @@ dac_time_lgssm <- function(tau, lambda, sigmaY, Nparticles, x0, y, method = "lig
     }
     Sigma.det[[u+1]] <- log(tmp)
   }
-  if(is.null(M)) {
-    # parameter for lightweight mixture
-    M <- ceiling(sqrt(Nparticles))
-  }
+
   for (t in 1:Time.step) {
     switch(method,
            lc={
@@ -41,9 +38,12 @@ dac_time_lgssm <- function(tau, lambda, sigmaY, Nparticles, x0, y, method = "lig
            mix={
              # dac with mixture weights
              res_dac <- dac_lgssm(x, y[t, ], tau, lambda, sigmaY, Sigma.det)
-           }, # dac with lightweight mixture weights
+           }, # dac with lightweight mixture weights (no adaptation)
+           light={
+             res_dac <- dac_lgssm_lightweight(x, y[t, ], tau, lambda, sigmaY, Sigma.det)
+           }, # dac with adaptive lightweight mixture weights
            {
-             res_dac <- dac_lgssm_lightweight(x, y[t, ], tau, lambda, sigmaY, Sigma.det, M)
+             res_dac <- dac_lgssm_lightweight(x, y[t, ], tau, lambda, sigmaY, Sigma.det, "adaptive")
            }
     )
     x <- res_dac[, 1:d]

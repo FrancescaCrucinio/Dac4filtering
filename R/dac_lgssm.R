@@ -88,7 +88,11 @@ dac_lgssm <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det){
   return(cbind(x, lZ))
 }
 
-dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det, m){
+dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det, M = NULL){
+  if(is.null(M)) {
+    # number of samples for lightweight mixture (no adaptation)
+    M <- ceiling(sqrt(Nparticles))
+  }
   # dimension and number of particles
   d <- ncol(xOld)
   Nparticles <- nrow(xOld)
@@ -99,6 +103,7 @@ dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det, m){
   # number of variables
   nv <- 1
   x <- matrix(0, nrow = Nparticles, ncol = d)
+  lW <- matrix(0, nrow = Nparticles, ncol = d)
   W <- matrix(0, nrow = Nparticles, ncol = d)
   lZ <- rep(0, times = d)
   # copies of xOld
@@ -109,9 +114,9 @@ dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det, m){
     } else {
       x[, i] <- 0.5*tau*xOld[, i]/(tau+lambda) + rnorm(Nparticles)/sqrt(tau+lambda)
     }
-    lW <- -0.5*(obs[i] - x[, i])^2/sigmaY - 0.5*log(2*pi*sigmaY)
-    max.lW <- max(lW)
-    W[, i] <- exp(lW - max.lW)
+    lW[, i] <- -0.5*(obs[i] - x[, i])^2/sigmaY - 0.5*log(2*pi*sigmaY)
+    max.lW <- max(lW[, i])
+    W[, i] <- exp(lW[, i] - max.lW)
     lZ[i] <- log(mean(W[, i])) + max.lW
     W[, i] <- W[, i]/sum(W[, i])
   }
@@ -131,34 +136,18 @@ dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det, m){
     for (i in 1:nodes){
       # get children indices
       ci <- child_indices(i, nvNew)
-      # resample on each children
-      if(u == 1){
-        # child 1
-        indices1 <- mult_resample(W[, nchild*(i-1)+1], m*Nparticles)
-        # child 2 (with random permutation)
-        indices2 <- sample(mult_resample(W[, nchild*i], m*Nparticles))
+      # lightweight mixture resampling
+      if(M == "adaptive") {
+        indices <- adaptive_light(Nparticles, i, u, nv, ci, lW, Nparticles, lambda, tau, x, xOld, indicesOld)
       }
-     else{
-       # child 1
-       indices1 <- sample.int(Nparticles, size = m*Nparticles, replace = TRUE)
-       # child 2
-       indices2 <- sample.int(Nparticles, size = m*Nparticles, replace = TRUE)
-     }
-      # mixture weights
-      lWmix <- -0.5*lambda * (lambda *x[indices1, (ci[1]+nv-1)]^2 -
-                        2*x[indices1, (ci[1]+nv-1)] * (x[indices2, (ci[1]+nv)] - 0.5*tau*xOld[indicesOld[indices2, (ci[1]+nv)], (ci[1]+nv)])
-                )
-      max.lWmix <- max(lWmix)
-      Wmix <- exp(lWmix - max.lWmix)
-      lZNew[i] <- lZ[(nchild*(i-1)+1)] + lZ[i*nchild] + log(mean(Wmix)) + max.lWmix -
-        0.5*Sigma.det[[u]][nchild*(i-1)+1] - 0.5*Sigma.det[[u]][i*nchild] + 0.5*Sigma.det[[u+1]][i]
-      # resampling the new population
-      indices <- mult_resample(Wmix/sum(Wmix), Nparticles)
+      else{
+        indices <- light(i, u, nv, ci, W, Nparticles, M, lambda, tau, x, xOld, indicesOld)
+      }
       # update particles
-      xNew[, ci[1]:ci[2]] <- cbind(x[indices1[indices], ci[1]:(ci[1]+nv-1)], x[indices2[indices], (ci[1]+nv):ci[2]])
+      xNew[, ci[1]:ci[2]] <- cbind(x[indices[, 1], ci[1]:(ci[1]+nv-1)], x[indices[, 2], (ci[1]+nv):ci[2]])
       # update xOld
-      indicesOld[, ci[1]:(ci[1]+nv-1)] <- indices1[indices]
-      indicesOld[, (ci[1]+nv):ci[2]] <- indices2[indices]
+      indicesOld[, ci[1]:(ci[1]+nv-1)] <- indices[, 1]
+      indicesOld[, (ci[1]+nv):ci[2]] <- indices[, 2]
    #   xOldNew[, ci[1]:ci[2]] <- cbind(xOld[indices1[indices], ci[1]:(ci[1]+nv-1)], xOld[indices2[indices], (ci[1]+nv):ci[2]])
       }
     x <- xNew

@@ -1,6 +1,5 @@
-# Linear Gaussian SSM -- comparison of dac and dac with mixture reweighting (both lightweight and full cost)
+### Linear Gaussian SSM -- comparison of dac and dac with mixture reweighting (both lightweight and full cost)
 set.seed(1234)
-
 # dimension
 d <- 4
 # initial state
@@ -24,7 +23,7 @@ y.error.var <- diag(x = sigmaY, d, d)
 y.coeff <- diag(x = 1, d, d)
 
 # number of time steps
-Time.step <- 10
+Time.step <- 1
 
 # get observations
 y <- lgssm_obs(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step)
@@ -40,11 +39,12 @@ for (t in 1:Time.step){
 }
 
 ### DAC
-Nparticles <- 100
+Nparticles <- 1000
 Nrep <- 10
 df_dac <- data.frame()
 df_dac_mix <- data.frame()
 df_dac_light <- data.frame()
+df_dac_light_ada <- data.frame()
 
 res <- bench::mark("dac" = {
   x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
@@ -71,12 +71,20 @@ res <- bench::mark("dac" = {
   # vse <- (res_dac_light$v - true_variances)^2
   df_dac_light <- data.frame(rbind(df_dac_light, t(se)))
 },
+"ada" = {
+  x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
+  res_dac_light_ada <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "ada")
+  # lZ <- res_dac_light_ada$lZ
+  se <- (res_dac_light_ada$m[Time.step, ] - true_means[Time.step, ])^2
+  # vse <- (res_dac_light_ada$v - true_variances)^2
+  df_dac_light_ada <- data.frame(rbind(df_dac_light_ada, t(se)))
+},
 memory = capabilities("profmem"),
 check = FALSE,
 iterations = Nrep-1,
 filter_gc = TRUE)
 
-df <- rbind(df_dac, df_dac_mix, df_dac_light)
-df$algo <- as.factor(rep(c("dac", "mix", "light"), each = Nrep))
+df <- rbind(df_dac, df_dac_mix, df_dac_light, df_dac_light_ada)
+df$algo <- as.factor(rep(c("dac", "mix", "light", "light_ada"), each = Nrep))
 df$runtime <- rep(res$total_time/res$n_itr, each = Nrep)
 df$memory <-  rep(res$mem_alloc/1e6, each = Nrep)
