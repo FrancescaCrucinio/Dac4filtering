@@ -1,7 +1,7 @@
 ### Linear Gaussian SSM -- comparison of dac and dac with mixture reweighting (both lightweight and full cost)
 set.seed(1234)
 # dimension
-d <- 4
+d <- 8
 # initial state
 mu0 <- rep(0, times = d)
 Sigma0 <- diag(x = 1, d, d)

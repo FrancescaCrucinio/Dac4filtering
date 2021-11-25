@@ -24,7 +24,7 @@ adaptive_light <- function(ess_target, i, u, nv, ci, lW, Nparticles, lambda, tau
     m <- m+1
     new_perm <- sample.int(Nparticles)
     if(u == 1){
-      lWmix_perm <- lW[new_perm, (nchild*(i-1)+1)] + lW[new_perm, i*nchild] -
+      lWmix_perm <- lW[, (nchild*(i-1)+1)] + lW[new_perm, i*nchild] -
         0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2 - 2*x[, (ci[1]+nv-1)] * (x[new_perm, (ci[1]+nv)] - 0.5*tau*xOld[indicesOld[new_perm, (ci[1]+nv)], (ci[1]+nv)])
         )
     } else{
@@ -40,6 +40,7 @@ adaptive_light <- function(ess_target, i, u, nv, ci, lW, Nparticles, lambda, tau
     ess <- ess_s^2/ess_ss
     lWmix <- c(lWmix, lWmix_perm)
   }
+  print(paste(m, "ESS", ess))
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
   # resampling the new population

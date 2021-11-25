@@ -70,7 +70,7 @@ dac_lgssm <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det){
       }
       Wmix <- Wmix/sum(Wmix)
       # resampling
-      indices <- mult_resample(Wmix, Nparticles)
+      indices <- stratified_resample(Wmix, Nparticles)
       # get row/column indices
       res <- rc_indices(indices, Nparticles)
       for(n in 1:Nparticles) {
@@ -203,9 +203,9 @@ dac_lgssm_lc <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det){
       ci <- child_indices(i, nvNew)
       # resample on each children
       # child 1
-      indices1 <- mult_resample(W[, nchild*(i-1)+1], Nparticles)
+      indices1 <- stratified_resample(W[, nchild*(i-1)+1], Nparticles)
       # child 2 (with random permutation)
-      indices2 <- sample(mult_resample(W[, nchild*i], Nparticles))
+      indices2 <- sample(stratified_resample(W[, nchild*i], Nparticles))
       # weights
       lW <- -0.5*lambda * (lambda *x[indices1, (ci[1]+nv-1)]^2 -
                              2*x[indices1, (ci[1]+nv-1)] * (x[indices2, (ci[1]+nv)] - 0.5*tau*xOld[indicesOld[indices2, (ci[1]+nv)], (ci[1]+nv)])
