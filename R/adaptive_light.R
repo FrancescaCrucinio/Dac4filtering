@@ -1,13 +1,13 @@
-adaptive_light <- function(ess_target, i, u, nv, ci, lW, Nparticles, lambda, tau, x, xOld, indicesOld){
+adaptive_light <- function(ess_target, i, u, nv, ci, lW, Nparticles, lambda, tau, x, xOld){
   # binary tree
   nchild <- 2
   # mixture weights
   if(u == 1){
     lWmix <- lW[, (nchild*(i-1)+1)] + lW[, i*nchild] -
-      0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2 - 2*x[, (ci[1]+nv-1)] * (x[, (ci[1]+nv)] - 0.5*tau*xOld[indicesOld[, (ci[1]+nv)], (ci[1]+nv)])
+      0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2 - 2*x[, (ci[1]+nv-1)] * (x[, (ci[1]+nv)] - 0.5*tau*xOld[, (ci[1]+nv)])
     )
   } else{
-    lWmix <- -0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2 - 2*x[, (ci[1]+nv-1)] * (x[, (ci[1]+nv)] - 0.5*tau*xOld[indicesOld[, (ci[1]+nv)], (ci[1]+nv)])
+    lWmix <- -0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2 - 2*x[, (ci[1]+nv-1)] * (x[, (ci[1]+nv)] - 0.5*tau*xOld[, (ci[1]+nv)])
       )
   }
   max.lWmix <- max(lWmix)
@@ -25,10 +25,10 @@ adaptive_light <- function(ess_target, i, u, nv, ci, lW, Nparticles, lambda, tau
     new_perm <- sample.int(Nparticles)
     if(u == 1){
       lWmix_perm <- lW[, (nchild*(i-1)+1)] + lW[new_perm, i*nchild] -
-        0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2 - 2*x[, (ci[1]+nv-1)] * (x[new_perm, (ci[1]+nv)] - 0.5*tau*xOld[indicesOld[new_perm, (ci[1]+nv)], (ci[1]+nv)])
+        0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2 - 2*x[, (ci[1]+nv-1)] * (x[new_perm, (ci[1]+nv)] - 0.5*tau*xOld[new_perm, (ci[1]+nv)])
         )
     } else{
-      lWmix_perm <- -0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2 - 2*x[, (ci[1]+nv-1)] * (x[new_perm, (ci[1]+nv)] - 0.5*tau*xOld[indicesOld[new_perm, (ci[1]+nv)], (ci[1]+nv)])
+      lWmix_perm <- -0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2 - 2*x[, (ci[1]+nv-1)] * (x[new_perm, (ci[1]+nv)] - 0.5*tau*xOld[new_perm, (ci[1]+nv)])
       )
     }
     permutation <- c(permutation, new_perm)

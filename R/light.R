@@ -1,4 +1,4 @@
-light <- function(i, u, nv, ci, W, Nparticles, m, lambda, tau, x, xOld, indicesOld){
+light <- function(i, u, nv, ci, W, Nparticles, m, lambda, tau, x, xOld){
   # binary tree
   nchild <- 2
   # resample on each children
@@ -16,13 +16,13 @@ light <- function(i, u, nv, ci, W, Nparticles, m, lambda, tau, x, xOld, indicesO
   }
   # mixture weights
   lWmix <- -0.5*lambda * (lambda *x[indices1, (ci[1]+nv-1)]^2 -
-                            2*x[indices1, (ci[1]+nv-1)] * (x[indices2, (ci[1]+nv)] - 0.5*tau*xOld[indicesOld[indices2, (ci[1]+nv)], (ci[1]+nv)])
+                            2*x[indices1, (ci[1]+nv-1)] * (x[indices2, (ci[1]+nv)] - 0.5*tau*xOld[indices2, (ci[1]+nv)])
   )
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
   # lZNew[i] <- lZ[(nchild*(i-1)+1)] + lZ[i*nchild] + log(mean(Wmix)) + max.lWmix -
   # 0.5*Sigma.det[[u]][nchild*(i-1)+1] - 0.5*Sigma.det[[u]][i*nchild] + 0.5*Sigma.det[[u+1]][i]
   # resampling the new population
-  indices <- mult_resample(Wmix/sum(Wmix), Nparticles)
+  indices <- stratified_resample(Wmix/sum(Wmix), Nparticles)
   return(cbind(indices1[indices], indices2[indices]))
 }

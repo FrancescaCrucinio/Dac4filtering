@@ -11,8 +11,6 @@ dac_lgssm <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det){
   x <- matrix(0, nrow = Nparticles, ncol = d)
   lW <- matrix(0, nrow = Nparticles, ncol = d)
   lZ <- rep(0, times = d)
-  # copies of xOld
-  indicesOld <- matrix(1:Nparticles, nrow = Nparticles, ncol = d)
   for (i in 1:nchild^nlevels){
     if (i == 1) {
       x[, i] <- 0.5*xOld[, i] + rnorm(Nparticles)/sqrt(tau)
@@ -77,8 +75,8 @@ dac_lgssm <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det){
         # update particles
         xNew[n, ci[1]:ci[2]] <- c(x[res[n, 1], ci[1]:(ci[1]+nv-1)], x[res[n, 2], (ci[1]+nv):ci[2]])
         # update xOld
-        indicesOld[n, ci[1]:(ci[1]+nv-1)] <- res[n, 1]
-        indicesOld[n, (ci[1]+nv):ci[2]] <- res[n, 2]
+        xOld[n, ci[1]:ci[2]] <- xOld[res[n, 1], ci[1]:ci[2]]
+        # xOld[n, (ci[1]+nv):ci[2]] <- xOld[res[n, 2], (ci[1]+nv):ci[2]]
       }
     }
     x <- xNew
@@ -106,8 +104,6 @@ dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det, M =
   lW <- matrix(0, nrow = Nparticles, ncol = d)
   W <- matrix(0, nrow = Nparticles, ncol = d)
   lZ <- rep(0, times = d)
-  # copies of xOld
-  indicesOld <- matrix(1:Nparticles, nrow = Nparticles, ncol = d)
   for (i in 1:nchild^nlevels){
     if (i == 1) {
       x[, i] <- 0.5*xOld[, i] + rnorm(Nparticles)/sqrt(tau)
@@ -130,7 +126,6 @@ dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det, M =
 
     # updated particles/normalizing constant
     xNew <- matrix(0, nrow = Nparticles, ncol = d)
-    xOldNew <- matrix(0, nrow = Nparticles, ncol = d)
     lZNew <- rep(0, times = nodes)
 
     for (i in 1:nodes){
@@ -138,17 +133,16 @@ dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det, M =
       ci <- child_indices(i, nvNew)
       # lightweight mixture resampling
       if(M == "adaptive") {
-        indices <- adaptive_light(Nparticles, i, u, nv, ci, lW, Nparticles, lambda, tau, x, xOld, indicesOld)
+        indices <- adaptive_light(Nparticles, i, u, nv, ci, lW, Nparticles, lambda, tau, x, xOld)
       }
       else{
-        indices <- light(i, u, nv, ci, W, Nparticles, M, lambda, tau, x, xOld, indicesOld)
+        indices <- light(i, u, nv, ci, W, Nparticles, M, lambda, tau, x, xOld)
       }
       # update particles
       xNew[, ci[1]:ci[2]] <- cbind(x[indices[, 1], ci[1]:(ci[1]+nv-1)], x[indices[, 2], (ci[1]+nv):ci[2]])
       # update xOld
-      indicesOld[, ci[1]:(ci[1]+nv-1)] <- indices[, 1]
-      indicesOld[, (ci[1]+nv):ci[2]] <- indices[, 2]
-   #   xOldNew[, ci[1]:ci[2]] <- cbind(xOld[indices1[indices], ci[1]:(ci[1]+nv-1)], xOld[indices2[indices], (ci[1]+nv):ci[2]])
+      xOld[, ci[1]:ci[2]] <- xOld[indices[, 1], ci[1]:ci[2]]
+      # xOld[, (ci[1]+nv):ci[2]] <- xOld[indices[, 2], (ci[1]+nv):ci[2]]
       }
     x <- xNew
     lZ <- lZNew
@@ -170,8 +164,6 @@ dac_lgssm_lc <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det){
   x <- matrix(0, nrow = Nparticles, ncol = d)
   W <- matrix(0, nrow = Nparticles, ncol = d)
   lZ <- rep(0, times = d)
-  # copies of xOld
-  indicesOld <- matrix(1:Nparticles, nrow = Nparticles, ncol = d)
   for (i in 1:nchild^nlevels){
     if (i == 1) {
       x[, i] <- 0.5*xOld[, i] + rnorm(Nparticles)/sqrt(tau)
@@ -208,7 +200,7 @@ dac_lgssm_lc <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det){
       indices2 <- sample(stratified_resample(W[, nchild*i], Nparticles))
       # weights
       lW <- -0.5*lambda * (lambda *x[indices1, (ci[1]+nv-1)]^2 -
-                             2*x[indices1, (ci[1]+nv-1)] * (x[indices2, (ci[1]+nv)] - 0.5*tau*xOld[indicesOld[indices2, (ci[1]+nv)], (ci[1]+nv)])
+                             2*x[indices1, (ci[1]+nv-1)] * (x[indices2, (ci[1]+nv)] - 0.5*tau*xOld[indices2, (ci[1]+nv)])
                           )
       max.lW <- max(lW)
       WNew[, i] <- exp(lW - max.lW)
@@ -217,8 +209,7 @@ dac_lgssm_lc <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det){
       # update particles
       xNew[, ci[1]:ci[2]] <- cbind(x[indices1, ci[1]:(ci[1]+nv-1)], x[indices2, (ci[1]+nv):ci[2]])
       # update xOld
-      indicesOld[, ci[1]:(ci[1]+nv-1)] <- indices1
-      indicesOld[, (ci[1]+nv):ci[2]] <- indices2
+      xOld[, ci[1]:ci[2]] <- xOld[indices1, ci[1]:ci[2]]
     }
     x <- xNew
     lZ <- lZNew

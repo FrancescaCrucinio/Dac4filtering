@@ -93,7 +93,7 @@ for (j in 1:Nrep){
   x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
   # dac (lightweight)
   tic()
-  res_dac_light <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "light", marginals = marginals)
+  res_dac_light <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "adaptive", marginals = marginals)
   runtime <- toc()
   trep_dac <- runtime$toc - runtime$tic
   Zrep_dac[, j] <- res_dac_light$lZ
