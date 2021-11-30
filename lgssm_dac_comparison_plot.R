@@ -1,6 +1,7 @@
 # read data
-d <- ncol(df) - 3
-df$d_means <- rowMeans(df[, 1:d])
+df <- read_csv("resampling_comparison_d8N1000ID1")
+d <- ncol(df) - 4
+df$d_means <- rowMeans(df[, 2:(d+1)])
 # time
 ggplot(data = df, aes(x = runtime, y = d_means, group = algo, fill = algo)) +
   geom_boxplot(aes(x = runtime, y = d_means), coef = 6) +
