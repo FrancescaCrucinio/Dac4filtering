@@ -82,7 +82,7 @@ res <- bench::mark("dac" = {
 },
 memory = capabilities("profmem"),
 check = FALSE,
-iterations = Nrep-1,
+iterations = Nrep,
 filter_gc = TRUE)
 
 df <- rbind(df_dac, df_dac_mix, df_dac_light, df_dac_light_ada)
