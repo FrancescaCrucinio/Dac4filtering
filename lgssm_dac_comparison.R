@@ -2,7 +2,7 @@ devtools::load_all(".")
 ### Linear Gaussian SSM -- comparison of dac and dac with mixture reweighting (both lightweight and full cost)
 
 # dimension
-d <- 8
+d <- 4
 # initial state
 mu0 <- rep(0, times = d)
 Sigma0 <- diag(x = 1, d, d)
@@ -11,12 +11,15 @@ tau <- 1
 lambda <- 1
 sigmaY <- 0.5^2
 # coefficient and precision of the state equation
-x.coeff <- diag(x = 0.5, d, d)
-x.error.prec <- diag(x = (tau + 2*lambda), d, d)
-x.error.prec[row(x.error.prec) - col(x.error.prec) == 1] <- -lambda
-x.error.prec[row(x.error.prec) - col(x.error.prec) == -1] <- -lambda
-x.error.prec[1, 1] <- x.error.prec[1, 1] - lambda
-x.error.prec[d, d] <- x.error.prec[d, d] - lambda
+# coefficient and precision of the state equation
+m1 <- diag(x = tau, d, d)
+m1[1, 1] <- tau + lambda
+m2 <- diag(x = tau+lambda, d, d)
+m2[row(m2) - col(m2) == 1] <- -lambda
+m3 <- diag(x = tau+lambda, d, d)
+m3[1, 1] <- tau
+x.coeff <- 0.5*m1%*%solve(m2)
+x.error.prec <- (t(m2)%*%m3%*%m2)/(tau+lambda)^2
 x.error.var <- solve(x.error.prec)
 
 # coefficient and covariance of the observation equation
@@ -24,7 +27,7 @@ y.error.var <- diag(x = sigmaY, d, d)
 y.coeff <- diag(x = 1, d, d)
 
 # number of time steps
-Time.step <- 1
+Time.step <- 10
 
 # get observations
 y <- lgssm_obs(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step)

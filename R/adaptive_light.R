@@ -20,7 +20,7 @@ adaptive_light <- function(ess_target, i, u, nv, ci, lW, Nparticles, lambda, tau
   # first permutation
   permutation <- 1:Nparticles
   m <- 1
-  while (ess < ess_target) {
+  while (ess < ess_target & m <= ceiling(sqrt(Nparticles))) {
     m <- m+1
     new_perm <- sample.int(Nparticles)
     if(u == 1){
