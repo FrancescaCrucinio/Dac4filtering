@@ -1,5 +1,5 @@
 # Generate observations from a linear gaussian SSM
-lgssm_obs <- function(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step){
+ssm_obs <- function(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step){
 
   # dimensions of y
   p <- nrow(y.error.var)

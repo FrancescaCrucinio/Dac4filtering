@@ -2,7 +2,7 @@ devtools::load_all(".")
 ### Linear Gaussian SSM -- comparison of dac and dac with mixture reweighting (both lightweight and full cost)
 
 # dimension
-d <- 4
+d <- 8
 # initial state
 mu0 <- rep(0, times = d)
 Sigma0 <- diag(x = 1, d, d)
@@ -93,9 +93,9 @@ df$algo <- as.factor(rep(c("dac", "mix", "light", "light_ada"), each = nrow(df)/
 df$runtime <- rep(res$total_time/res$n_itr, each = nrow(df)/4)
 df$memory <-  rep(res$mem_alloc/1e6, each = nrow(df)/4)
 
-ID <- 1
-ID <- as.numeric(Sys.getenv("SGE_TASK_ID"))
-print(ID)
-filename <- paste0("resampling_comparison_d", d, "N", Nparticles, "ID", ID)
-filename <- paste0("resampling_comparison_d", d, "N", Nparticles, "ID", ID)
-write.csv(x=df, file=filename)
+# ID <- 1
+# ID <- as.numeric(Sys.getenv("SGE_TASK_ID"))
+# print(ID)
+# filename <- paste0("resampling_comparison_d", d, "N", Nparticles, "ID", ID)
+# filename <- paste0("resampling_comparison_d", d, "N", Nparticles, "ID", ID)
+# write.csv(x=df, file=filename)
