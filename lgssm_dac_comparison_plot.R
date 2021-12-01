@@ -5,6 +5,11 @@ for (id in 2:10){
   dfnew <- read.csv(filename)
   df <- rbind(df, dfnew)
 }
+for (id in 1:10){
+  filename <- paste("data/resampling_comparison_d8N10000ID", id, sep = "")
+  dfnew <- read.csv(filename)
+  df <- rbind(df, dfnew)
+}
 d <- ncol(df) - 4
 df$d_means <- rowMeans(df[, 2:(d+1)])
 # time
