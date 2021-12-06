@@ -51,7 +51,7 @@ df_dac_light_ada <- data.frame()
 
 res <- bench::mark("dac" = {
   x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
-  res_dac <- dac_time_lgssm_crossover(tau, lambda, sigmaY, Nparticles, x0, y, method = "lc")
+  res_dac <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "lc")
   # lZ <- res_dac$lZ
   se <- (res_dac$m[Time.step, ] - true_means[Time.step, ])^2
  # vse <- (res_dac$v - true_variances)^2
@@ -60,7 +60,7 @@ res <- bench::mark("dac" = {
 },
 "mix" = {
   x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
-  res_dac_mix <- dac_time_lgssm_crossover(tau, lambda, sigmaY, Nparticles, x0, y, method = "mix")
+  res_dac_mix <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "mix")
   # lZ <- res_dac_mix$lZ
   se <- (res_dac_mix$m[Time.step, ] - true_means[Time.step, ])^2
   # vse <- (res_dac_mix$v - true_variances)^2
@@ -68,7 +68,7 @@ res <- bench::mark("dac" = {
 },
 "light" = {
   x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
-  res_dac_light <- dac_time_lgssm_crossover(tau, lambda, sigmaY, Nparticles, x0, y, method = "light")
+  res_dac_light <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "light")
   # lZ <- res_dac_light$lZ
   se <- (res_dac_light$m[Time.step, ] - true_means[Time.step, ])^2
   # vse <- (res_dac_light$v - true_variances)^2
@@ -76,7 +76,7 @@ res <- bench::mark("dac" = {
 },
 "ada" = {
   x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
-  res_dac_light_ada <- dac_time_lgssm_crossover(tau, lambda, sigmaY, Nparticles, x0, y, method = "ada")
+  res_dac_light_ada <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "ada")
   # lZ <- res_dac_light_ada$lZ
   se <- (res_dac_light_ada$m[Time.step, ] - true_means[Time.step, ])^2
   # vse <- (res_dac_light_ada$v - true_variances)^2
@@ -95,6 +95,4 @@ df$memory <-  rep(res$mem_alloc/1e6, each = nrow(df)/4)
 ID <- 1
 ID <- as.numeric(Sys.getenv("SGE_TASK_ID"))
 print(ID)
-filename <- paste0("resampling_comparison_d", d, "N", Nparticles, "ID", ID)
-filename <- paste0("resampling_comparison_d", d, "N", Nparticles, "ID", ID)
-write.csv(x=df, file=filename)
+filename <- paste0("resampling_comparison_d", d, "N", Nparticles, "ID", ID)write.csv(x=df, file=filename)
