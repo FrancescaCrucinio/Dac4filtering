@@ -1,17 +1,17 @@
 # read data
-df <- read.csv("data/resampling_comparison_d8N1000ID1")
-for (id in 2:10){
+df <- read.csv("data/resampling_comparison_d8N100ID1")
+for (id in 2:50){
+  filename <- paste("data/resampling_comparison_d8N100ID", id, sep = "")
+  dfnew <- read.csv(filename)
+  df <- rbind(df, dfnew)
+}
+for (id in 2:50){
   filename <- paste("data/resampling_comparison_d8N1000ID", id, sep = "")
   dfnew <- read.csv(filename)
   df <- rbind(df, dfnew)
 }
-for (id in 1:10){
-  filename <- paste("data/resampling_comparison_d8N10000ID", id, sep = "")
-  dfnew <- read.csv(filename)
-  df <- rbind(df, dfnew)
-}
-d <- ncol(df) - 4
-df$d_means <- rowMeans(df[, 2:(d+1)])
+d <- ncol(df) - 2
+df$d_means <- rowMeans(df[, 1:d])
 # time
 ggplot(data = df, aes(x = runtime, y = d_means, group = algo, fill = algo)) +
   geom_boxplot(aes(x = runtime, y = d_means), coef = 6, width = 10) +
