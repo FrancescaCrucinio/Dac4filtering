@@ -99,7 +99,8 @@ runtime <- toc()
 se <- (res_dac_light_ada$m[Time.step, ] - true_means[Time.step, ])^2
 df <- data.frame(rbind(df, t(c(se, runtime$toc - runtime$tic))))
 
-df$algo <- as.factor(c("dac", "mix", "light", "light_ada", "dac_co", "mix_co", "light_co", "light_ada_co"))
+df$algo <- as.factor(c("dac", "mix", "light", "light_ada", "dac", "mix", "light", "light_ada"))
+df$mutation <- as.factor(c(0, 0, 0, 0, 1, 1, 1, 1))
 
 ID <- as.numeric(Sys.getenv("SGE_TASK_ID"))
 filename <- paste0("resampling_comparison_d", d, "N", Nparticles, "ID", ID)

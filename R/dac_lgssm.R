@@ -1,4 +1,4 @@
-dac_lgssm <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det){
+dac_lgssm <- function(xOld, obs, tau, lambda, sigmaY){
   # dimension and number of particles
   d <- ncol(xOld)
   Nparticles <- nrow(xOld)
@@ -10,7 +10,6 @@ dac_lgssm <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det){
   nv <- 1
   x <- matrix(0, nrow = Nparticles, ncol = d)
   lW <- matrix(0, nrow = Nparticles, ncol = d)
-  lZ <- rep(0, times = d)
   for (i in 1:nchild^nlevels){
     if (i == 1) {
       x[, i] <- 0.5*xOld[, i] + rnorm(Nparticles)/sqrt(tau)
@@ -20,7 +19,6 @@ dac_lgssm <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det){
     lW[, i] <- -0.5*(obs[i] - x[, i])^2/sigmaY - 0.5*log(2*pi*sigmaY)
     max.lW <- max(lW[, i])
     W <- exp(lW[, i] - max.lW)
-    lZ[i] <- log(mean(W)) + max.lW
   }
 
   # loop over tree levels excluding leaves
@@ -32,7 +30,6 @@ dac_lgssm <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det){
 
     # updated particles/normalizing constant
     xNew <- matrix(0, nrow = Nparticles, ncol = d)
-    lZNew <- rep(0, times = nodes)
 
     for (i in 1:nodes){
 
@@ -51,8 +48,6 @@ dac_lgssm <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det){
         }
         max.lWmix <- max(lWmix)
         Wmix <- exp(lWmix - max.lWmix)
-        lZNew[i] <- log(mean(Wmix)) + max.lWmix -
-          0.5*Sigma.det[[u]][nchild*(i-1)+1] - 0.5*Sigma.det[[u]][i*nchild] + 0.5*Sigma.det[[u+1]][i]
       } else {
         for (n1 in 1:Nparticles) {
           for (n2 in 1:Nparticles) {
@@ -63,8 +58,6 @@ dac_lgssm <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det){
         }
         max.lWmix <- max(lWmix)
         Wmix <- exp(lWmix - max.lWmix)
-        lZNew[i] <- log(mean(Wmix)) + max.lWmix + lZ[(nchild*(i-1)+1)] + lZ[i*nchild] -
-          0.5*Sigma.det[[u]][nchild*(i-1)+1] - 0.5*Sigma.det[[u]][i*nchild] + 0.5*Sigma.det[[u+1]][i]
       }
       Wmix <- Wmix/sum(Wmix)
       # resampling
@@ -76,17 +69,15 @@ dac_lgssm <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det){
         xNew[n, ci[1]:ci[2]] <- c(x[res[n, 1], ci[1]:(ci[1]+nv-1)], x[res[n, 2], (ci[1]+nv):ci[2]])
         # update xOld
         xOld[n, ci[1]:ci[2]] <- xOld[res[n, 1], ci[1]:ci[2]]
-        # xOld[n, (ci[1]+nv):ci[2]] <- xOld[res[n, 2], (ci[1]+nv):ci[2]]
       }
     }
     x <- xNew
-    lZ <- lZNew
     nv <- nvNew
   }
-  return(cbind(x, lZ))
+  return(x)
 }
 
-dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det, M = NULL){
+dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, M = NULL){
   if(is.null(M)) {
     # number of samples for lightweight mixture (no adaptation)
     M <- ceiling(sqrt(Nparticles))
@@ -103,7 +94,6 @@ dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det, M =
   x <- matrix(0, nrow = Nparticles, ncol = d)
   lW <- matrix(0, nrow = Nparticles, ncol = d)
   W <- matrix(0, nrow = Nparticles, ncol = d)
-  lZ <- rep(0, times = d)
   for (i in 1:nchild^nlevels){
     if (i == 1) {
       x[, i] <- 0.5*xOld[, i] + rnorm(Nparticles)/sqrt(tau)
@@ -113,7 +103,6 @@ dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det, M =
     lW[, i] <- -0.5*(obs[i] - x[, i])^2/sigmaY - 0.5*log(2*pi*sigmaY)
     max.lW <- max(lW[, i])
     W[, i] <- exp(lW[, i] - max.lW)
-    lZ[i] <- log(mean(W[, i])) + max.lW
     W[, i] <- W[, i]/sum(W[, i])
   }
 
@@ -126,7 +115,6 @@ dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det, M =
 
     # updated particles/normalizing constant
     xNew <- matrix(0, nrow = Nparticles, ncol = d)
-    lZNew <- rep(0, times = nodes)
 
     for (i in 1:nodes){
       # get children indices
@@ -142,16 +130,14 @@ dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det, M =
       xNew[, ci[1]:ci[2]] <- cbind(x[indices[, 1], ci[1]:(ci[1]+nv-1)], x[indices[, 2], (ci[1]+nv):ci[2]])
       # update xOld
       xOld[, ci[1]:ci[2]] <- xOld[indices[, 1], ci[1]:ci[2]]
-      # xOld[, (ci[1]+nv):ci[2]] <- xOld[indices[, 2], (ci[1]+nv):ci[2]]
       }
     x <- xNew
-    lZ <- lZNew
     nv <- nvNew
   }
-  return(cbind(x, lZ))
+  return(x)
 }
 
-dac_lgssm_lc <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det){
+dac_lgssm_lc <- function(xOld, obs, tau, lambda, sigmaY){
   # dimension and number of particles
   d <- ncol(xOld)
   Nparticles <- nrow(xOld)
@@ -163,7 +149,6 @@ dac_lgssm_lc <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det){
   nv <- 1
   x <- matrix(0, nrow = Nparticles, ncol = d)
   W <- matrix(0, nrow = Nparticles, ncol = d)
-  lZ <- rep(0, times = d)
   for (i in 1:nchild^nlevels){
     if (i == 1) {
       x[, i] <- 0.5*xOld[, i] + rnorm(Nparticles)/sqrt(tau)
@@ -173,7 +158,6 @@ dac_lgssm_lc <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det){
     lW <- -0.5*(obs[i] - x[, i])^2/sigmaY - 0.5*log(2*pi*sigmaY)
     max.lW <- max(lW)
     W[, i] <- exp(lW - max.lW)
-    lZ[i] <- log(mean(W[, i])) + max.lW
     W[, i] <- W[, i]/sum(W[, i])
   }
 
@@ -187,7 +171,6 @@ dac_lgssm_lc <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det){
     # updated particles/normalizing constant
     xNew <- matrix(0, nrow = Nparticles, ncol = d)
     xOldNew <- matrix(0, nrow = Nparticles, ncol = d)
-    lZNew <- rep(0, times = nodes)
     WNew <- matrix(0, nrow = Nparticles, ncol = nodes)
 
     for (i in 1:nodes){
@@ -204,17 +187,14 @@ dac_lgssm_lc <- function(xOld, obs, tau, lambda, sigmaY, Sigma.det){
                           )
       max.lW <- max(lW)
       WNew[, i] <- exp(lW - max.lW)
-      lZNew[i] <- lZ[(nchild*(i-1)+1)] + lZ[i*nchild] + log(mean(WNew)) + max.lW -
-        0.5*Sigma.det[[u]][nchild*(i-1)+1] - 0.5*Sigma.det[[u]][i*nchild] + 0.5*Sigma.det[[u+1]][i]
       # update particles
       xNew[, ci[1]:ci[2]] <- cbind(x[indices1, ci[1]:(ci[1]+nv-1)], x[indices2, (ci[1]+nv):ci[2]])
       # update xOld
       xOld[, ci[1]:ci[2]] <- xOld[indices1, ci[1]:ci[2]]
     }
     x <- xNew
-    lZ <- lZNew
     nv <- nvNew
     W <- WNew
   }
-  return(cbind(x, lZ))
+  return(x)
 }
