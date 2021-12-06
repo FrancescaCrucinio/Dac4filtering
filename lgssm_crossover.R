@@ -27,7 +27,7 @@ y.coeff <- diag(x = 1, d, d)
 Time.step <- 1
 
 # get observations
-y <- lgssm_obs(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step)
+y <- ssm_obs(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step)
 
 # Kalman filter
 res_KF <- fkf(a0 = mu0, P0 = 0.5^2*t(x.coeff)%*%Sigma0%*%x.coeff + x.error.var, dt = as.matrix(rep(0, times = d)),
@@ -50,7 +50,7 @@ history <- array(0, dim = c(Nparticles, d, 2))
 history[, , 1] <- mvrnorm(n = Nparticles, mu0, Sigma0)
 # dac (lightweight)
 tic()
-res_dac <- dac_lgssm_lc_crossover(history, y, tau, lambda, sigmaY)
+res_dac <- dac_lgssm_crossover(history, y, tau, lambda, sigmaY)
 runtime <- toc()
 trep_dac <- runtime$toc - runtime$tic
 colMeans(res_dac)

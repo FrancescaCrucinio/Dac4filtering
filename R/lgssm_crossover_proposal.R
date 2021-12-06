@@ -3,8 +3,7 @@ crossover <- function(i, nodes, x, history, historyIndex, tau, lambda){
   nchild <- 2
   Nparticles <- nrow(x)
   d <- ncol(x)
-  # updated history
-  historyIndexNew <- historyIndex
+  historyIndexNew <- historyIndex[, , nchild*(i-1)+1]
   for (n in 1:Nparticles){
     # sample crossover point
     crossover_point <- sample.int(d-1, 1)
@@ -26,8 +25,8 @@ crossover <- function(i, nodes, x, history, historyIndex, tau, lambda){
                   0.5*tau*history[historyIndex[n, crossover_point+1, nchild*(i-1)+1], crossover_point+1, 2])
     # accept/reject
     if(runif(1) <= exp(mh_ratio)){
-      # accepted
-      historyIndexNew[n, , i] <- c(historyIndex[n, 1:crossover_point, nchild*(i-1)+1], historyIndex[n, (crossover_point+1):d, nchild*i])
+      # accepted (only update the non-auxiliary history)
+      historyIndexNew[n, ] <- c(historyIndex[n, 1:crossover_point, nchild*(i-1)+1], historyIndex[n, (crossover_point+1):d, nchild*i])
     }
   }
   return(historyIndexNew)

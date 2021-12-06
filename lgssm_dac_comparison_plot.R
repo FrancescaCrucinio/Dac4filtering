@@ -1,5 +1,5 @@
 # read data
-df <- read.csv("data/resampling_comparison_d8N1000ID2")
+df <- read.csv("data/resampling_comparison_d8N1000ID1")
 for (id in 2:10){
   filename <- paste("data/resampling_comparison_d8N1000ID", id, sep = "")
   dfnew <- read.csv(filename)
