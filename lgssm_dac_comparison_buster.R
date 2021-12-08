@@ -43,7 +43,7 @@ for (t in 1:Time.step){
 }
 
 ### DAC
-Nparticles <- 100
+Nparticles <- 1000
 df <- data.frame()
 
 # NO CROSSOVER

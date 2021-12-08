@@ -12,17 +12,17 @@ dac_time_lgssm <- function(tau, lambda, sigmaY, Nparticles, x0, y, method = "lig
     switch(method,
            lc={
              # linear cost dac
-             res_dac <- dac_lgssm_lc(x, y[t, ], tau, lambda, sigmaY, Sigma.det)
+             res_dac <- dac_lgssm_lc(x, y[t, ], tau, lambda, sigmaY)
            },
            mix={
              # dac with mixture weights
-             res_dac <- dac_lgssm(x, y[t, ], tau, lambda, sigmaY, Sigma.det)
+             res_dac <- dac_lgssm(x, y[t, ], tau, lambda, sigmaY)
            }, # dac with lightweight mixture weights (no adaptation)
            light={
-             res_dac <- dac_lgssm_lightweight(x, y[t, ], tau, lambda, sigmaY, Sigma.det)
+             res_dac <- dac_lgssm_lightweight(x, y[t, ], tau, lambda, sigmaY)
            }, # dac with adaptive lightweight mixture weights
            {
-             res_dac <- dac_lgssm_lightweight(x, y[t, ], tau, lambda, sigmaY, Sigma.det, "adaptive")
+             res_dac <- dac_lgssm_lightweight(x, y[t, ], tau, lambda, sigmaY, "adaptive")
            }
     )
     x <- res_dac[, 1:d]

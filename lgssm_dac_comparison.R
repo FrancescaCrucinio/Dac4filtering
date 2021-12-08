@@ -43,7 +43,7 @@ for (t in 1:Time.step){
 
 ### DAC
 Nparticles <- 1000
-Nrep <- 10
+Nrep <- 1
 df_dac <- data.frame()
 df_dac_mix <- data.frame()
 df_dac_light <- data.frame()
@@ -95,4 +95,5 @@ df$memory <-  rep(res$mem_alloc/1e6, each = nrow(df)/4)
 ID <- 1
 ID <- as.numeric(Sys.getenv("SGE_TASK_ID"))
 print(ID)
-filename <- paste0("resampling_comparison_d", d, "N", Nparticles, "ID", ID)write.csv(x=df, file=filename)
+filename <- paste0("resampling_comparison_d", d, "N", Nparticles, "ID", ID)
+write.csv(x=df, file=filename)
