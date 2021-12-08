@@ -1,4 +1,4 @@
-devtools::load_all(".")
+devtools::load_all("/storage/u1693998/Dac4filtering")
 ### Linear Gaussian SSM -- comparison of dac and dac with mixture reweighting (both lightweight and full cost)
 
 # dimension
