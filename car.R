@@ -24,10 +24,10 @@ y.coeff <- diag(1, d, d)
 
 
 # number of time steps
-Time.step <- 20
+Time.step <- 1
 
 # get observations
-y <- lgssm_obs(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step)
+y <- ssm_obs(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step)
 
 # Kalman filter
 res_KF <- fkf(a0 = mu0, P0 = x.coeff%*%Sigma0 + x.error.var, dt = as.matrix(rep(0, times = d)),
@@ -37,26 +37,6 @@ true_means <- res_KF$att
 true_variances <- matrix(0, ncol = d, nrow = Time.step)
 for (t in 1:Time.step){
   true_variances[t, ] <- diag(res_KF$Ptt[, , t])
-}
-
-# precompute determinants of precision matrices
-Sigma.det <- vector(mode = "list", length = log2(d)+1)
-Sigma.det[[1]] <- log(rep(1/sigmaX, times = d))
-# loop over tree levels excluding leaves
-nlevels <- log2(d)
-nchild <- 2
-for (u in 1:nlevels){
-  # number of nodes at this level
-  nodes <- nchild^(nlevels-u)
-  # number of variables in each node
-  nv <- nchild^u
-  tmp <- rep(0, times = nodes)
-  for (i in 1:nodes){
-    ci <- child_indices(i, nv)
-    # determinant of precision of variables in node i at level u
-    tmp[i] <- det(x.error.prec[ci[1]:ci[2], ci[1]:ci[2]])
-  }
-  Sigma.det[[u+1]] <- log(tmp)
 }
 
 Nparticles <- 1000
@@ -85,7 +65,7 @@ for (j in 1:Nrep){
   for (t in 1:Time.step) {
     # dac
     tic()
-    res_dac <- dac_car_lightweight(x_dac[, , t], y[t, ], sigmaX, sigmaY, Sigma.det, M)
+    res_dac <- dac_car_lightweight(x_dac[, , t], y[t, ], sigmaX, sigmaY, M)
     runtime <- toc()
     tRep_dac[j] <- tRep_dac[j] + runtime$toc - runtime$tic
     x_dac[, , t+1] <- res_dac[, 1:d]

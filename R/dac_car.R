@@ -93,7 +93,11 @@ dac_car <- function(xOld, obs, sigmaX, sigmaY, Sigma.det){
   return(cbind(x, lZ))
 }
 
-dac_car_lightweight <- function(xOld, obs, sigmaX, sigmaY, Sigma.det, m){
+dac_car_lightweight <- function(xOld, obs, sigmaX, sigmaY, M = NULL){
+  if(is.null(M)) {
+    # number of samples for lightweight mixture (no adaptation)
+    M <- ceiling(sqrt(Nparticles))
+  }
   # dimension and number of particles
   d <- ncol(xOld)
   Nparticles <- nrow(xOld)
@@ -104,18 +108,15 @@ dac_car_lightweight <- function(xOld, obs, sigmaX, sigmaY, Sigma.det, m){
   # number of variables
   nv <- 1
   x <- matrix(0, nrow = Nparticles, ncol = d)
+  lW <- matrix(0, nrow = Nparticles, ncol = d)
   W <- matrix(0, nrow = Nparticles, ncol = d)
-  lZ <- rep(0, times = d)
-  # copies of xOld
-  indicesOld <- matrix(1:Nparticles, nrow = Nparticles, ncol = d)
   for (i in 1:nchild^nlevels){
     # propose
     x[, i] <- rowSums(xOld[, i:d, drop = FALSE])/d + sqrt(sigmaX) * rnorm(Nparticles)
     # weights
-    lW <- -0.5*(obs[i] - x[, i])^2/sigmaY - 0.5*log(2*pi*sigmaY)
-    max.lW <- max(lW)
-    W[, i] <- exp(lW - max.lW)
-    lZ[i] <- log(mean(W[, i])) + max.lW
+    lW[, i] <- -0.5*(obs[i] - x[, i])^2/sigmaY - 0.5*log(2*pi*sigmaY)
+    max.lW <- max(lW[, i])
+    W[, i] <- exp(lW[, i] - max.lW)
     W[, i] <- W[, i]/sum(W[, i])
   }
 
@@ -126,49 +127,25 @@ dac_car_lightweight <- function(xOld, obs, sigmaX, sigmaY, Sigma.det, m){
     # number of variables in each node
     nvNew <- nchild^u
 
-    # updated particles/normalizing constant
+    # updated particles
     xNew <- matrix(0, nrow = Nparticles, ncol = d)
-    lZNew <- rep(0, times = nodes)
 
     for (i in 1:nodes) {
-      # mixture weights
-      lWmix <- matrix(0, ncol = Nparticles, nrow = Nparticles)
       ci <- child_indices(i, nvNew)
-      # resample on each children
-      # child 1
-      indices1 <- mult_resample(W[, nchild*(i-1)+1], m*Nparticles)
-      # child 2 (with random permutation)
-      indices2 <- sample(mult_resample(W[, nchild*i], m*Nparticles))
-      # mixture weights
-      lWmix <- rep(0, times = m*Nparticles)
-      for (n in 1:(m*Nparticles)) {
-        # merge the two children nodes
-        mx <- c(x[indices1[n], ci[1]:(ci[1]+nv-1)], x[indices2[n], (ci[1]+nv):ci[2]])
-        # get last term in mixture weights
-        tmp <- 0
-        for (h in 1:nv){
-          tmp <- tmp + (nv-h+1)*xOld[indicesOld[indices2[n], d-h+1], d-h+1]
-        }
-        tmp <- sum(x[indices1[n], ci[1]:(ci[1]+nv-1)])*tmp/(d^2*sigmaX)
-        lWmix[n] <- sum(x[indices1[n], ci[1]:(ci[1]+nv-1)])*sum(x[indices2[n], (ci[1]+nv):ci[2]])/(d*sigmaX) -
-          (sum(cumsum(mx[1:(nvNew-1)]/d)^2) - sum(cumsum(x[indices1[n], ci[1]:(ci[1]+nv-1)][seq(length.out = (nv-1))]/d)^2) -
-             sum(cumsum(x[indices2[n], (ci[1]+nv):ci[2]][seq(length.out = (nv-1))]/d)^2))/(2*sigmaX) - tmp
+      # lightweight mixture resampling
+      if(M == "adaptive") {
+        indices <- car_adaptive_light()
       }
-      max.lWmix <- max(lWmix)
-      Wmix <- exp(lWmix - max.lWmix)
-      lZNew[i] <- lZ[(nchild*(i-1)+1)] + lZ[i*nchild] + log(mean(Wmix)) + max.lWmix -
-        0.5*Sigma.det[[u]][nchild*(i-1)+1] - 0.5*Sigma.det[[u]][i*nchild] + 0.5*Sigma.det[[u+1]][i]
-      # resampling the new population
-      ancestors <- mult_resample(Wmix/sum(Wmix), Nparticles)
+      else{
+        indices <- car_light(i, u, nv, nvNew, ci, W, Nparticles, m, sigmaX, x, xOld)
+      }
       # update particles
-      xNew[, ci[1]:ci[2]] <- cbind(x[indices1[ancestors], ci[1]:(ci[1]+nv-1)], x[indices2[ancestors], (ci[1]+nv):ci[2]])
+      xNew[, ci[1]:ci[2]] <- cbind(x[indices[, 1], ci[1]:(ci[1]+nv-1)], x[indices[, 2], (ci[1]+nv):ci[2]])
       # update xOld
-      indicesOld[, ci[1]:(ci[1]+nv-1)] <- indices1[ancestors]
-      indicesOld[, (ci[1]+nv):ci[2]] <- indices2[ancestors]
+      xOld[, ci[1]:ci[2]] <- xOld[indices[, 1], ci[1]:ci[2]]
     }
     x <- xNew
-    lZ <- lZNew
     nv <- nvNew
   }
-  return(cbind(x, lZ))
+  return(x)
 }
