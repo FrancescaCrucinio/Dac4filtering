@@ -38,3 +38,8 @@ true_variances <- matrix(0, ncol = d, nrow = Time.step)
 for (t in 1:Time.step){
   true_variances[t, ] <- diag(res_KF$Ptt[, , t])
 }
+
+Nparticles <- 500
+M<- 2*d
+xOld <- mvrnorm(n = Nparticles, mu0, Sigma0)
+res <- nsmc_car(xOld, obs, sigmaX, sigmaY, M)
