@@ -3,7 +3,6 @@ nsmc_time_lgssm <- function(tau, lambda, sigmaY, Nparticles, x0, y, M = NULL, ma
   d <- ncol(y)
   # time interval
   Time.step <- nrow(y)
-  lZ <- rep(0, times = Time.step)
   m <- matrix(0, nrow = Time.step, ncol = d)
   v <- matrix(0, nrow = Time.step, ncol = d)
   # initial value
@@ -15,9 +14,7 @@ nsmc_time_lgssm <- function(tau, lambda, sigmaY, Nparticles, x0, y, M = NULL, ma
   }
 
   for (t in 1:Time.step) {
-    res_nsmc <- nsmc_lgssm(x, y[t, ], tau, lambda, sigmaY, M)
-    x <- res_nsmc$x
-    lZ[t] <- res_nsmc$lZ
+    x <- nsmc_lgssm(x, y[t, ], tau, lambda, sigmaY, M)
     m[t, ] <- colMeans(x)
     v[t, ] <- colVars(x)
   }
@@ -26,6 +23,6 @@ nsmc_time_lgssm <- function(tau, lambda, sigmaY, Nparticles, x0, y, M = NULL, ma
     ks_dac <- apply(rbind(matrix(x, ncol = d, nrow = Nparticles*M), marginals), ks_dist, N = Nparticles, MARGIN = 2)
     w1_dac <- apply(rbind(matrix(x, ncol = d, nrow = Nparticles*M), marginals), w1_dist, N = Nparticles, MARGIN = 2)
   }
-  out <- list("m" = m, "v" = v, "lZ" = lZ, "ks" = ks_dac, "w1" = w1_dac)
+  out <- list("m" = m, "v" = v, "ks" = ks_dac, "w1" = w1_dac)
   return(out)
 }

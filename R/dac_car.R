@@ -134,10 +134,10 @@ dac_car_lightweight <- function(xOld, obs, sigmaX, sigmaY, M = NULL){
       ci <- child_indices(i, nvNew)
       # lightweight mixture resampling
       if(M == "adaptive") {
-        indices <- car_adaptive_light()
+        indices <- car_adaptive_light(Nparticles, i, u, nv, nvNew, ci, lW, Nparticles, lambda, tau, x, xOld)
       }
       else{
-        indices <- car_light(i, u, nv, nvNew, ci, W, Nparticles, m, sigmaX, x, xOld)
+        indices <- car_light(i, u, nv, nvNew, ci, W, Nparticles, M, sigmaX, x, xOld)
       }
       # update particles
       xNew[, ci[1]:ci[2]] <- cbind(x[indices[, 1], ci[1]:(ci[1]+nv-1)], x[indices[, 2], (ci[1]+nv):ci[2]])

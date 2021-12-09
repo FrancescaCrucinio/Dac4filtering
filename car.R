@@ -65,7 +65,7 @@ for (j in 1:Nrep){
   for (t in 1:Time.step) {
     # dac
     tic()
-    res_dac <- dac_car_lightweight(x_dac[, , t], y[t, ], sigmaX, sigmaY, M)
+    res_dac <- dac_car_lightweight(x_dac[, , t], y[t, ], sigmaX, sigmaY)
     runtime <- toc()
     tRep_dac[j] <- tRep_dac[j] + runtime$toc - runtime$tic
     x_dac[, , t+1] <- res_dac[, 1:d]

@@ -71,21 +71,18 @@ Nrep <- 10
 # dac
 se_dac <- array(0, dim = c(Time.step, d, Nrep))
 vse_dac <- array(0, dim = c(Time.step, d, Nrep))
-Zrep_dac <- matrix(0, nrow = Time.step, ncol = Nrep)
 trep_dac <- rep(0, times = Nrep)
 ks_dac <- matrix(0, nrow = d, ncol = Nrep)
 w1_dac <- matrix(0, nrow = d, ncol = Nrep)
 # stpf
 se_stpf <- array(0, dim = c(Time.step, d, Nrep))
 vse_stpf <- array(0, dim = c(Time.step, d, Nrep))
-Zrep_stpf <- matrix(0, nrow = Time.step, ncol = Nrep)
 trep_stpf <- rep(0, times = Nrep)
 ks_stpf <- matrix(0, nrow = d, ncol = Nrep)
 w1_stpf <- matrix(0, nrow = d, ncol = Nrep)
 # nsmc
 se_nsmc <- array(0, dim = c(Time.step, d, Nrep))
 vse_nsmc <- array(0, dim = c(Time.step, d, Nrep))
-Zrep_nsmc <- matrix(0, nrow = Time.step, ncol = Nrep)
 trep_nsmc <- rep(0, times = Nrep)
 ks_nsmc <- matrix(0, nrow = d, ncol = Nrep)
 w1_nsmc <- matrix(0, nrow = d, ncol = Nrep)
@@ -96,7 +93,6 @@ for (j in 1:Nrep){
   res_dac_light <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "adaptive", marginals = marginals)
   runtime <- toc()
   trep_dac <- runtime$toc - runtime$tic
-  Zrep_dac[, j] <- res_dac_light$lZ
   se_dac[, , j] <- (res_dac_light$m - true_means)^2
   vse_dac[, , j] <- (res_dac_light$v - true_variances)^2
   ks_dac[, j] <- res_dac_light$ks
@@ -107,7 +103,6 @@ for (j in 1:Nrep){
   res_nsmc <- nsmc_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, M = M, marginals = marginals)
   runtime <- toc()
   trep_nsmc <- runtime$toc - runtime$tic
-  Zrep_nsmc[, j] <- res_nsmc$lZ
   se_nsmc[, , j] <- (res_nsmc$m - true_means)^2
   vse_nsmc[, , j] <- (res_nsmc$v - true_variances)^2
   ks_nsmc[, j] <- res_nsmc$ks
@@ -119,7 +114,6 @@ for (j in 1:Nrep){
   res_stpf <- stpf_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, marginals = marginals)
   runtime <- toc()
   trep_stpf <- runtime$toc - runtime$tic
-  Zrep_stpf[, j] <- res_stpf$lZ
   se_stpf[, , j] <- (res_stpf$m - true_means)^2
   vse_stpf[, , j] <- (res_stpf$v - true_variances)^2
   ks_stpf[, j] <- res_stpf$ks

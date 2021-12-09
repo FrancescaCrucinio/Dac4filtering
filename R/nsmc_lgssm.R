@@ -28,7 +28,7 @@ nsmc_lgssm <- function(xOld, obs, tau, lambda, sigmaY, M){
       x[i, j] <- q[[i]]$x[mult_resample(W/sum(W), 1), j]
     }
   }
-  return(list("x" = x, "lZ" = mean(lZ)))
+  return(x)
 }
 
 
