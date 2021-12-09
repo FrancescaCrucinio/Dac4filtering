@@ -24,10 +24,11 @@ time_means <- aggregate(elapsed ~ algo + N + mutation, data = df, FUN= "mean" )
 time_means <- time_means[order(time_means$algo), ]
 df$runtime <- rep(time_means$elapsed, each = 50)
 # time
-ggplot(data = df, aes(x = runtime, y = d_means, group = interaction(algo, mutation), fill = interaction(algo, mutation), colour = interaction(algo, mutation))) +
-  geom_boxplot(aes(x = runtime, y = d_means), coef = 6) +
+ggplot(data = df, aes(x = runtime, y = d_means, group = interaction(algo, mutation), fill = algo, colour = algo)) +
+  geom_boxplot(aes(x = runtime, y = d_means, alpha = as.factor(mutation)), coef = 6) +
   scale_y_continuous(trans='log10') +
   scale_x_continuous(trans='log10') +
+  guides(alpha = FALSE) +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=15))
 # memory
