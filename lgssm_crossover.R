@@ -1,6 +1,6 @@
 set.seed(1234)
 # dimension
-d <- 32
+d <- 8
 # initial state
 mu0 <- rep(0, times = d)
 Sigma0 <- diag(x = 1, d, d)
@@ -105,15 +105,15 @@ vmse_stpf <- apply(vse_stpf, c(1,2), mean)
 mse_nsmc <- apply(se_nsmc, c(1,2), mean)
 vmse_nsmc <- apply(vse_nsmc, c(1,2), mean)
 
-plot(1:Time.step, type = "l", rowMeans(mse_dac/true_variances), col = "blue", xlab=" ", ylab=" ", cex = 1.5, ylim = c(0, 1))
+plot(1:Time.step, type = "l", rowMeans(mse_dac/true_variances), col = "blue", xlab=" ", ylab=" ", cex = 1.5, ylim = c(0, max(mse_dac/true_variances)))
 lines(1:Time.step, rowMeans(mse_nsmc/true_variances), col = "red")
 lines(1:Time.step, rowMeans(mse_stpf/true_variances), col = "green")
 
-plot(1:Time.step, type = "l", colMeans(ks_dac), col = "blue", xlab=" ", ylab=" ", cex = 1.5, ylim = c(0, 0.25))
+plot(1:Time.step, type = "l", colMeans(ks_dac), col = "blue", xlab=" ", ylab=" ", cex = 1.5, ylim = c(0, max(colMeans(ks_stpf))))
 lines(1:Time.step, colMeans(ks_nsmc), col = "red")
 lines(1:Time.step, colMeans(ks_stpf), col = "green")
 
-plot(1:Time.step, type = "l", colMeans(w1_dac), col = "blue", xlab=" ", ylab=" ", cex = 1.5, ylim = c(0, 0.25))
+plot(1:Time.step, type = "l", colMeans(w1_dac), col = "blue", xlab=" ", ylab=" ", cex = 1.5, ylim = c(0,  max(colMeans(w1_stpf))))
 lines(1:Time.step, colMeans(w1_nsmc), col = "red")
 lines(1:Time.step, colMeans(w1_stpf), col = "green")
 

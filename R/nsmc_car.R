@@ -1,4 +1,4 @@
-nsmc_lgssm <- function(xOld, obs, tau, lambda, sigmaY, M){
+nsmc_car <- function(xOld, obs, sigmaX, sigmaY, M){
   # dimension, number islands and number of particles
   d <- ncol(xOld)
   Nparticles <- nrow(xOld)
@@ -8,7 +8,7 @@ nsmc_lgssm <- function(xOld, obs, tau, lambda, sigmaY, M){
   # loop over outer level particles
   q <- vector(mode = "list", length = Nparticles)
   for(i in 1:Nparticles){
-    q[[i]] <- nsmc_inner_lgssm(x[i, ], obs, tau, lambda, sigmaY, M)
+    q[[i]] <- nsmc_inner_lgssm(x[i, ], obs, sigmaX, sigmaY, M)
     lZ[i] <- q[[i]]$lZ
   }
   # resampling outer particles
@@ -32,12 +32,12 @@ nsmc_lgssm <- function(xOld, obs, tau, lambda, sigmaY, M){
 }
 
 
-nsmc_inner_lgssm <- function(xinnerOld, obs, tau, lambda, sigmaY, M){
+nsmc_inner_lgssm <- function(xinnerOld, obs, sigmaX, sigmaY, M){
   xinner <- matrix(0, nrow = M, ncol = d)
   # loop over dimension
   # j=1
   j <- 1
-  xinner[, j] <- 0.5*xinnerOld[j] + rnorm(M)/sqrt(tau)
+  xinner[, j] <- sum(xinnerOld) + sqrt(sigmaX) * rnorm(M)
   # weights
   lW <- -0.5*(obs[j] - xinner[, j])^2/sigmaY - 0.5*log(2*pi*sigmaY)
   max.lW <- max(lW)
@@ -49,7 +49,7 @@ nsmc_inner_lgssm <- function(xinnerOld, obs, tau, lambda, sigmaY, M){
   xinner[ , j] <- xinner[ancestors, j]
   for(j in 2:d){
     # propose
-    xinner[, j] <- (0.5*tau*xinnerOld[j] + lambda*xinner[, j-1])/(tau+lambda) + rnorm(M)/sqrt(tau+lambda)
+    xinner[, j] <- (sum(xinnerOld[j:d]) + sum(xinner[, 1:j-1]))/d + sqrt(sigmaX) * rnorm(M)
     # weights
     lW <- -0.5*(obs[j] - xinner[, j])^2/sigmaY - 0.5*log(2*pi*sigmaY)
     max.lW <- max(lW)

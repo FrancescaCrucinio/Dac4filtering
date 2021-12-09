@@ -19,7 +19,7 @@ stpf_lgssm <- function(xOld, obs, tau, lambda, sigmaY){
     lZ[i] <- log(mean(W)) + max.lW
     # resampling
     W <- W/sum(W)
-    ancestors <- mult_resample(W, M)
+    ancestors <- stratified_resample(W, M)
     xOld[i, , ] <- xOld[i, ancestors, ]
     x[i, , j] <- x[i, ancestors, j]
     for(j in 2:d){
@@ -32,7 +32,7 @@ stpf_lgssm <- function(xOld, obs, tau, lambda, sigmaY){
       lZ[i] <- lZ[i] + log(mean(W)) + max.lW
       # resampling
       W <- W/sum(W)
-      ancestors <- mult_resample(W, M)
+      ancestors <- stratified_resample(W, M)
       xOld[i, , ] <- xOld[i, ancestors, ]
       x[i, , 1:j] <- x[i, ancestors, 1:j]
     }
@@ -40,7 +40,7 @@ stpf_lgssm <- function(xOld, obs, tau, lambda, sigmaY){
   # resampling islands
   Wisland <- exp(lZ - max(lZ))
   Wisland <- Wisland/sum(Wisland)
-  ancestors_island <- mult_resample(Wisland, Nparticles)
+  ancestors_island <- stratified_resample(Wisland, Nparticles)
   x <- x[ancestors_island, ,]
   return(x)
 }
