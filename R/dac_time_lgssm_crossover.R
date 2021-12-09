@@ -1,4 +1,4 @@
-dac_time_lgssm_crossover <- function(tau, lambda, sigmaY, Nparticles, x0, y, method = "light", M = NULL, marginals = NULL){
+dac_time_lgssm_crossover <- function(tau, lambda, sigmaY, Nparticles, x0, y, method = "adaptive", M = NULL, marginals = NULL){
   # dimension
   d <- ncol(y)
   # time interval
