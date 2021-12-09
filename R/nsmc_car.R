@@ -8,7 +8,7 @@ nsmc_car <- function(xOld, obs, sigmaX, sigmaY, M){
   # loop over outer level particles
   q <- vector(mode = "list", length = Nparticles)
   for(i in 1:Nparticles){
-    q[[i]] <- nsmc_inner_lgssm(x[i, ], obs, sigmaX, sigmaY, M)
+    q[[i]] <- nsmc_inner_car(x[i, ], obs, sigmaX, sigmaY, M)
     lZ[i] <- q[[i]]$lZ
   }
   # resampling outer particles
@@ -20,20 +20,15 @@ nsmc_car <- function(xOld, obs, sigmaX, sigmaY, M){
   x <- matrix(0, nrow = Nparticles, ncol = d)
   # backward simulation
   for(i in 1:Nparticles){
-    x[i, d] <- q[[i]]$x[sample.int(M, 1), d]
-    for (j in (d-1):1){
-      lW <- -0.5*lambda*(x[i, j+1] - q[[i]]$x[, j])^2
-      W <- exp(lW - max(lW))
-      # resampling
-      x[i, j] <- q[[i]]$x[stratified_resample(W/sum(W), 1), j]
-    }
+    x[i, ] <- q[[i]]$xa[sample.int(M, 1), ]
   }
   return(x)
 }
 
 
-nsmc_inner_lgssm <- function(xinnerOld, obs, sigmaX, sigmaY, M){
+nsmc_inner_car <- function(xinnerOld, obs, sigmaX, sigmaY, M){
   xinner <- matrix(0, nrow = M, ncol = d)
+  xinnera <- matrix(0, nrow = M, ncol = d)
   # loop over dimension
   # j=1
   j <- 1
@@ -46,7 +41,8 @@ nsmc_inner_lgssm <- function(xinnerOld, obs, sigmaX, sigmaY, M){
   # resampling
   W <- W/sum(W)
   ancestors <- stratified_resample(W, M)
-  xinner[ , j] <- xinner[ancestors, j]
+  xinner[, j] <- xinner[ancestors, j]
+  xinnera[, j] <- xinner[, j]
   for(j in 2:d){
     # propose
     xinner[, j] <- (sum(xinnerOld[j:d]) + sum(xinner[, 1:j-1]))/d + sqrt(sigmaX) * rnorm(M)
@@ -59,6 +55,8 @@ nsmc_inner_lgssm <- function(xinnerOld, obs, sigmaX, sigmaY, M){
     W <- W/sum(W)
     ancestors <- stratified_resample(W, M)
     xinner[, j] <- xinner[ancestors, j]
+    xinnera[,1:j] <- xinnera[ancestors, 1:j]
+    xinnera[,j] <- xinner[, j]
   }
-  return(list("lZ" = lZ, "x" = xinner))
+  return(list("lZ" = lZ, "x" = xinner, "xa" = xinnera))
 }
