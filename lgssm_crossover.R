@@ -46,74 +46,32 @@ for(i in 1:d){
 
 Nparticles <- 1000
 M <- 2*d
-Nrep <- 10
-# dac
-se_dac <- array(0, dim = c(Time.step, d, Nrep))
-vse_dac <- array(0, dim = c(Time.step, d, Nrep))
-trep_dac <- rep(0, times = Nrep)
-ks_dac <- matrix(0, nrow = d, ncol = Nrep)
-w1_dac <- matrix(0, nrow = d, ncol = Nrep)
-# stpf
-se_stpf <- array(0, dim = c(Time.step, d, Nrep))
-vse_stpf <- array(0, dim = c(Time.step, d, Nrep))
-trep_stpf <- rep(0, times = Nrep)
-ks_stpf <- matrix(0, nrow = d, ncol = Nrep)
-w1_stpf <- matrix(0, nrow = d, ncol = Nrep)
-# nsmc
-se_nsmc <- array(0, dim = c(Time.step, d, Nrep))
-vse_nsmc <- array(0, dim = c(Time.step, d, Nrep))
-trep_nsmc <- rep(0, times = Nrep)
-ks_nsmc <- matrix(0, nrow = d, ncol = Nrep)
-w1_nsmc <- matrix(0, nrow = d, ncol = Nrep)
-for (j in 1:Nrep){
+df <- data.frame()
+
   x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
   # dac (lightweight)
   tic()
   res_dac_light <- dac_time_lgssm_crossover(tau, lambda, sigmaY, Nparticles, x0, y, method = "adaptive", marginals = marginals)
   runtime <- toc()
-  trep_dac <- runtime$toc - runtime$tic
-  se_dac[, , j] <- (res_dac_light$m - true_means)^2
-  vse_dac[, , j] <- (res_dac_light$v - true_variances)^2
-  ks_dac[, j] <- res_dac_light$ks
-  w1_dac[, j] <- res_dac_light$w1
-
+  rse <- (res_dac_light$m - true_means)^2/true_variances
+  df <- data.frame(rbind(df, cbind(t(rse), res_dac_light$w1, res_dac_light$ks, rep(runtime$toc[[1]] - runtime$tic[[1]], times = d))))
   # nsmc
   tic()
   res_nsmc <- nsmc_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, M = M, marginals = marginals)
   runtime <- toc()
-  trep_nsmc <- runtime$toc - runtime$tic
-  se_nsmc[, , j] <- (res_nsmc$m - true_means)^2
-  vse_nsmc[, , j] <- (res_nsmc$v - true_variances)^2
-  ks_nsmc[, j] <- res_nsmc$ks
-  w1_nsmc[, j] <- res_nsmc$w1
-
+  rse <- (res_nsmc$m - true_means)^2/true_variances
+  df <- data.frame(rbind(df, cbind(t(rse), res_nsmc$w1, res_nsmc$ks, rep(runtime$toc[[1]] - runtime$tic[[1]], times = d))))
   # stpf
   x0 <- array(mvrnorm(n = Nparticles*M, mu0, Sigma0), dim = c(Nparticles, M, d))
   tic()
   res_stpf <- stpf_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, marginals = marginals)
   runtime <- toc()
-  trep_stpf <- runtime$toc - runtime$tic
-  se_stpf[, , j] <- (res_stpf$m - true_means)^2
-  vse_stpf[, , j] <- (res_stpf$v - true_variances)^2
-  ks_stpf[, j] <- res_stpf$ks
-  w1_stpf[, j] <- res_stpf$w1
-}
-mse_dac <- apply(se_dac, c(1,2), mean)
-vmse_dac <- apply(vse_dac, c(1,2), mean)
-mse_stpf <- apply(se_stpf, c(1,2), mean)
-vmse_stpf <- apply(vse_stpf, c(1,2), mean)
-mse_nsmc <- apply(se_nsmc, c(1,2), mean)
-vmse_nsmc <- apply(vse_nsmc, c(1,2), mean)
+  rse <- (res_stpf$m - true_means)^2/true_variances
+  df <- data.frame(rbind(df, cbind(t(rse), res_stpf$w1, res_stpf$ks, rep(runtime$toc[[1]] - runtime$tic[[1]], times = d))))
 
-plot(1:Time.step, type = "l", rowMeans(mse_dac/true_variances), col = "blue", xlab=" ", ylab=" ", cex = 1.5, ylim = c(0, max(mse_dac/true_variances)))
-lines(1:Time.step, rowMeans(mse_nsmc/true_variances), col = "red")
-lines(1:Time.step, rowMeans(mse_stpf/true_variances), col = "green")
 
-plot(1:Time.step, type = "l", colMeans(ks_dac), col = "blue", xlab=" ", ylab=" ", cex = 1.5, ylim = c(0, max(colMeans(ks_stpf))))
-lines(1:Time.step, colMeans(ks_nsmc), col = "red")
-lines(1:Time.step, colMeans(ks_stpf), col = "green")
+df$algo <- as.factor(rep(c("dac", "nsmc", "stpf"), each = d))
 
-plot(1:Time.step, type = "l", colMeans(w1_dac), col = "blue", xlab=" ", ylab=" ", cex = 1.5, ylim = c(0,  max(colMeans(w1_stpf))))
-lines(1:Time.step, colMeans(w1_nsmc), col = "red")
-lines(1:Time.step, colMeans(w1_stpf), col = "green")
-
+ID <- as.numeric(Sys.getenv("SGE_TASK_ID"))
+filename <- paste0("lgssm_d", d, "N", Nparticles, "ID", ID)
+write.csv(x=df, file=filename)
