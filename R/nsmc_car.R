@@ -44,7 +44,7 @@ nsmc_inner_car <- function(xinnerOld, obs, sigmaX, sigmaY, M){
   xinnera[, j] <- xinner[, j]
   for(j in 2:d){
     # propose
-    xinner[, j] <- (sum(xinnerOld[j:d]) + rowSums(xinner[, 1:j-1, drop = FALSE]))/d + sqrt(sigmaX) * rnorm(M)
+    xinner[, j] <- (sum(xinnerOld[j:d]) + rowSums(xinner[, 1:(j-1), drop = FALSE]))/d + sqrt(sigmaX) * rnorm(M)
     # weights
     lW <- -0.5*(obs[j] - xinner[, j])^2/sigmaY - 0.5*log(2*pi*sigmaY)
     max.lW <- max(lW)
