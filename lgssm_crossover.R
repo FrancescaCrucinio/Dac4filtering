@@ -1,6 +1,8 @@
+devtools::load_all("/storage/u1693998/Dac4filtering")
+
 set.seed(1234)
 # dimension
-d <- 8
+d <- 32
 # initial state
 mu0 <- rep(0, times = d)
 Sigma0 <- diag(x = 1, d, d)
@@ -24,7 +26,7 @@ y.error.var <- diag(x = sigmaY, d, d)
 y.coeff <- diag(x = 1, d, d)
 
 # number of time steps
-Time.step <- 10
+Time.step <- 100
 
 # get observations
 y <- ssm_obs(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step)
@@ -44,31 +46,30 @@ for(i in 1:d){
   marginals[, i] <- rnorm(10^5, mean = true_means[Time.step, i], sd = sqrt(true_variances[Time.step, i]))
 }
 
-Nparticles <- 1000
+Nparticles <- 100
 M <- 2*d
 df <- data.frame()
 
-  x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
-  # dac (lightweight)
-  tic()
-  res_dac_light <- dac_time_lgssm_crossover(tau, lambda, sigmaY, Nparticles, x0, y, method = "adaptive", marginals = marginals)
-  runtime <- toc()
-  rse <- (res_dac_light$m - true_means)^2/true_variances
-  df <- data.frame(rbind(df, cbind(t(rse), res_dac_light$w1, res_dac_light$ks, rep(runtime$toc[[1]] - runtime$tic[[1]], times = d))))
-  # nsmc
-  tic()
-  res_nsmc <- nsmc_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, M = M, marginals = marginals)
-  runtime <- toc()
-  rse <- (res_nsmc$m - true_means)^2/true_variances
-  df <- data.frame(rbind(df, cbind(t(rse), res_nsmc$w1, res_nsmc$ks, rep(runtime$toc[[1]] - runtime$tic[[1]], times = d))))
-  # stpf
-  x0 <- array(mvrnorm(n = Nparticles*M, mu0, Sigma0), dim = c(Nparticles, M, d))
-  tic()
-  res_stpf <- stpf_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, marginals = marginals)
-  runtime <- toc()
-  rse <- (res_stpf$m - true_means)^2/true_variances
-  df <- data.frame(rbind(df, cbind(t(rse), res_stpf$w1, res_stpf$ks, rep(runtime$toc[[1]] - runtime$tic[[1]], times = d))))
-
+x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
+# dac (lightweight)
+tic()
+res_dac_light <- dac_time_lgssm_crossover(tau, lambda, sigmaY, Nparticles, x0, y, method = "adaptive", marginals = marginals)
+runtime <- toc()
+rse <- (res_dac_light$m - true_means)^2/true_variances
+df <- data.frame(rbind(df, cbind(t(rse), res_dac_light$w1, res_dac_light$ks, rep(runtime$toc[[1]] - runtime$tic[[1]], times = d))))
+# nsmc
+tic()
+res_nsmc <- nsmc_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, M = M, marginals = marginals)
+runtime <- toc()
+rse <- (res_nsmc$m - true_means)^2/true_variances
+df <- data.frame(rbind(df, cbind(t(rse), res_nsmc$w1, res_nsmc$ks, rep(runtime$toc[[1]] - runtime$tic[[1]], times = d))))
+# stpf
+x0 <- array(mvrnorm(n = Nparticles*M, mu0, Sigma0), dim = c(Nparticles, M, d))
+tic()
+res_stpf <- stpf_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, marginals = marginals)
+runtime <- toc()
+rse <- (res_stpf$m - true_means)^2/true_variances
+df <- data.frame(rbind(df, cbind(t(rse), res_stpf$w1, res_stpf$ks, rep(runtime$toc[[1]] - runtime$tic[[1]], times = d))))
 
 df$algo <- as.factor(rep(c("dac", "nsmc", "stpf"), each = d))
 

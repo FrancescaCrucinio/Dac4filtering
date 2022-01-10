@@ -96,7 +96,7 @@ car_adaptive_light <- function(ess_target, i, u, nv, nvNew, ci, lW, Nparticles, 
     lWmix <- c(lWmix, lWmix_perm)
   }
   print(paste(m, "ESS", ess))
-  write.table(data.frame("u" = u, "m" = m), file = "adaptive_lgssm.csv", sep = ",", append = TRUE, quote = FALSE,
+  write.table(data.frame("u" = u, "m" = m), file = "adaptive_car.csv", sep = ",", append = TRUE, quote = FALSE,
               col.names = FALSE, row.names = FALSE)
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)

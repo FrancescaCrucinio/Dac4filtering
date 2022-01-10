@@ -20,8 +20,6 @@ lgssm_light <- function(i, u, nv, ci, W, Nparticles, m, lambda, tau, x, xOld){
   )
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
-  # lZNew[i] <- lZ[(nchild*(i-1)+1)] + lZ[i*nchild] + log(mean(Wmix)) + max.lWmix -
-  # 0.5*Sigma.det[[u]][nchild*(i-1)+1] - 0.5*Sigma.det[[u]][i*nchild] + 0.5*Sigma.det[[u+1]][i]
   # resampling the new population
   indices <- stratified_resample(Wmix/sum(Wmix), Nparticles)
   return(cbind(indices1[indices], indices2[indices]))
