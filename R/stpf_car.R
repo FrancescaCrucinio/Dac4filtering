@@ -37,5 +37,5 @@ stpf_car <- function(xOld, obs, sigmaX, sigmaY){
   Wisland <- Wisland/sum(Wisland)
   ancestors_island <- mult_resample(Wisland, Nparticles)
   x <- x[ancestors_island, ,]
-  return(list(x, mean(lZ)))
+  return(x)
 }

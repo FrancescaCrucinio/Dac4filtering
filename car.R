@@ -24,7 +24,7 @@ y.coeff <- diag(1, d, d)
 
 
 # number of time steps
-Time.step <- 1
+Time.step <- 2
 
 # get observations
 y <- ssm_obs(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step)
@@ -33,13 +33,41 @@ y <- ssm_obs(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step
 res_KF <- fkf(a0 = mu0, P0 = x.coeff%*%Sigma0 + x.error.var, dt = as.matrix(rep(0, times = d)),
               ct = as.matrix(rep(0, times = d)), Tt = x.coeff, Zt = y.coeff, HHt = x.error.var, GGt = y.error.var, yt = t(y))
 true_ll <- res_KF$logLik
-true_means <- res_KF$att
+true_means <- t(res_KF$att)
 true_variances <- matrix(0, ncol = d, nrow = Time.step)
 for (t in 1:Time.step){
   true_variances[t, ] <- diag(res_KF$Ptt[, , t])
 }
 
-Nparticles <- 500
-M<- 2*d
-xOld <- mvrnorm(n = Nparticles, mu0, Sigma0)
-res <- nsmc_car(xOld, obs, sigmaX, sigmaY, M)
+# samples from marginals at last time step
+marginals <- matrix(0, nrow = 10^5, ncol = d)
+for(i in 1:d){
+  marginals[, i] <- rnorm(10^5, mean = true_means[Time.step, i], sd = sqrt(true_variances[Time.step, i]))
+}
+
+Nparticles <- 100
+M <- 2*d
+df <- data.frame()
+
+x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
+# dac (lightweight)
+tic()
+res_dac_light <- dac_time_car(sigmaX, sigmaY, Nparticles, x0, y, marginals = marginals)
+runtime <- toc()
+rse <- (res_dac_light$m - true_means)^2/true_variances
+df <- data.frame(rbind(df, cbind(t(rse), res_dac_light$w1, res_dac_light$ks, rep(runtime$toc[[1]] - runtime$tic[[1]], times = d))))
+# nsmc
+tic()
+res_nsmc <- nsmc_time_car(sigmaX, sigmaY, Nparticles, x0, y, M = M, marginals = marginals)
+runtime <- toc()
+rse <- (res_nsmc$m - true_means)^2/true_variances
+df <- data.frame(rbind(df, cbind(t(rse), res_nsmc$w1, res_nsmc$ks, rep(runtime$toc[[1]] - runtime$tic[[1]], times = d))))
+# stpf
+x0 <- array(mvrnorm(n = Nparticles*M, mu0, Sigma0), dim = c(Nparticles, M, d))
+tic()
+res_stpf <- stpf_time_car(sigmaX, sigmaY, Nparticles, x0, y, marginals = marginals)
+runtime <- toc()
+rse <- (res_stpf$m - true_means)^2/true_variances
+df <- data.frame(rbind(df, cbind(t(rse), res_stpf$w1, res_stpf$ks, rep(runtime$toc[[1]] - runtime$tic[[1]], times = d))))
+
+df$algo <- as.factor(rep(c("dac", "nsmc", "stpf"), each = d))

@@ -1,4 +1,4 @@
-# devtools::load_all("/storage/u1693998/Dac4filtering")
+devtools::load_all("/storage/u1693998/Dac4filtering")
 
 set.seed(1234)
 # dimension
