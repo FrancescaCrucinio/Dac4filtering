@@ -31,7 +31,7 @@ ggplot(data = df, aes(x = runtime, y = d_means, group = interaction(algo, mutati
   guides(alpha = FALSE) +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=15))
-ggsave("res_time_low.pdf")
+# ggsave("res_time_low.pdf")
 df <- read.csv("data/adaptive_lgssm.csv", col.names = c("u", "m"))
 df$u <- as.factor(df$u)
 # histogram of m
@@ -40,4 +40,4 @@ ggplot(data = df, aes(x = m)) +
   facet_grid(~u) +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=15))
-ggsave("histogram_m_d8_N1000.pdf")
+# ggsave("histogram_m_d8_N1000.pdf")

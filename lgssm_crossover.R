@@ -1,4 +1,4 @@
-devtools::load_all("/storage/u1693998/Dac4filtering")
+# devtools::load_all("/storage/u1693998/Dac4filtering")
 
 set.seed(1234)
 # dimension
@@ -26,7 +26,7 @@ y.error.var <- diag(x = sigmaY, d, d)
 y.coeff <- diag(x = 1, d, d)
 
 # number of time steps
-Time.step <- 100
+Time.step <- 10
 
 # get observations
 y <- ssm_obs(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step)
@@ -74,5 +74,5 @@ df <- data.frame(rbind(df, cbind(t(rse), res_stpf$w1, res_stpf$ks, rep(runtime$t
 df$algo <- as.factor(rep(c("dac", "nsmc", "stpf"), each = d))
 
 ID <- as.numeric(Sys.getenv("SGE_TASK_ID"))
-filename <- paste0("lgssm_d", d, "N", Nparticles, "ID", ID)
+filename <- paste0("results/lgssm_d", d, "N", Nparticles, "ID", ID)
 write.csv(x=df, file=filename)
