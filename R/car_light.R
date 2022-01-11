@@ -19,15 +19,10 @@ car_light <- function(i, u, nv, nvNew, ci, W, Nparticles, m, sigmaX, x, xOld){
   for (n in 1:(m*Nparticles)) {
     # merge the two children nodes
     mx <- c(x[indices1[n], ci[1]:(ci[1]+nv-1)], x[indices2[n], (ci[1]+nv):ci[2]])
-    # get last term in mixture weights
-    tmp <- 0
-    for (h in 1:nv){
-      tmp <- tmp + (nv-h+1)*xOld[indices2[n], d-h+1]
-    }
-    tmp <- sum(x[indices1[n], ci[1]:(ci[1]+nv-1)])*tmp/(d^2*sigmaX)
     lWmix[n] <- sum(x[indices1[n], ci[1]:(ci[1]+nv-1)])*sum(x[indices2[n], (ci[1]+nv):ci[2]])/(d*sigmaX) -
       (sum(cumsum(mx[1:(nvNew-1)]/d)^2) - sum(cumsum(x[indices1[n], ci[1]:(ci[1]+nv-1)][seq(length.out = (nv-1))]/d)^2) -
-         sum(cumsum(x[indices2[n], (ci[1]+nv):ci[2]][seq(length.out = (nv-1))]/d)^2))/(2*sigmaX) - tmp
+         sum(cumsum(x[indices2[n], (ci[1]+nv):ci[2]][seq(length.out = (nv-1))]/d)^2))/(2*sigmaX) -
+      sum(x[indices1[n], ci[1]:(ci[1]+nv-1)])*sum(cumsum(rev(xOld[indices2[n], (ci[1]+nv):d])))/(d^2*sigmaX)
   }
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
@@ -35,7 +30,8 @@ car_light <- function(i, u, nv, nvNew, ci, W, Nparticles, m, sigmaX, x, xOld){
   indices <- stratified_resample(Wmix/sum(Wmix), Nparticles)
   return(cbind(indices1[indices], indices2[indices]))
 }
-car_adaptive_light <- function(ess_target, i, u, nv, nvNew, ci, lW, Nparticles, lambda, tau, x, xOld){
+car_adaptive_light <- function(ess_target, i, u, nv, nvNew, ci, lW, Nparticles, sigmaX, x, xOld)
+{
   # binary tree
   nchild <- 2
   # mixture weights
@@ -43,15 +39,10 @@ car_adaptive_light <- function(ess_target, i, u, nv, nvNew, ci, lW, Nparticles, 
   for (n in 1:Nparticles) {
     # merge the two children nodes
     mx <- x[n, ci[1]:ci[2]]
-    # get last term in mixture weights
-    tmp <- 0
-    for (h in 1:nv){
-      tmp <- tmp + (nv-h+1)*xOld[n, d-h+1]
-    }
-    tmp <- sum(x[n, ci[1]:(ci[1]+nv-1)])*tmp/(d^2*sigmaX)
     lWmix[n] <- sum(x[n, ci[1]:(ci[1]+nv-1)])*sum(x[n, (ci[1]+nv):ci[2]])/(d*sigmaX) -
       (sum(cumsum(mx[1:(nvNew-1)]/d)^2) - sum(cumsum(x[n, ci[1]:(ci[1]+nv-1)][seq(length.out = (nv-1))]/d)^2) -
-         sum(cumsum(x[n, (ci[1]+nv):ci[2]][seq(length.out = (nv-1))]/d)^2))/(2*sigmaX) - tmp
+         sum(cumsum(x[n, (ci[1]+nv):ci[2]][seq(length.out = (nv-1))]/d)^2))/(2*sigmaX) -
+      sum(x[n, ci[1]:(ci[1]+nv-1)])*sum(cumsum(rev(xOld[n, (ci[1]+nv):d])))/(d^2*sigmaX)
   }
   if(u == 1){
     lWmix <- lWmix + lW[, (nchild*(i-1)+1)] + lW[, i*nchild]
@@ -73,15 +64,10 @@ car_adaptive_light <- function(ess_target, i, u, nv, nvNew, ci, lW, Nparticles, 
     for (n in 1:Nparticles) {
       # merge the two children nodes
       mx <- c(x[n, ci[1]:(ci[1]+nv-1)], x[new_perm[n], (ci[1]+nv):ci[2]])
-      # get last term in mixture weights
-      tmp <- 0
-      for (h in 1:nv){
-        tmp <- tmp + (nv-h+1)*xOld[new_perm[n], d-h+1]
-      }
-      tmp <- sum(x[n, ci[1]:(ci[1]+nv-1)])*tmp/(d^2*sigmaX)
-      lWmix[n] <- sum(x[n, ci[1]:(ci[1]+nv-1)])*sum(x[new_perm[n], (ci[1]+nv):ci[2]])/(d*sigmaX) -
+      lWmix_perm[n] <- sum(x[n, ci[1]:(ci[1]+nv-1)])*sum(x[new_perm[n], (ci[1]+nv):ci[2]])/(d*sigmaX) -
         (sum(cumsum(mx[1:(nvNew-1)]/d)^2) - sum(cumsum(x[n, ci[1]:(ci[1]+nv-1)][seq(length.out = (nv-1))]/d)^2) -
-           sum(cumsum(x[new_perm[n], (ci[1]+nv):ci[2]][seq(length.out = (nv-1))]/d)^2))/(2*sigmaX) - tmp
+           sum(cumsum(x[new_perm[n], (ci[1]+nv):ci[2]][seq(length.out = (nv-1))]/d)^2))/(2*sigmaX) -
+        sum(x[n, ci[1]:(ci[1]+nv-1)])*sum(cumsum(rev(xOld[new_perm[n], (ci[1]+nv):d])))/(d^2*sigmaX)
     }
     if(u == 1){
       lWmix_perm <- lWmix_perm + lW[, (nchild*(i-1)+1)] + lW[new_perm, i*nchild]
@@ -96,8 +82,8 @@ car_adaptive_light <- function(ess_target, i, u, nv, nvNew, ci, lW, Nparticles, 
     lWmix <- c(lWmix, lWmix_perm)
   }
   print(paste(m, "ESS", ess))
-  write.table(data.frame("u" = u, "m" = m), file = "adaptive_car.csv", sep = ",", append = TRUE, quote = FALSE,
-              col.names = FALSE, row.names = FALSE)
+  # write.table(data.frame("u" = u, "m" = m), file = "adaptive_car.csv", sep = ",", append = TRUE, quote = FALSE,
+  #             col.names = FALSE, row.names = FALSE)
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
   # resampling the new population

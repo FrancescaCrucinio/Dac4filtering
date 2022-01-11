@@ -101,7 +101,7 @@ dac_time_car <- function(sigmaX, sigmaY, Nparticles, x0, y, marginals = NULL){
   history[, , 1] <- x0
 
   for (t in 1:Time.step) {
-    res_dac <- dac_lgssm_lightweight(history, y[t, ], tau, lambda, sigmaY)
+    res_dac <- dac_car_lightweight(history, y[t, ], sigmaX, sigmaY)
     x <- res_dac[, 1:d]
     history[, , 2] <- history[, , 1]
     history[, , 1] <- x
