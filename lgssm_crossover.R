@@ -1,6 +1,5 @@
-devtools::load_all("/storage/u1693998/Dac4filtering")
+# devtools::load_all("/storage/u1693998/Dac4filtering")
 
-set.seed(1234)
 # dimension
 d <- 32
 # initial state
@@ -74,5 +73,6 @@ df <- data.frame(rbind(df, cbind(t(rse), res_stpf$w1, res_stpf$ks, rep(runtime$t
 df$algo <- as.factor(rep(c("dac", "nsmc", "stpf"), each = d))
 
 ID <- as.numeric(Sys.getenv("SGE_TASK_ID"))
-filename <- paste0("results/lgssm_d", d, "N", Nparticles, "ID", ID)
+ID <- 2
+filename <- paste0("data/lgssm_d", d, "N", Nparticles, "ID", ID)
 write.csv(x=df, file=filename)

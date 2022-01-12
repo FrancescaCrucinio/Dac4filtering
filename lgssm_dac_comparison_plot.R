@@ -19,19 +19,21 @@ df <- df[, -1]
 d <- ncol(df) - 3
 df$d_means <- rowMeans(df[, 1:d])
 df$N <- as.factor(rep(c("10^2", "10^3", "10^4"), each = 50*8))
-df <- df[order(df$algo),]
-time_means <- aggregate(elapsed ~ algo + N + mutation, data = df, FUN= "mean" )
-time_means <- time_means[order(time_means$algo), ]
+df <- df[order(df$algo, df$mutation),]
+time_means <- aggregate(elapsed ~ algo + mutation + N, data = df, FUN = "mean" )
+time_means <- time_means[order(time_means$algo, time_means$mutation), ]
 df$runtime <- rep(time_means$elapsed, each = 50)
+
 # time
 ggplot(data = df, aes(x = runtime, y = d_means, group = interaction(algo, mutation, N), fill = algo, colour = algo)) +
-  geom_boxplot(aes(x = runtime, y = d_means, alpha = as.factor(mutation)), coef = 2) +
+  geom_boxplot(aes(x = runtime, y = d_means, alpha = as.factor(mutation)), coef = 6, width = 10) +
   scale_y_continuous(trans='log10') +
-  scale_x_continuous(trans='log10') +
+  scale_x_continuous(trans='log10', breaks = trans_breaks('log10', function(x) 10^x)) +
   guides(alpha = FALSE) +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
-        legend.title = element_blank(), legend.text=element_text(size=15))
-# ggsave("res_time_low.pdf")
+        legend.title = element_blank(), legend.text=element_text(size=20),
+        text = element_text(size=15))
+# ggsave("res_time_low.pdf", width = 10, height = 5, dpi = 300)
 df <- read.csv("data/adaptive_lgssm.csv", col.names = c("u", "m"))
 df$u <- as.factor(df$u)
 # histogram of m

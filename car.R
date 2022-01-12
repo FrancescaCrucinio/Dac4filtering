@@ -45,7 +45,7 @@ for(i in 1:d){
   marginals[, i] <- rnorm(10^5, mean = true_means[Time.step, i], sd = sqrt(true_variances[Time.step, i]))
 }
 
-Nparticles <- 1000
+Nparticles <- 10
 M <- 2*d
 df <- data.frame()
 

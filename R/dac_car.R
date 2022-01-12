@@ -10,7 +10,6 @@ dac_car_lightweight <- function(history, obs, sigmaX, sigmaY){
   nv <- 1
   x <- matrix(0, nrow = Nparticles, ncol = d)
   lW <- matrix(0, nrow = Nparticles, ncol = d)
-  W <- matrix(0, nrow = Nparticles, ncol = d)
   # history indices
   historyIndex <- array(1:Nparticles, dim = c(Nparticles, d, d))
   for (i in 1:nchild^nlevels){

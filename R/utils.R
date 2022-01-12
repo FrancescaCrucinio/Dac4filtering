@@ -9,11 +9,19 @@ rc_indices <- function(indices, dims){
   c <- pmin(trunc((indices -1 )/dims)+1, dims)
   return(cbind(r, c))
 }
-# KS distance
+#' Kolmogorov-Smirnov distance
+#'
+#' @param x a vector of samples
+#' @param N mid point of vector x
+#' @return The Kolmogorov-Smirnov distance between x[1:N] and x[N:end]
 ks_dist <- function(x, N){
   ks.test(x[1:N], x[N:length(x)])$statistic
 }
-# Wasserstein-1 distance
+#' Wasserstein-1 distance
+#'
+#' @param x a vector of samples
+#' @param N mid point of vector x
+#' @return The Wasserstein-1 distance between x[1:N] and x[N:end]
 w1_dist <- function(x, N){
   wasserstein1d(x[1:N], x[N:length(x)])
 }
@@ -37,7 +45,11 @@ mult_resample <- function(W, N){
   return(indices)
 }
 
-
+#' Stratified resampling
+#'
+#' @param W vector of weights
+#' @param N number of samples to output
+#' @return A vector of N indices corresponding to equally weighted samples from the weighted distribution W
 stratified_resample <- function(W, N){
   W <- c(W)
   # vector to store number of offsprings
