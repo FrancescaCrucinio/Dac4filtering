@@ -26,10 +26,10 @@ df$runtime <- rep(time_means$elapsed, each = 50)
 
 # time
 ggplot(data = df, aes(x = runtime, y = d_means, group = interaction(algo, mutation, N), fill = algo, colour = algo)) +
-  geom_boxplot(aes(x = runtime, y = d_means, alpha = as.factor(mutation)), coef = 6, width = 10) +
+  geom_boxplot(aes(alpha = as.factor(mutation)), coef = 6, width = 10) +
   scale_y_continuous(trans='log10') +
   scale_x_continuous(trans='log10', breaks = trans_breaks('log10', function(x) 10^x)) +
-  guides(alpha = FALSE) +
+  guides(alpha = "none") +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=20),
         text = element_text(size=15))
