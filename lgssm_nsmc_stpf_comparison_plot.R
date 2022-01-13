@@ -19,7 +19,7 @@ Time.step <- ncol(df) - 5
 colnames(df)[(Time.step+1):(Time.step+3)] <- c("w1", "ks", "runtime")
 
 # distances
-distances <- data.frame(aggregate(w1 ~ algo + N, data = df, FUN = "mean"))
+distances <- data.frame(aggregate(w1 ~ algo + runtime + N, data = df, FUN = "mean"))
 distances$ks <- aggregate(ks ~ algo + runtime + N, data = df, FUN = "mean")$ks
 time_means <- aggregate(runtime ~ algo + N, data = df, FUN= "mean" )
 time_means <- time_means[order(time_means$algo, time_means$N), ]
@@ -40,12 +40,15 @@ ggplot(data = distances, aes(x = runtime_mean, y = ks, group = interaction(algo,
         legend.title = element_blank(), legend.text=element_text(size=20),
         text = element_text(size=15))
 # RMSE
-tmp <- aggregate(. ~ algo, data = df, FUN = "mean")
-rmse_data <- data.frame(rep(1:Time.step, times = 3), rep(tmp$algo, each = 100))
-colnames(rmse_data) <- c("Time.step", "algo")
-rmse_data$rmse <- as.vector(t(as.matrix(tmp[, 2:101])))
+tmp <- aggregate(. ~ algo + N, data = df, FUN = "mean")
+rmse_data <- data.frame(rep(1:Time.step, times = 3), rep(tmp$algo, each = 100), rep(tmp$N, each = 100))
+colnames(rmse_data) <- c("Time.step", "algo", "N")
+rmse_data <- rmse_data[order(rmse_data$algo, rmse_data$N), ]
+tmp <- tmp[order(tmp$algo, tmp$N), ]
+rmse_data$rmse <- as.vector(t(as.matrix(tmp[, 3:102])))
 ggplot(data = rmse_data, aes(x = Time.step, y = rmse, group = algo, colour = algo)) +
-  geom_line(aes(x = Time.step, y = rmse)) +
+  geom_line() +
+  facet_grid(~N) +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=20),
         text = element_text(size=15))

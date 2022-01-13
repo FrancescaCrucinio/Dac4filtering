@@ -1,2 +1,2 @@
 exportPattern("^[[:alpha:]]+")
-import(MASS, FKF, LaplacesDemon, resample, ggplot2, bench, tictoc, transport)
+import(MASS, FKF, LaplacesDemon, resample, ggplot2, bench, tictoc, transport, scales)
