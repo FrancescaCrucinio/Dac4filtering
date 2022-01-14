@@ -37,6 +37,8 @@ ggplot(data = distances, aes(x = runtime_mean, y = w1, group = interaction(algo,
 # Kolmogorov-Smirnov
 ggplot(data = distances, aes(x = runtime_mean, y = ks, group = interaction(algo, N), fill = algo, colour = algo)) +
   geom_boxplot(coef = 2) +
+  scale_y_continuous(trans='log10') +
+  scale_x_continuous(trans='log10') +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=20),
         text = element_text(size=15))
