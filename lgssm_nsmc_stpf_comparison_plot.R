@@ -33,12 +33,14 @@ ggplot(data = distances, aes(x = runtime_mean, y = w1, group = interaction(algo,
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=20),
         text = element_text(size=15))
+# ggsave("lgssm32_w1.pdf", width = 10, height = 8, dpi = 300)
 # Kolmogorov-Smirnov
 ggplot(data = distances, aes(x = runtime_mean, y = ks, group = interaction(algo, N), fill = algo, colour = algo)) +
   geom_boxplot(coef = 2) +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=20),
         text = element_text(size=15))
+# ggsave("lgssm32_ks.pdf", width = 10, height = 8, dpi = 300)
 # RMSE
 tmp <- aggregate(. ~ algo + N, data = df, FUN = "mean")
 rmse_data <- data.frame(rep(1:Time.step, times = 3), rep(tmp$algo, each = 100), rep(tmp$N, each = 100))
@@ -47,8 +49,9 @@ rmse_data <- rmse_data[order(rmse_data$algo, rmse_data$N), ]
 tmp <- tmp[order(tmp$algo, tmp$N), ]
 rmse_data$rmse <- as.vector(t(as.matrix(tmp[, 3:102])))
 ggplot(data = rmse_data, aes(x = Time.step, y = rmse, group = algo, colour = algo)) +
-  geom_line() +
+  geom_line(size = 2) +
   facet_grid(~N) +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=20),
         text = element_text(size=15))
+# ggsave("lgssm32_rmse.pdf", width = 12, height = 8, dpi = 300)
