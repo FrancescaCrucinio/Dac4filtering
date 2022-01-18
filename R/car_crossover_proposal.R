@@ -7,9 +7,10 @@ car_crossover <- function(i, nodes, x, history, historyIndex, sigmaX){
   for (n in 1:Nparticles){
     # sample crossover point
     crossover_point <- sample.int(d-1, 1)
-    # accept/reject ratio
-    # mh_ratio <- -((x[n, ] - (c(0, cumsum(x[n, ])[-d]) + )/d)^2 +
+    # # accept/reject ratio
+    # ft_ratio <- -((x[n, ] - (c(0, cumsum(x[n, ])[-d]) + )/d)^2 +
     #                 (x[n, ] - (c(0, cumsum(x[n, ])[-d]) + )/d)^2)/(2*sigmaX)
+    #
     #
     #
     # for (h in 1:d){
@@ -21,6 +22,8 @@ car_crossover <- function(i, nodes, x, history, historyIndex, sigmaX){
     #     (x[n, h] -d^{-1}(sum(x[n, 1:(h-1)] + sum(history[historyIndex[n, h:d, nchild*(i-1)+1], h:d, 1]))))^2
     #     )/(2*sigmaX)
     # }
+    # gamma_ratio <-
+    mh_ratio <- ft_ratio + gamma_ratio
 
     # accept/reject
     if(runif(1) <= exp(mh_ratio)){

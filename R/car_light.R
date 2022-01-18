@@ -81,9 +81,8 @@ car_adaptive_light <- function(ess_target, i, u, nv, nvNew, ci, lW, Nparticles, 
     ess <- ess_s^2/ess_ss
     lWmix <- c(lWmix, lWmix_perm)
   }
-  print(paste(m, "ESS", ess))
-  # write.table(data.frame("u" = u, "m" = m), file = "adaptive_car.csv", sep = ",", append = TRUE, quote = FALSE,
-  #             col.names = FALSE, row.names = FALSE)
+  write.table(data.frame("u" = u, "m" = m), file = "data/adaptive_car.csv", sep = ",", append = TRUE, quote = FALSE,
+              col.names = FALSE, row.names = FALSE)
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
   # resampling the new population

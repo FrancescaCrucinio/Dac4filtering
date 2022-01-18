@@ -34,12 +34,13 @@ ggplot(data = df, aes(x = runtime, y = d_means, group = interaction(algo, mutati
         legend.title = element_blank(), legend.text=element_text(size=20),
         text = element_text(size=15))
 # ggsave("res_time_low.pdf", width = 10, height = 5, dpi = 300)
-df <- read.csv("data/adaptive_lgssm.csv", col.names = c("u", "m"))
+df <- read.csv("data/adaptive_car_d32N1000T100.csv", col.names = c("u", "m"))
 df$u <- as.factor(df$u)
 # histogram of m
 ggplot(data = df, aes(x = m)) +
-  geom_histogram() +
+  geom_histogram(breaks=seq(2, 33, by=1)) +
   facet_grid(~u) +
+  scale_y_continuous(trans='log1p') +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=15))
-# ggsave("histogram_m_d8_N1000.pdf")
+# ggsave("m_adaptive32.pdf", width = 10, height = 5, dpi = 300)

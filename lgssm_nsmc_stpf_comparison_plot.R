@@ -14,6 +14,12 @@ for (id in 1:50){
   dfnew$N <- "10^3"
   df <- rbind(df, dfnew)
 }
+for (id in 1:50){
+  filename <- paste("data/lgssm_d32N10000ID", id, sep = "")
+  dfnew <- read.csv(filename)
+  dfnew$N <- "10^4"
+  df <- rbind(df, dfnew)
+}
 df <- df[, -1]
 Time.step <- ncol(df) - 5
 colnames(df)[(Time.step+1):(Time.step+3)] <- c("w1", "ks", "runtime")
@@ -52,7 +58,8 @@ tmp <- tmp[order(tmp$algo, tmp$N), ]
 rmse_data$rmse <- as.vector(t(as.matrix(tmp[, 3:102])))
 ggplot(data = rmse_data, aes(x = Time.step, y = rmse, group = algo, colour = algo)) +
   geom_line(size = 2) +
-  facet_grid(~N) +
+  scale_y_continuous(trans='log10') +
+  facet_wrap(~N, ncol = 2, nrow = 2) +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=20),
         text = element_text(size=15))
