@@ -43,4 +43,4 @@ ggplot(data = df, aes(x = m)) +
   scale_y_continuous(trans='log1p') +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=15))
-# ggsave("m_adaptive32.pdf", width = 10, height = 5, dpi = 300)
+# ggsave("m_adaptive32_car.pdf", width = 10, height = 5, dpi = 300)
