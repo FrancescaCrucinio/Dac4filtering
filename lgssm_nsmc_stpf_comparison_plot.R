@@ -1,21 +1,21 @@
 # read data
 d <- 32
-df <- read.csv("data/lgssm_d32N100ID1")
+df <- read.csv("data/lgssm/lgssm_d32N100ID1")
 df$N <- "10^2"
 for (id in 2:50){
-  filename <- paste("data/lgssm_d32N100ID", id, sep = "")
+  filename <- paste("data/lgssm/lgssm_d32N100ID", id, sep = "")
   dfnew <- read.csv(filename)
   dfnew$N <- "10^2"
   df <- rbind(df, dfnew)
 }
 for (id in 1:50){
-  filename <- paste("data/lgssm_d32N1000ID", id, sep = "")
+  filename <- paste("data/lgssm/lgssm_d32N1000ID", id, sep = "")
   dfnew <- read.csv(filename)
   dfnew$N <- "10^3"
   df <- rbind(df, dfnew)
 }
 for (id in 1:50){
-  filename <- paste("data/lgssm_d32N10000ID", id, sep = "")
+  filename <- paste("data/lgssm/lgssm_d32N10000ID", id, sep = "")
   dfnew <- read.csv(filename)
   dfnew$N <- "10^4"
   df <- rbind(df, dfnew)
@@ -30,7 +30,7 @@ distances$ks <- aggregate(ks ~ algo + runtime + N, data = df, FUN = "mean")$ks
 time_means <- aggregate(runtime ~ algo + N, data = df, FUN= "mean" )
 time_means <- time_means[order(time_means$algo, time_means$N), ]
 distances <- distances[order(distances$algo, distances$N), ]
-distances$runtime_mean <- rep(time_means$runtime, each = 2)
+distances$runtime_mean <- rep(time_means$runtime, each = 50)
 # Wasserstein-1
 ggplot(data = distances, aes(x = runtime_mean, y = w1, group = interaction(algo, N), fill = algo, colour = algo)) +
   geom_boxplot(coef = 2) +
