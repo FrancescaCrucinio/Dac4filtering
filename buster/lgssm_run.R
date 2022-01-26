@@ -1,7 +1,7 @@
 # devtools::load_all("/storage/u1693998/Dac4filtering")
 
 ID <- as.numeric(Sys.getenv("SGE_TASK_ID"))
-ID <- 1
+ID <- 2
 d <- 32
 timeinterval <- 10
 # get time interval extrema

@@ -9,13 +9,17 @@ crossover <- function(i, nodes, x, history, historyIndex, tau, lambda){
     right_ancestor_coordinates <- cbind(historyIndex[n, (crossover_point+1):d, nchild*i], (crossover_point+1):d, rep(1, times = length((crossover_point+1):d)))
     left_ancestor_coordinates <- cbind(historyIndex[n, (crossover_point+1):d, nchild*(i-1)+1], (crossover_point+1):d, rep(1, times = length((crossover_point+1):d)))
     ft_ratio <- -0.5*(tau+lambda) * sum((x[n, (crossover_point+1):d] - 0.5*tau*history[right_ancestor_coordinates]/(tau+lambda))^2 -
-                  (x[n, (crossover_point+1):d] - 0.5*tau*history[left_ancestor_coordinates]/(tau+lambda))^2) + 0.5*tau*lambda * sum(x[n, crossover_point:(d-1)] *
-                  (history[right_ancestor_coordinates] - history[historyIndex[left_ancestor_coordinates], (crossover_point+1):d, 1]))
-    older_right_ancestor_coordinates <- c(historyIndex[n, crossover_point+1, nchild*i], crossover_point+1, 2)
-    older_left_ancestor_coodinates <- c(historyIndex[n, crossover_point+1, nchild*(i-1)+1], crossover_point+1, 2)
-    gamma_ratio <- -lambda * (history[right_ancestor_coordinates] - history[left_ancestor_coordinates]) *
-                    (history[right_ancestor_coordinates] - history[left_ancestor_coordinates] -
-                    0.5*tau*history[older_right_ancestor_coordinates] - 0.5*tau*history[older_left_ancestor_coodinates])
+                  (x[n, (crossover_point+1):d] - 0.5*tau*history[left_ancestor_coordinates]/(tau+lambda))^2) -
+                0.5*tau*lambda * sum(x[n, crossover_point:(d-1)] *
+                  (history[right_ancestor_coordinates] - history[left_ancestor_coordinates]))
+    right_ancestor_coordinates <- cbind(historyIndex[n, crossover_point:(crossover_point+1), nchild*i], crossover_point:(crossover_point+1), rep(1, times = 2))
+    left_ancestor_coordinates <- cbind(historyIndex[n, crossover_point:(crossover_point+1), nchild*(i-1)+1], crossover_point:(crossover_point+1), rep(1, times = 2))
+    # turn into matrix to use as indices for history
+    older_right_ancestor_coordinates <- matrix(c(historyIndex[n, crossover_point+1, nchild*i], crossover_point+1, 2), ncol = 3)
+    older_left_ancestor_coordinates <- matrix(c(historyIndex[n, crossover_point+1, nchild*(i-1)+1], crossover_point+1, 2), ncol = 3)
+    gamma_ratio <- -lambda * (history[right_ancestor_coordinates[1, , drop = FALSE]] - history[left_ancestor_coordinates[1, , drop = FALSE]]) *
+                    (history[right_ancestor_coordinates[2, , drop = FALSE]] - history[left_ancestor_coordinates[2, , drop = FALSE]] -
+                    0.5*tau*history[older_right_ancestor_coordinates] + 0.5*tau*history[older_left_ancestor_coordinates])
     mh_ratio <- gamma_ratio + ft_ratio
     # accept/reject
     if(runif(1) <= exp(mh_ratio)){

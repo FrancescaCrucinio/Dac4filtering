@@ -5,24 +5,14 @@ car_crossover <- function(i, nodes, x, history, historyIndex, sigmaX){
   d <- ncol(x)
   historyIndexNew <- historyIndex[, , nchild*(i-1)+1]
   for (n in 1:Nparticles){
-    # sample crossover point
     crossover_point <- sample.int(d-1, 1)
-    # # accept/reject ratio
-    # ft_ratio <- -((x[n, ] - (c(0, cumsum(x[n, ])[-d]) + )/d)^2 +
-    #                 (x[n, ] - (c(0, cumsum(x[n, ])[-d]) + )/d)^2)/(2*sigmaX)
-    #
-    #
-    #
-    # for (h in 1:d){
-    #   mh_ratio <- mh_ratio -
-    #
-    #
-    #     ((x[n, h] -d^{-1}(sum(x[n, 1:(h-1)]) + ifelse(h<=crossover_point, sum(history[historyIndex[n, h:crossover_point, nchild*(i-1)+1], h:crossover_point, 1], history[historyIndex[n, (crossover_point+1):d, nchild*i], (crossover_point+1):d, 1]),
-    #                                                                        sum(history[historyIndex[n, h:d, nchild*i], h:d, 1]))))^2 +
-    #     (x[n, h] -d^{-1}(sum(x[n, 1:(h-1)] + sum(history[historyIndex[n, h:d, nchild*(i-1)+1], h:d, 1]))))^2
-    #     )/(2*sigmaX)
-    # }
-    # gamma_ratio <-
+    left_ancestor_coordinates <- cbind(historyIndex[n, , nchild*(i-1)+1], 1:d, rep(1, times = d))
+    right_ancestor_coordinates <- cbind(historyIndex[n, , nchild*i], 1:d, rep(1, times = d))
+    crossed_over_history <- history[rbind(left_ancestor_coordinates[1:crossover_point, ], right_ancestor_coordinates[(crossover_point+1):d, ])]
+    ft_ratio <- sum(-(x[n, ] - (c(0, cumsum(x[n, 1:(d-1)])) + rev(cumsum(rev(crossed_over_history))))/d)^2 +
+                    (x[n, ] - (c(0, cumsum(x[n, 1:(d-1)])) + rev(cumsum(rev(history[left_ancestor_coordinates]))))/d)^2)/(2*sigmaX)
+
+    gamma_ratio <- 0
     mh_ratio <- ft_ratio + gamma_ratio
 
     # accept/reject
