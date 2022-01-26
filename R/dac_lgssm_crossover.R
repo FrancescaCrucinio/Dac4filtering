@@ -46,8 +46,13 @@ dac_lgssm_lc_crossover <- function(history, obs, tau, lambda, sigmaY){
       historyIndex[, , nchild*i] <- historyIndex[indices2, , nchild*i]
       # update particles
       x[, ci[1]:ci[2]] <- cbind(x[indices1, ci[1]:(ci[1]+nv-1)], x[indices2, (ci[1]+nv):ci[2]])
-      # mutation
-      historyIndexNew[, , i] <- crossover(i, nodes, x, history, historyIndex, tau, lambda)
+      if(u > 1){
+        # mutation
+        historyIndexNew[, , i] <- crossover(i, nodes, x, history, historyIndex, tau, lambda)
+      }
+      else{ # at the leaf level all histories are the same
+        historyIndexNew[, , i] <- historyIndex[, , i]
+      }
       # weights
       lW <- -0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2 -
                              2*x[, (ci[1]+nv-1)] * (x[, (ci[1]+nv)] - 0.5*tau*history[historyIndex[, (ci[1]+nv), nchild*i], (ci[1]+nv), 1])
@@ -171,8 +176,13 @@ dac_lgssm_crossover <- function(history, obs, tau, lambda, sigmaY){
     # updated history
     historyIndexNew <- array(0, dim = c(Nparticles, d, nodes))
     for (i in 1:nodes){
-      # mutation
-      historyIndexNew[, , i] <- crossover(i, nodes, x, history, historyIndex, tau, lambda)
+      if(u > 1){
+        # mutation
+        historyIndexNew[, , i] <- crossover(i, nodes, x, history, historyIndex, tau, lambda)
+      }
+      else{ # at the leaf level all histories are the same
+        historyIndexNew[, , i] <- historyIndex[, , i]
+      }
 
       # mixture weights
       lWmix <- matrix(0, ncol = Nparticles, nrow = Nparticles)
