@@ -5,24 +5,17 @@ crossover <- function(i, nodes, x, history, historyIndex, tau, lambda){
   d <- ncol(x)
   historyIndexNew <- historyIndex[, , nchild*(i-1)+1]
   for (n in 1:Nparticles){
-    # sample crossover point
     crossover_point <- sample.int(d-1, 1)
-    # accept/reject ratio
-    mh_ratio <- -0.5*(tau+lambda) * sum( (x[n, (crossover_point+1):d]
-                                          - 0.5*tau*history[historyIndex[n, (crossover_point+1):d, nchild*i], (crossover_point+1):d, 1]/(tau+lambda))^2 -
-                                          (x[n, (crossover_point+1):d]
-                                           - 0.5*tau*history[historyIndex[n, (crossover_point+1):d, nchild*(i-1)+1], (crossover_point+1):d, 1]/(tau+lambda))^2
-                ) +
-                0.5*tau*lambda * sum(x[n, crossover_point:(d-1)] *
-                                       (history[historyIndex[n, (crossover_point+1):d, nchild*i], (crossover_point+1):d, 1]
-                                        - history[historyIndex[n, (crossover_point+1):d, nchild*(i-1)+1], (crossover_point+1):d, 1])
-                ) -
-                lambda * (history[historyIndex[n, crossover_point, nchild*i], crossover_point, 1]
-                          - history[historyIndex[n, crossover_point, nchild*(i-1)+1], crossover_point, 1]) *
-                (history[historyIndex[n, crossover_point, nchild*i], crossover_point, 1]
-                 - history[historyIndex[n, crossover_point, nchild*(i-1)+1], crossover_point, 1] -
-                0.5*tau*history[historyIndex[n, crossover_point+1, nchild*i], crossover_point+1, 2] -
-                  0.5*tau*history[historyIndex[n, crossover_point+1, nchild*(i-1)+1], crossover_point+1, 2])
+    right_ancestor_coordinates <- cbind(historyIndex[n, (crossover_point+1):d, nchild*i], (crossover_point+1):d, rep(1, times = length((crossover_point+1):d)))
+    left_ancestor_coordinates <- cbind(historyIndex[n, (crossover_point+1):d, nchild*(i-1)+1], (crossover_point+1):d, rep(1, times = length((crossover_point+1):d)))
+    ft_ratio <- -0.5*(tau+lambda) * sum((x[n, (crossover_point+1):d] - 0.5*tau*history[right_ancestor_coordinates]/(tau+lambda))^2 -
+                  (x[n, (crossover_point+1):d] - 0.5*tau*history[left_ancestor_coordinates]/(tau+lambda))^2) + 0.5*tau*lambda * sum(x[n, crossover_point:(d-1)] *
+                  (history[right_ancestor_coordinates] - history[historyIndex[left_ancestor_coordinates], (crossover_point+1):d, 1]))
+    gamma_ratio <- -lambda * (history[right_ancestor_coordinates] - history[left_ancestor_coordinates]) *
+                    (history[right_ancestor_coordinates] - history[left_ancestor_coordinates] -
+                    0.5*tau*history[historyIndex[n, crossover_point+1, nchild*i], crossover_point+1, 2] -
+                    0.5*tau*history[historyIndex[n, crossover_point+1, nchild*(i-1)+1], crossover_point+1, 2])
+    mh_ratio <- gamma_ratio + ft_ratio
     # accept/reject
     if(runif(1) <= exp(mh_ratio)){
       # accepted (only update the non-auxiliary history)

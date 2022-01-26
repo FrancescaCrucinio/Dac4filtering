@@ -62,18 +62,18 @@ output_stats <- function(ID, d, Time.step, Nparticles, M, model){
     v_stpf[t, ] <- colMeans(res_stpf^2, dims = 2) - m_stpf[t, ]^2
   }
 }
-component <- 14
-library(ks)
-kde_dac <- kde(x = res_dac[, component])
-kde_nsmc <- kde(x = res_nsmc[, component], eval.points = kde_dac$eval.points)
-kde_stpf <- kde(x = c(res_stpf[, , component]), eval.points = kde_dac$eval.points)
-plot(kde_dac$eval.points, dnorm(kde_dac$eval.points, mean = true_means[Time.step, component],
-                                sd = sqrt(true_variances[Time.step, component])), type = "l", ylim = c(0, 1.2))
-lines(kde_dac$eval.points, kde_dac$estimate, type = "l", col = "blue")
-lines(kde_dac$eval.points, kde_nsmc$estimate, type = "l", col = "red")
-lines(kde_dac$eval.points, kde_stpf$estimate, type = "l", col = "green")
-
-plot(1:32, df_distances$ks[1:32], type = "l", col = "blue", ylim = c(0, 1))
-lines(1:32, df_distances$ks[33:64], type = "l", col = "red")
-lines(1:32, df_distances$ks[65:96], type = "l", col = "green", ylim = c(0, 0.5))
-lines(1:32, alternative_w1)
+# component <- 14
+# library(ks)
+# kde_dac <- kde(x = res_dac[, component])
+# kde_nsmc <- kde(x = res_nsmc[, component], eval.points = kde_dac$eval.points)
+# kde_stpf <- kde(x = c(res_stpf[, , component]), eval.points = kde_dac$eval.points)
+# plot(kde_dac$eval.points, dnorm(kde_dac$eval.points, mean = true_means[Time.step, component],
+#                                 sd = sqrt(true_variances[Time.step, component])), type = "l", ylim = c(0, 1.2))
+# lines(kde_dac$eval.points, kde_dac$estimate, type = "l", col = "blue")
+# lines(kde_dac$eval.points, kde_nsmc$estimate, type = "l", col = "red")
+# lines(kde_dac$eval.points, kde_stpf$estimate, type = "l", col = "green")
+#
+# plot(1:32, df_distances$ks[1:32], type = "l", col = "blue", ylim = c(0, 1))
+# lines(1:32, df_distances$ks[33:64], type = "l", col = "red")
+# lines(1:32, df_distances$ks[65:96], type = "l", col = "green", ylim = c(0, 0.5))
+# lines(1:32, alternative_w1)

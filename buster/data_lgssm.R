@@ -1,7 +1,7 @@
 # devtools::load_all("/storage/u1693998/Dac4filtering")
 
 ID <- as.numeric(Sys.getenv("SGE_TASK_ID"))
-ID <- 2
+ID <- 1
 set.seed(1234*ID)
 
 # dimension

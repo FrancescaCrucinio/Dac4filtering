@@ -106,8 +106,13 @@ dac_lgssm_lightweight_crossover <- function(history, obs, tau, lambda, sigmaY, M
     for (i in 1:nodes){
       # get children indices
       ci <- child_indices(i, nvNew)
-      # mutation
-      historyIndexNew[, , i] <- crossover(i, nodes, x, history, historyIndex, tau, lambda)
+      if(u > 1){
+        # mutation
+        historyIndexNew[, , i] <- crossover(i, nodes, x, history, historyIndex, tau, lambda)
+      }
+      else{ # at the leaf level all histories are the same
+        historyIndexNew[, , i] <- historyIndex[, , i]
+      }
       # lightweight mixture resampling
       if(M == "adaptive") {
         xOld <- history[historyIndex[, ci[1]+nv, nchild*i], ci[1]+nv, 1]
