@@ -26,6 +26,9 @@ output_stats <- function(ID, d, Time.step, Nparticles, M, model){
       data_stpf <- rbind(data_stpf, read.csv(filename, row.names = 1))
     }
   }
+  runtime_dac <- sum(data_dac$runtime[seq(from = 1, to = Time.step*Nparticles, by = Nparticles)])
+  runtime_nsmc <- sum(data_nsmc$runtime[seq(from = 1, to = Time.step*Nparticles, by = Nparticles)])
+  runtime_stpf <- sum(data_stpf$runtime[seq(from = 1, to = Time.step*Nparticles*M, by = M*Nparticles)])
   res_dac <- unname(data.matrix(data_dac[data_dac$timestep == Time.step, 1:d]))
   res_nsmc <- unname(data.matrix(data_nsmc[data_nsmc$timestep == Time.step, 1:d]))
   res_stpf <- array(c(data.matrix(data_stpf[data_stpf$timestep == Time.step, 1:d])), dim = c(Nparticles, M, d))
@@ -38,29 +41,36 @@ output_stats <- function(ID, d, Time.step, Nparticles, M, model){
   w1_stpf <- apply(rbind(matrix(res_stpf, ncol = d, nrow = Nparticles*M), marginals), w1_dist, N = M*Nparticles, MARGIN = 2)
   df_distances <- data.frame(cbind(c(ks_dac, ks_nsmc, ks_stpf), c(w1_dac, w1_nsmc, w1_stpf)))
   df_distances$algo <- rep(c("dac", "nsmc", "stpf"), each = d)
+  df_distances$runtime <- rep(c(runtime_dac, runtime_nsmc, runtime_stpf), each = d)
   colnames(df_distances)[1:2] <- c("ks", "w1")
   if(model == "lgssm"){
     filename <- paste0("data/distances_lgssm_d", d, "N", Nparticles, "ID", ID)
   }
   write.csv(x=df_distances, file=filename)
   # mean and variance
-  m_dac <- matrix(0, nrow = Time.step, ncol = d)
-  v_dac <- matrix(0, nrow = Time.step, ncol = d)
-  m_nsmc <- matrix(0, nrow = Time.step, ncol = d)
-  v_nsmc <- matrix(0, nrow = Time.step, ncol = d)
-  m_stpf <- matrix(0, nrow = Time.step, ncol = d)
-  v_stpf <- matrix(0, nrow = Time.step, ncol = d)
+  m_dac <- matrix(0, nrow = d, ncol = Time.step)
+  v_dac <- matrix(0, nrow = d, ncol = Time.step)
+  m_nsmc <- matrix(0, nrow = d, ncol = Time.step)
+  v_nsmc <- matrix(0, nrow = d, ncol = Time.step)
+  m_stpf <- matrix(0, nrow = d, ncol = Time.step)
+  v_stpf <- matrix(0, nrow = d, ncol = Time.step)
   for (t in 1:Time.step) {
     res_dac <- data.matrix(data_dac[data_dac$timestep == t, 1:d])
     res_nsmc <- data.matrix(data_nsmc[data_nsmc$timestep == t, 1:d])
     res_stpf <- array(c(data.matrix(data_stpf[data_stpf$timestep == t, 1:d])), dim = c(Nparticles, M, d))
-    m_dac[t, ] <- colMeans(res_dac)
-    v_dac[t, ] <- colVars(res_dac)
-    m_nsmc[t, ] <- colMeans(res_nsmc)
-    v_nsmc[t, ] <- colVars(res_nsmc)
-    m_stpf[t, ] <- colMeans(res_stpf, dims = 2)
-    v_stpf[t, ] <- colMeans(res_stpf^2, dims = 2) - m_stpf[t, ]^2
+    m_dac[, t] <- (colMeans(res_dac) - true_means[t, ])^2/true_variances[t, ]
+    v_dac[, t] <- (colVars(res_dac) - true_variances[t, ])^2
+    m_nsmc[, t] <- (colMeans(res_nsmc) - true_means[t, ])^2/true_variances[t, ]
+    v_nsmc[, t] <- (colVars(res_nsmc) - true_variances[t, ])^2
+    m_stpf[, t] <- (colMeans(res_stpf, dims = 2) - true_means[t, ])^2/true_variances[t, ]
+    v_stpf[, t] <- (colMeans(res_stpf^2, dims = 2) - m_stpf[, t]^2 - true_variances[t, ])^2
   }
+  if(model == "lgssm"){
+    filename <- paste0("data/rmse_lgssm_d", d, "N", Nparticles, "ID", ID)
+  }
+  df_rmse <- data.frame(rbind(m_dac, m_nsmc, m_stpf, v_dac, v_nsmc, v_stpf))
+  df_rmse$algo <- rep(c("dac", "nsmc", "stpf"), each = 2*d)
+  write.csv(x=df_rmse, file=filename)
 }
 # component <- 25
 # library(ks)
