@@ -24,10 +24,12 @@ y <- data.matrix(data[1:Time.step, 1:d], rownames.force = NA)
 Nparticles <- 1000
 M <- 2*d
 
+history <- array(0, dim = c(Nparticles, d, 2))
 if(timeinterval>1){
   filename <- paste0("data/dac_lgssm_d", d, "N", Nparticles, "ID", ID, "timeinterval", timeinterval-1)
   data_dac <- read.csv(filename, row.names = 1)
-  res_dac <- data.matrix(data_dac[data_dac$timestep == ti_begin-1, 1:d])
+  history[, , 2] <- data.matrix(data_dac[data_dac$timestep == ti_begin-2, 1:d])
+  history[, , 1] <- data.matrix(data_dac[data_dac$timestep == ti_begin-1, 1:d])
   filename <- paste0("data/nsmc_lgssm_d", d, "N", Nparticles, "ID", ID, "timeinterval", timeinterval-1)
   data_nsmc <- read.csv(filename, row.names = 1)
   res_nsmc <- data.matrix(data_nsmc[data_nsmc$timestep == ti_begin-1, 1:d])
@@ -38,7 +40,6 @@ if(timeinterval>1){
   # initial value
   res_nsmc <- mvrnorm(n = Nparticles, mu0, Sigma0)
   res_stpf <- array(mvrnorm(n = Nparticles*M, mu0, Sigma0), dim = c(Nparticles, M, d))
-  history <- array(0, dim = c(Nparticles, d, 2))
   history[, , 1] <- res_nsmc
 }
 

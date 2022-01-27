@@ -24,7 +24,7 @@ y.coeff <- diag(1, d, d)
 
 
 # number of time steps
-Time.step <- 1
+Time.step <- 10
 
 # get observations
 y <- ssm_obs(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step)
@@ -45,7 +45,7 @@ for(i in 1:d){
   marginals[, i] <- rnorm(10^5, mean = true_means[Time.step, i], sd = sqrt(true_variances[Time.step, i]))
 }
 
-Nparticles <- 10
+Nparticles <- 1000
 M <- 2*d
 df <- data.frame()
 

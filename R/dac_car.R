@@ -33,15 +33,13 @@ dac_car_lightweight <- function(history, obs, sigmaX, sigmaY){
     for (i in 1:nodes) {
       # get children indices
       ci <- child_indices(i, nvNew)
-      # if(u > 1){
-      #   # mutation
-      #   historyIndexNew[, , i] <-
-      # }
-      # else{ # at the leaf level all histories are the same
-      #   historyIndexNew[, , i] <- historyIndex[, , i]
-      # }
-      # mutation
-      historyIndexNew[, , i] <- historyIndex[, , i]
+      if(u > 1){
+        # mutation
+        historyIndexNew[, , i] <- car_crossover(i, nodes, x, history, historyIndex, sigmaX)
+      }
+      else{ # at the leaf level all histories are the same
+        historyIndexNew[, , i] <- historyIndex[, , i]
+      }
       # adaptive lightweight mixture resampling
       xOld <- history[historyIndex[, , nchild*i], , 1]
       indices <- car_adaptive_light(Nparticles, i, u, nv, nvNew, ci, lW, Nparticles, sigmaX, x, xOld)
