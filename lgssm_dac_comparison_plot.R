@@ -1,34 +1,49 @@
 # read data
-df <- read.csv("data/resampling_comparison_d8N100ID1")
+df <- read.csv("data/resampling/resampling_comparison_d8N100ID1")
+df$N <- "10^2"
 for (id in 2:50){
-  filename <- paste("data/resampling_comparison_d8N100ID", id, sep = "")
+  filename <- paste("data/resampling/resampling_comparison_d8N100ID", id, sep = "")
   dfnew <- read.csv(filename)
+  dfnew$N <- "10^2"
   df <- rbind(df, dfnew)
 }
 for (id in 1:50){
-  filename <- paste("data/resampling_comparison_d8N1000ID", id, sep = "")
+  filename <- paste("data/resampling/resampling_comparison_d8N1000ID", id, sep = "")
   dfnew <- read.csv(filename)
+  dfnew$N <- "10^3"
   df <- rbind(df, dfnew)
 }
 for (id in 1:50){
-  filename <- paste("data/resampling_comparison_d8N10000ID", id, sep = "")
+  filename <- paste("data/resampling/resampling_comparison_d8N10000ID", id, sep = "")
   dfnew <- read.csv(filename)
+  dfnew$N <- "10^4"
+  df <- rbind(df, dfnew)
+}
+for (id in 1:50){
+  filename <- paste("data/resampling/resampling_comparison_d8N1e+05ID", id, sep = "")
+  dfnew <- read.csv(filename)
+  dfnew$N <- "10^5"
   df <- rbind(df, dfnew)
 }
 df <- df[, -1]
-d <- ncol(df) - 3
+d <- ncol(df) - 4
 df$d_means <- rowMeans(df[, 1:d])
-df$N <- as.factor(rep(c("10^2", "10^3", "10^4"), each = 50*8))
-df <- df[order(df$algo, df$mutation),]
+df <- df[order(df$algo, df$mutation, df$N),]
 time_means <- aggregate(elapsed ~ algo + mutation + N, data = df, FUN = "mean" )
-time_means <- time_means[order(time_means$algo, time_means$mutation), ]
+time_means <- time_means[order(time_means$algo, time_means$mutation, time_means$N), ]
 df$runtime <- rep(time_means$elapsed, each = 50)
-
+aggregate(d_means ~ algo + mutation + N, data = df, FUN = "mean")
 # time
 ggplot(data = df, aes(x = runtime, y = d_means, group = interaction(algo, mutation, N), fill = algo, colour = algo)) +
   geom_boxplot(aes(alpha = as.factor(mutation)), coef = 6, width = 10) +
-  scale_y_continuous(trans='log10') +
-  scale_x_continuous(trans='log10', breaks = trans_breaks('log10', function(x) 10^x)) +
+  scale_x_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  scale_y_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
   guides(alpha = "none") +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=20),

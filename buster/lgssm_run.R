@@ -1,7 +1,7 @@
 # devtools::load_all("/storage/u1693998/Dac4filtering")
 
 ID <- as.numeric(Sys.getenv("SGE_TASK_ID"))
-ID <- 2
+set.seed(1234*ID)
 d <- 32
 timeinterval <- 10
 # get time interval extrema
@@ -10,7 +10,7 @@ ti_end <- timeinterval*10
 Time.step <- 100
 set.seed(1234*ID)
 
-filename <- paste0("data/data_lgssm_d", d, "ID", ID)
+filename <- paste0("/storage/u1693998/data/data_lgssm_d", d, "ID", ID)
 data <- read.csv(filename, row.names = 1)
 
 # parameters
@@ -26,14 +26,14 @@ M <- 2*d
 
 history <- array(0, dim = c(Nparticles, d, 2))
 if(timeinterval>1){
-  filename <- paste0("data/dac_lgssm_d", d, "N", Nparticles, "ID", ID, "timeinterval", timeinterval-1)
+  filename <- paste0("/storage/u1693998/results/dac_lgssm_d", d, "N", Nparticles, "ID", ID, "timeinterval", timeinterval-1)
   data_dac <- read.csv(filename, row.names = 1)
   history[, , 2] <- data.matrix(data_dac[data_dac$timestep == ti_begin-2, 1:d])
   history[, , 1] <- data.matrix(data_dac[data_dac$timestep == ti_begin-1, 1:d])
-  filename <- paste0("data/nsmc_lgssm_d", d, "N", Nparticles, "ID", ID, "timeinterval", timeinterval-1)
+  filename <- paste0("/storage/u1693998/results/nsmc_lgssm_d", d, "N", Nparticles, "ID", ID, "timeinterval", timeinterval-1)
   data_nsmc <- read.csv(filename, row.names = 1)
   res_nsmc <- data.matrix(data_nsmc[data_nsmc$timestep == ti_begin-1, 1:d])
-  filename <- paste0("data/stpf_lgssm_d", d, "N", Nparticles, "ID", ID, "timeinterval", timeinterval-1)
+  filename <- paste0("/storage/u1693998/results/stpf_lgssm_d", d, "N", Nparticles, "ID", ID, "timeinterval", timeinterval-1)
   data_stpf <- read.csv(filename, row.names = 1)
   res_stpf <- array(c(data.matrix(data_stpf[data_stpf$timestep == ti_begin-1, 1:d])), dim = c(Nparticles, M, d))
 } else{
@@ -77,11 +77,11 @@ for (t in ti_begin:ti_end) {
   print(paste(t))
 }
 
-filename <- paste0("data/dac_lgssm_d", d, "N", Nparticles, "ID", ID, "timeinterval", timeinterval)
+filename <- paste0("/storage/u1693998/results/dac_lgssm_d", d, "N", Nparticles, "ID", ID, "timeinterval", timeinterval)
 write.csv(x=df_dac, file=filename)
-filename <- paste0("data/nsmc_lgssm_d", d, "N", Nparticles, "ID", ID, "timeinterval", timeinterval)
+filename <- paste0("/storage/u1693998/results/nsmc_lgssm_d", d, "N", Nparticles, "ID", ID, "timeinterval", timeinterval)
 write.csv(x=df_nsmc, file=filename)
-filename <- paste0("data/stpf_lgssm_d", d, "N", Nparticles, "ID", ID, "timeinterval", timeinterval)
+filename <- paste0("/storage/u1693998/results/stpf_lgssm_d", d, "N", Nparticles, "ID", ID, "timeinterval", timeinterval)
 write.csv(x=df_stpf, file=filename)
 
 
