@@ -54,8 +54,8 @@ dac_lgssm_lc_crossover <- function(history, obs, tau, lambda, sigmaY){
         historyIndexNew[, , i] <- historyIndex[, , i]
       }
       # weights
-      lW <- -0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2 -
-                             2*x[, (ci[1]+nv-1)] * (x[, (ci[1]+nv)] - 0.5*tau*history[historyIndex[, (ci[1]+nv), nchild*i], (ci[1]+nv), 1])
+      lW <- -0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2/(tau+lambda) -
+                             2*x[, (ci[1]+nv-1)] * (x[, (ci[1]+nv)] - 0.5*tau*history[historyIndex[, (ci[1]+nv), nchild*i], (ci[1]+nv), 1]/(tau+lambda))
       )
       max.lW <- max(lW)
       W[, i] <- exp(lW - max.lW)
@@ -191,8 +191,8 @@ dac_lgssm_crossover <- function(history, obs, tau, lambda, sigmaY){
         for (n1 in 1:Nparticles) {
           for (n2 in 1:Nparticles) {
             lWmix[n1, n2] <- lW[n1, (nchild*(i-1)+1)] + lW[n2, i*nchild] -
-              0.5*lambda * (lambda *x[n1, (ci[1]+nv-1)]^2 -
-                              2*x[n1, (ci[1]+nv-1)] * (x[n2, (ci[1]+nv)] - 0.5*tau*history[historyIndex[n2, ci[1]+nv, nchild*i], ci[1]+nv, 1])
+              0.5*lambda * (lambda *x[n1, (ci[1]+nv-1)]^2/(tau+lambda) -
+                              2*x[n1, (ci[1]+nv-1)] * (x[n2, (ci[1]+nv)] - 0.5*tau*history[historyIndex[n2, ci[1]+nv, nchild*i], ci[1]+nv, 1]/(tau+lambda))
               )
           }
         }

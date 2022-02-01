@@ -1,7 +1,9 @@
 # devtools::load_all("/storage/u1693998/Dac4filtering")
-
+ID <- as.numeric(Sys.getenv("SGE_TASK_ID"))
+ID <- 2
+set.seed(1234*ID)
 # dimension
-d <- 4
+d <- 32
 # initial state
 mu0 <- rep(0, times = d)
 Sigma0 <- diag(x = 1, d, d)
@@ -25,7 +27,7 @@ y.error.var <- diag(x = sigmaY, d, d)
 y.coeff <- diag(x = 1, d, d)
 
 # number of time steps
-Time.step <- 1
+Time.step <- 100
 
 # get observations
 y <- ssm_obs(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step)
@@ -45,7 +47,7 @@ for(i in 1:d){
   marginals[, i] <- rnorm(10^5, mean = true_means[Time.step, i], sd = sqrt(true_variances[Time.step, i]))
 }
 
-Nparticles <- 10
+Nparticles <- 1000
 M <- 2*d
 df <- data.frame()
 
@@ -72,7 +74,6 @@ df <- data.frame(rbind(df, cbind(t(rse), res_stpf$w1, res_stpf$ks, rep(runtime$t
 
 df$algo <- as.factor(rep(c("dac", "nsmc", "stpf"), each = d))
 
-ID <- as.numeric(Sys.getenv("SGE_TASK_ID"))
-ID <- 2
+
 filename <- paste0("data/lgssm_d", d, "N", Nparticles, "ID", ID)
 write.csv(x=df, file=filename)

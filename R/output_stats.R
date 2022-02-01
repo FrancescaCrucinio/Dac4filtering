@@ -44,7 +44,7 @@ output_stats <- function(ID, d, Time.step, Nparticles, M, model){
   df_distances$runtime <- rep(c(runtime_dac, runtime_nsmc, runtime_stpf), each = d)
   colnames(df_distances)[1:2] <- c("ks", "w1")
   if(model == "lgssm"){
-    filename <- paste0("data/distances_lgssm_d", d, "N", Nparticles, "ID", ID)
+    filename <- paste0("/storage/u1693998/out/distances_lgssm_d", d, "N", Nparticles, "ID", ID)
   }
   write.csv(x=df_distances, file=filename)
   # mean and variance
@@ -66,7 +66,7 @@ output_stats <- function(ID, d, Time.step, Nparticles, M, model){
     v_stpf[, t] <- (colMeans(res_stpf^2, dims = 2) - m_stpf[, t]^2 - true_variances[t, ])^2
   }
   if(model == "lgssm"){
-    filename <- paste0("data/rmse_lgssm_d", d, "N", Nparticles, "ID", ID)
+    filename <- paste0("/storage/u1693998/out/rmse_lgssm_d", d, "N", Nparticles, "ID", ID)
   }
   df_rmse <- data.frame(rbind(m_dac, m_nsmc, m_stpf, v_dac, v_nsmc, v_stpf))
   df_rmse$algo <- rep(c("dac", "nsmc", "stpf"), each = 2*d)

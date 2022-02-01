@@ -41,8 +41,8 @@ dac_lgssm <- function(xOld, obs, tau, lambda, sigmaY){
         for (n1 in 1:Nparticles) {
           for (n2 in 1:Nparticles) {
             lWmix[n1, n2] <- lW[n1, (nchild*(i-1)+1)] + lW[n2, i*nchild] -
-              0.5*lambda * (lambda *x[n1, (ci[1]+nv-1)]^2 -
-                2*x[n1, (ci[1]+nv-1)] * (x[n2, (ci[1]+nv)] - 0.5*tau*xOld[n2, (ci[1]+nv)])
+              0.5*lambda * (lambda*x[n1, (ci[1]+nv-1)]^2/(tau+lambda) -
+                2*x[n1, (ci[1]+nv-1)] * (x[n2, (ci[1]+nv)] - 0.5*tau*xOld[n2, (ci[1]+nv)]/(tau+lambda))
                 )
           }
         }
@@ -51,8 +51,8 @@ dac_lgssm <- function(xOld, obs, tau, lambda, sigmaY){
       } else {
         for (n1 in 1:Nparticles) {
           for (n2 in 1:Nparticles) {
-            lWmix[n1, n2] <- -0.5*lambda * (lambda *x[n1, (ci[1]+nv-1)]^2 -
-                              2*x[n1, (ci[1]+nv-1)] * (x[n2, (ci[1]+nv)] - 0.5*tau*xOld[n2, (ci[1]+nv)])
+            lWmix[n1, n2] <- -0.5*lambda * (lambda*x[n1, (ci[1]+nv-1)]^2/(tau+lambda) -
+                              2*x[n1, (ci[1]+nv-1)] * (x[n2, (ci[1]+nv)] - 0.5*tau*xOld[n2, (ci[1]+nv)]/(tau+lambda))
                               )
           }
         }
@@ -182,8 +182,8 @@ dac_lgssm_lc <- function(xOld, obs, tau, lambda, sigmaY){
       # child 2 (with random permutation)
       indices2 <- sample(stratified_resample(W[, nchild*i], Nparticles))
       # weights
-      lW <- -0.5*lambda * (lambda *x[indices1, (ci[1]+nv-1)]^2 -
-                             2*x[indices1, (ci[1]+nv-1)] * (x[indices2, (ci[1]+nv)] - 0.5*tau*xOld[indices2, (ci[1]+nv)])
+      lW <- -0.5*lambda * (lambda *x[indices1, (ci[1]+nv-1)]^2/(tau+lambda) -
+                             2*x[indices1, (ci[1]+nv-1)] * (x[indices2, (ci[1]+nv)] - 0.5*tau*xOld[indices2, (ci[1]+nv)]/(tau+lambda))
                           )
       max.lW <- max(lW)
       WNew[, i] <- exp(lW - max.lW)
