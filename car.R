@@ -24,7 +24,7 @@ y.coeff <- diag(1, d, d)
 
 
 # number of time steps
-Time.step <- 10
+Time.step <- 1
 
 # get observations
 y <- ssm_obs(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step)

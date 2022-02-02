@@ -30,7 +30,7 @@ distances$ks <- aggregate(ks ~ algo + runtime + N, data = df, FUN = "mean")$ks
 time_means <- aggregate(runtime ~ algo + N, data = df, FUN= "mean" )
 time_means <- time_means[order(time_means$algo, time_means$N), ]
 distances <- distances[order(distances$algo, distances$N), ]
-distances$runtime_mean <- rep(time_means$runtime, each = 50)
+distances$runtime_mean <- rep(time_means$runtime, each = 1)
 # Wasserstein-1
 ggplot(data = distances, aes(x = runtime_mean, y = w1, group = interaction(algo, N), fill = algo, colour = algo)) +
   geom_boxplot(coef = 2) +

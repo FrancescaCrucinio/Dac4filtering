@@ -1,6 +1,7 @@
 devtools::load_all("/storage/u1693998/Dac4filtering")
 ### Linear Gaussian SSM -- comparison of dac and dac with mixture reweighting (both lightweight and full cost)
-
+ID <- as.numeric(Sys.getenv("SGE_TASK_ID"))
+set.seed(1234*ID)
 # dimension
 d <- 8
 # initial state
@@ -49,23 +50,23 @@ df <- data.frame()
 # NO CROSSOVER
 # dac
 x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
-tic()
-res_dac <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "lc")
-runtime <- toc()
-se <- (res_dac$m[Time.step, ] - true_means[Time.step, ])^2
-df <- data.frame(rbind(df, t(c(se, runtime$toc - runtime$tic))))
-# mix
-tic()
-res_dac_mix <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "mix")
-runtime <- toc()
-se <- (res_dac_mix$m[Time.step, ] - true_means[Time.step, ])^2
-df <- data.frame(rbind(df, t(c(se, runtime$toc - runtime$tic))))
-# light
-tic()
-res_dac_light <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "light")
-runtime <- toc()
-se <- (res_dac_light$m[Time.step, ] - true_means[Time.step, ])^2
-df <- data.frame(rbind(df, t(c(se, runtime$toc - runtime$tic))))
+# tic()
+# res_dac <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "lc")
+# runtime <- toc()
+# se <- (res_dac$m[Time.step, ] - true_means[Time.step, ])^2
+# df <- data.frame(rbind(df, t(c(se, runtime$toc - runtime$tic))))
+# # mix
+# tic()
+# res_dac_mix <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "mix")
+# runtime <- toc()
+# se <- (res_dac_mix$m[Time.step, ] - true_means[Time.step, ])^2
+# df <- data.frame(rbind(df, t(c(se, runtime$toc - runtime$tic))))
+# # light
+# tic()
+# res_dac_light <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "light")
+# runtime <- toc()
+# se <- (res_dac_light$m[Time.step, ] - true_means[Time.step, ])^2
+# df <- data.frame(rbind(df, t(c(se, runtime$toc - runtime$tic))))
 # adaptive light
 tic()
 res_dac_light_ada <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "ada")
@@ -75,23 +76,23 @@ df <- data.frame(rbind(df, t(c(se, runtime$toc - runtime$tic))))
 # CROSSOVER
 # dac
 x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
-tic()
-res_dac <- dac_time_lgssm_crossover(tau, lambda, sigmaY, Nparticles, x0, y, method = "lc")
-runtime <- toc()
-se <- (res_dac$m[Time.step, ] - true_means[Time.step, ])^2
-df <- data.frame(rbind(df, t(c(se, runtime$toc - runtime$tic))))
-# mix
-tic()
-res_dac_mix <- dac_time_lgssm_crossover(tau, lambda, sigmaY, Nparticles, x0, y, method = "mix")
-runtime <- toc()
-se <- (res_dac_mix$m[Time.step, ] - true_means[Time.step, ])^2
-df <- data.frame(rbind(df, t(c(se, runtime$toc - runtime$tic))))
-# light
-tic()
-res_dac_light <- dac_time_lgssm_crossover(tau, lambda, sigmaY, Nparticles, x0, y, method = "light")
-runtime <- toc()
-se <- (res_dac_light$m[Time.step, ] - true_means[Time.step, ])^2
-df <- data.frame(rbind(df, t(c(se, runtime$toc - runtime$tic))))
+# tic()
+# res_dac <- dac_time_lgssm_crossover(tau, lambda, sigmaY, Nparticles, x0, y, method = "lc")
+# runtime <- toc()
+# se <- (res_dac$m[Time.step, ] - true_means[Time.step, ])^2
+# df <- data.frame(rbind(df, t(c(se, runtime$toc - runtime$tic))))
+# # mix
+# tic()
+# res_dac_mix <- dac_time_lgssm_crossover(tau, lambda, sigmaY, Nparticles, x0, y, method = "mix")
+# runtime <- toc()
+# se <- (res_dac_mix$m[Time.step, ] - true_means[Time.step, ])^2
+# df <- data.frame(rbind(df, t(c(se, runtime$toc - runtime$tic))))
+# # light
+# tic()
+# res_dac_light <- dac_time_lgssm_crossover(tau, lambda, sigmaY, Nparticles, x0, y, method = "light")
+# runtime <- toc()
+# se <- (res_dac_light$m[Time.step, ] - true_means[Time.step, ])^2
+# df <- data.frame(rbind(df, t(c(se, runtime$toc - runtime$tic))))
 # adaptive light
 tic()
 res_dac_light_ada <- dac_time_lgssm_crossover(tau, lambda, sigmaY, Nparticles, x0, y, method = "ada")
@@ -99,9 +100,12 @@ runtime <- toc()
 se <- (res_dac_light_ada$m[Time.step, ] - true_means[Time.step, ])^2
 df <- data.frame(rbind(df, t(c(se, runtime$toc - runtime$tic))))
 
-df$algo <- as.factor(c("dac", "mix", "light", "light_ada", "dac", "mix", "light", "light_ada"))
-df$mutation <- as.factor(c(0, 0, 0, 0, 1, 1, 1, 1))
+# df$algo <- as.factor(c("dac", "mix", "light", "light_ada", "dac", "mix", "light", "light_ada"))
+# df$algo <- as.factor(c("dac", "light", "light_ada", "dac", "light", "light_ada"))
+# df$mutation <- as.factor(c(0, 0, 0, 0, 1, 1, 1, 1))
+# df$mutation <- as.factor(c(0, 0, 0, 1, 1, 1))
 
-ID <- as.numeric(Sys.getenv("SGE_TASK_ID"))
-filename <- paste0("resampling_comparison_d", d, "N", Nparticles, "ID", ID)
+df$algo <- as.factor(c("light_ada_nothreshold", "light_ada_nothreshold"))
+df$mutation <- as.factor(c(0, 1))
+filename <- paste0("results/additional_resampling_comparison_d", d, "N", Nparticles, "ID", ID)
 write.csv(x=df, file=filename)

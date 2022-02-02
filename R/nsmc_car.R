@@ -20,7 +20,17 @@ nsmc_car <- function(xOld, obs, sigmaX, sigmaY, M){
   x <- matrix(0, nrow = Nparticles, ncol = d)
   # backward simulation
   for(i in 1:Nparticles){
-    x[i, ] <- q[[i]]$xa[sample.int(M, 1), ]
+    x[i, d] <- q[[i]]$x[sample.int(M, 1), d]
+    for (j in (d-1):1){
+      tmp <- 0
+      for (h in (j+1):d){
+         tmp <- tmp - 0.5*(x[i, h] - (rowSums(q[[i]]$x[, 1:(h-1), drop = FALSE]) + sum(q[[i]]$xOld[h:d]))/d)^2/sigmaX
+      }
+      lW <- tmp
+      W <- exp(lW - max(lW))
+      # resampling
+      x[i, j] <- q[[i]]$x[stratified_resample(W/sum(W), 1), j]
+    }
   }
   return(x)
 }
@@ -57,5 +67,5 @@ nsmc_inner_car <- function(xinnerOld, obs, sigmaX, sigmaY, M){
     xinnera[, 1:j] <- xinnera[ancestors, 1:j]
     xinnera[, j] <- xinner[, j]
   }
-  return(list("lZ" = lZ, "x" = xinner, "xa" = xinnera))
+  return(list("lZ" = lZ, "x" = xinner, "xa" = xinnera, "xOld" = xinnerOld))
 }

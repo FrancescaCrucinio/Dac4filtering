@@ -75,5 +75,5 @@ df <- data.frame(rbind(df, cbind(t(rse), res_stpf$w1, res_stpf$ks, rep(runtime$t
 df$algo <- as.factor(rep(c("dac", "nsmc", "stpf"), each = d))
 
 
-filename <- paste0("data/lgssm_d", d, "N", Nparticles, "ID", ID)
+filename <- paste0("lgssm_d", d, "N", Nparticles, "ID", ID)
 write.csv(x=df, file=filename)

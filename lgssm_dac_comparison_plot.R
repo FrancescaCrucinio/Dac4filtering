@@ -49,13 +49,13 @@ ggplot(data = df, aes(x = runtime, y = d_means, group = interaction(algo, mutati
         legend.title = element_blank(), legend.text=element_text(size=20),
         text = element_text(size=15))
 # ggsave("res_time_low.pdf", width = 10, height = 5, dpi = 300)
-df <- read.csv("data/adaptive_lgssm_d32N1000T100.csv", col.names = c("u", "m"))
+df <- read.csv("data/adaptive_lgssm_d32N1000T100_nothreshold.csv", col.names = c("u", "m"))
 df$u <- as.factor(df$u)
 # histogram of m
 ggplot(data = df, aes(x = m)) +
-  geom_histogram(breaks=seq(2, 33, by=1)) +
+  geom_histogram() +
   facet_grid(~u) +
   scale_y_continuous(trans='log1p') +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=15))
-# ggsave("m_adaptive32_lgssm.pdf", width = 10, height = 5, dpi = 300)
+# ggsave("m_adaptive32_lgssm_nothreshold.pdf", width = 10, height = 5, dpi = 300)
