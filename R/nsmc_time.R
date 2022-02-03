@@ -20,10 +20,10 @@ nsmc_time_lgssm <- function(tau, lambda, sigmaY, Nparticles, x0, y, M = NULL, ma
   }
   if(!is.null(marginals)){
     # compare marginals at last time step
-    ks_dac <- apply(rbind(matrix(x, ncol = d, nrow = Nparticles*M), marginals), ks_dist, N = Nparticles, MARGIN = 2)
-    w1_dac <- apply(rbind(matrix(x, ncol = d, nrow = Nparticles*M), marginals), w1_dist, N = Nparticles, MARGIN = 2)
+    ks_nsmc <- apply(rbind(x, marginals), ks_dist, N = Nparticles, MARGIN = 2)
+    w1_nsmc <- apply(rbind(x, marginals), ks_dist, N = Nparticles, MARGIN = 2)
   }
-  out <- list("m" = m, "v" = v, "ks" = ks_dac, "w1" = w1_dac)
+  out <- list("m" = m, "v" = v, "ks" = ks_nsmc, "w1" = w1_nsmc)
   return(out)
 }
 
@@ -49,9 +49,9 @@ nsmc_time_car <- function(sigmaX, sigmaY, Nparticles, x0, y, M = NULL, marginals
   }
   if(!is.null(marginals)){
     # compare marginals at last time step
-    ks_dac <- apply(rbind(matrix(x, ncol = d, nrow = Nparticles*M), marginals), ks_dist, N = Nparticles, MARGIN = 2)
-    w1_dac <- apply(rbind(matrix(x, ncol = d, nrow = Nparticles*M), marginals), w1_dist, N = Nparticles, MARGIN = 2)
+    ks_nsmc <- apply(rbind(x, marginals), ks_dist, N = Nparticles, MARGIN = 2)
+    w1_nsmc <- apply(rbind(x, marginals), ks_dist, N = Nparticles, MARGIN = 2)
   }
-  out <- list("m" = m, "v" = v, "ks" = ks_dac, "w1" = w1_dac)
+  out <- list("m" = m, "v" = v, "ks" = ks_nsmc, "w1" = w1_nsmc, "x" = x)
   return(out)
 }

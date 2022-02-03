@@ -10,7 +10,7 @@ stpf_time_lgssm <- function(tau, lambda, sigmaY, Nparticles, x0, y, M = NULL, ma
 
   if(is.null(M)) {
     # number of particles per island
-    M <- d
+    M <- 2*d
   }
 
   for (t in 1:Time.step) {
@@ -20,10 +20,10 @@ stpf_time_lgssm <- function(tau, lambda, sigmaY, Nparticles, x0, y, M = NULL, ma
   }
   if(!is.null(marginals)){
     # compare marginals at last time step
-    ks_dac <- apply(rbind(matrix(x, ncol = d, nrow = Nparticles*M), marginals), ks_dist, N = M*Nparticles, MARGIN = 2)
-    w1_dac <- apply(rbind(matrix(x, ncol = d, nrow = Nparticles*M), marginals), w1_dist, N = M*Nparticles, MARGIN = 2)
+    ks_stpf <- apply(rbind(matrix(x, ncol = d, nrow = Nparticles*M), marginals), ks_dist, N = M*Nparticles, MARGIN = 2)
+    w1_stpf <- apply(rbind(matrix(x, ncol = d, nrow = Nparticles*M), marginals), w1_dist, N = M*Nparticles, MARGIN = 2)
   }
-  out <- list("m" = m, "v" = v, "ks" = ks_dac, "w1" = w1_dac)
+  out <- list("m" = m, "v" = v, "ks" = ks_stpf, "w1" = w1_stpf)
   return(out)
 }
 

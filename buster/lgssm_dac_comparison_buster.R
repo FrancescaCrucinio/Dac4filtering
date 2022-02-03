@@ -44,29 +44,29 @@ for (t in 1:Time.step){
 }
 
 ### DAC
-Nparticles <- 1000
+Nparticles <- 100
 df <- data.frame()
 
 # NO CROSSOVER
 # dac
 x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
-# tic()
-# res_dac <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "lc")
-# runtime <- toc()
-# se <- (res_dac$m[Time.step, ] - true_means[Time.step, ])^2
-# df <- data.frame(rbind(df, t(c(se, runtime$toc - runtime$tic))))
-# # mix
-# tic()
-# res_dac_mix <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "mix")
-# runtime <- toc()
-# se <- (res_dac_mix$m[Time.step, ] - true_means[Time.step, ])^2
-# df <- data.frame(rbind(df, t(c(se, runtime$toc - runtime$tic))))
-# # light
-# tic()
-# res_dac_light <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "light")
-# runtime <- toc()
-# se <- (res_dac_light$m[Time.step, ] - true_means[Time.step, ])^2
-# df <- data.frame(rbind(df, t(c(se, runtime$toc - runtime$tic))))
+tic()
+res_dac <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "lc")
+runtime <- toc()
+se <- (res_dac$m[Time.step, ] - true_means[Time.step, ])^2
+df <- data.frame(rbind(df, t(c(se, runtime$toc - runtime$tic))))
+# mix
+tic()
+res_dac_mix <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "mix")
+runtime <- toc()
+se <- (res_dac_mix$m[Time.step, ] - true_means[Time.step, ])^2
+df <- data.frame(rbind(df, t(c(se, runtime$toc - runtime$tic))))
+# light
+tic()
+res_dac_light <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "light")
+runtime <- toc()
+se <- (res_dac_light$m[Time.step, ] - true_means[Time.step, ])^2
+df <- data.frame(rbind(df, t(c(se, runtime$toc - runtime$tic))))
 # adaptive light
 tic()
 res_dac_light_ada <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "ada")
