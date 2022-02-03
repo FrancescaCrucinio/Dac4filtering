@@ -67,7 +67,7 @@ df <- data.frame(rbind(df, cbind(t(rse), res_nsmc$w1, res_nsmc$ks, rep(runtime$t
 # stpf
 x0 <- array(mvrnorm(n = Nparticles*M, mu0, Sigma0), dim = c(Nparticles, M, d))
 tic()
-res_stpf <- stpf_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, marginals = marginals)
+res_stpf <- stpf_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, M = M, marginals = marginals)
 runtime <- toc()
 rse <- (res_stpf$m - true_means)^2/true_variances
 df <- data.frame(rbind(df, cbind(t(rse), res_stpf$w1, res_stpf$ks, rep(runtime$toc[[1]] - runtime$tic[[1]], times = d))))
