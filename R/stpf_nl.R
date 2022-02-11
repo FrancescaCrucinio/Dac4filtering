@@ -22,11 +22,11 @@ stpf_nl <- function(xOld, obs, eta){
           # sample component of mixture
           mixture_component <- sample.int(5, size = 1, prob = mixture_weights)
           switch(mixture_component,
-               1={xMean[j] <- xOld[i, j, row, col]},
-               2={xMean[j] <- xOld[i, j, row, col-1]},
-               3={xMean[j] <- xOld[i, j, row-1, col]},
-               4={xMean[j] <- xOld[i, j, row, col+1]},
-               5={xMean[j] <- xOld[i, j+1, row, col]}
+               {xMean[j] <- xOld[i, j, row, col]},
+               {xMean[j] <- xOld[i, j, row, col-1]},
+               {xMean[j] <- xOld[i, j, row-1, col]},
+               {xMean[j] <- xOld[i, j, row, col+1]},
+               {xMean[j] <- xOld[i, j+1, row, col]}
           )
         }
         x[i, , row, col] <- xMean + rnorm(M)

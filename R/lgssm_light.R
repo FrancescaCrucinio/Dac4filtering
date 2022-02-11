@@ -72,5 +72,59 @@ lgssm_adaptive_light <- function(ess_target, i, u, nv, ci, lW, Nparticles, lambd
   Wmix <- exp(lWmix - max.lWmix)
   # resampling the new population
   indices <- stratified_resample(Wmix/sum(Wmix), Nparticles)
-  return(cbind(rep(1:Nparticles, time = m)[indices], permutation[indices]))
+  return(list("resampled_indices" = cbind(rep(1:Nparticles, time = m)[indices], permutation[indices]),
+              "target_reached" = (ess >= ess_target), "resampled_particles_lW" = lWmix[indices]))
+}
+
+
+
+
+# xOldv is the ci[1]+nv component of xOld (main code)
+lgssm_adaptive_light_v2 <- function(ess_target, i, u, nv, ci, W, Nparticles, lambda, tau, x, xOldv){
+  # binary tree
+  nchild <- 2
+  # mixture weights
+  # first permutation
+  if(u == 1){
+    permutation <- cbind(stratified_resample(W[, nchild*(i-1)+1], Nparticles), sample(stratified_resample(W[, nchild*i], Nparticles)))
+  }
+  else{
+    permutation <- cbind(sample.int(Nparticles, size = Nparticles, replace = TRUE), sample.int(Nparticles, size = Nparticles, replace = TRUE))
+  }
+  # mixture weights
+  lWmix <- -0.5*lambda * (lambda *x[permutation[, 1], (ci[1]+nv-1)]^2/(tau+lambda) -
+                            2*x[permutation[, 1], (ci[1]+nv-1)] * (x[permutation[, 2], (ci[1]+nv)] - 0.5*tau*xOldv[permutation[, 2]]/(tau+lambda))
+  )
+  max.lWmix <- max(lWmix)
+  Wmix <- exp(lWmix - max.lWmix)
+  # build ESS
+  ess_s <- sum(Wmix)
+  ess_ss <- sum(Wmix^2)
+  ess <- ess_s^2/ess_ss
+  m <- 1
+  while (ess < ess_target) {
+    m <- m+1
+    if(u == 1){
+      new_perm <- cbind(stratified_resample(W[, nchild*(i-1)+1], Nparticles), sample(stratified_resample(W[, nchild*i], Nparticles)))
+    } else{
+      new_perm <- cbind(sample.int(Nparticles, size = Nparticles, replace = TRUE), sample.int(Nparticles, size = Nparticles, replace = TRUE))
+    }
+    lWmix_perm <- -0.5*lambda * (lambda *x[new_perm[, 1], (ci[1]+nv-1)]^2 - 2*x[new_perm[, 1], (ci[1]+nv-1)] * (x[new_perm[, 2], (ci[1]+nv)] - 0.5*tau*xOldv[new_perm[, 2]])
+    )
+    permutation <- rbind(permutation, new_perm)
+    max.lWmix <- max(lWmix_perm)
+    Wmix <- exp(lWmix_perm - max.lWmix)
+    # build ESS
+    ess_s <- ess_s + sum(Wmix)
+    ess_ss <- ess_ss + sum(Wmix^2)
+    ess <- ess_s^2/ess_ss
+    lWmix <- c(lWmix, lWmix_perm)
+  }
+  # write.table(data.frame("u" = u, "m" = m), file = "data/adaptive_lgssm.csv", sep = ",", append = TRUE, quote = FALSE,
+  #              col.names = FALSE, row.names = FALSE)
+  max.lWmix <- max(lWmix)
+  Wmix <- exp(lWmix - max.lWmix)
+  # resampling the new population
+  indices <- stratified_resample(Wmix/sum(Wmix), Nparticles)
+  return(cbind(permutation[indices, 1], permutation[indices, 2]))
 }

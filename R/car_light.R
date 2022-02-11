@@ -56,7 +56,7 @@ car_adaptive_light <- function(ess_target, i, u, nv, nvNew, ci, lW, Nparticles, 
   # first permutation
   permutation <- 1:Nparticles
   m <- 1
-  while (ess < ess_target) {
+  while (ess < ess_target & m<=ceiling(sqrt(Nparticles))) {
     m <- m+1
     new_perm <- sample.int(Nparticles)
     # mixture weights
@@ -81,12 +81,76 @@ car_adaptive_light <- function(ess_target, i, u, nv, nvNew, ci, lW, Nparticles, 
     ess <- ess_s^2/ess_ss
     lWmix <- c(lWmix, lWmix_perm)
   }
-  # write.table(data.frame("u" = u, "m" = m), file = "data/adaptive_car.csv", sep = ",", append = TRUE, quote = FALSE,
-  #             col.names = FALSE, row.names = FALSE)
+  write.table(data.frame("u" = u, "m" = m), file = "data/adaptive_car.csv", sep = ",", append = TRUE, quote = FALSE,
+              col.names = FALSE, row.names = FALSE)
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
   # resampling the new population
   indices <- stratified_resample(Wmix/sum(Wmix), Nparticles)
   return(cbind(rep(1:Nparticles, time = m)[indices], permutation[indices]))
+}
+
+
+car_adaptive_light_v2 <- function(ess_target, i, u, nv, nvNew, ci, W, Nparticles, sigmaX, x, xOld)
+{
+  # binary tree
+  nchild <- 2
+  # first permutation
+  if(u == 1){
+    permutation <- cbind(stratified_resample(W[, nchild*(i-1)+1], Nparticles), sample(stratified_resample(W[, nchild*i], Nparticles)))
+  }
+  else{
+    permutation <- cbind(sample.int(Nparticles, size = Nparticles, replace = TRUE), sample.int(Nparticles, size = Nparticles, replace = TRUE))
+  }
+  # mixture weights
+  lWmix <- rep(0, times = Nparticles)
+  for (n in 1:Nparticles) {
+    # merge the two children nodes
+    mx <- x[n, ci[1]:ci[2]]
+    lWmix[n] <- sum(x[permutation[n, 1], ci[1]:(ci[1]+nv-1)])*sum(x[permutation[n, 2], (ci[1]+nv):ci[2]])/(d*sigmaX) -
+      (sum(cumsum(mx[1:(nvNew-1)]/d)^2) - sum(cumsum(x[permutation[n, 1], ci[1]:(ci[1]+nv-1)][seq(length.out = (nv-1))]/d)^2) -
+         sum(cumsum(x[permutation[n, 2], (ci[1]+nv):ci[2]][seq(length.out = (nv-1))]/d)^2))/(2*sigmaX) -
+      sum(x[permutation[n, 1], ci[1]:(ci[1]+nv-1)])*sum(cumsum(rev(xOld[permutation[n, 2], (ci[1]+nv):d])))/(d^2*sigmaX)
+  }
+  max.lWmix <- max(lWmix)
+  Wmix <- exp(lWmix - max.lWmix)
+  # build ESS
+  ess_s <- sum(Wmix)
+  ess_ss <- sum(Wmix^2)
+  ess <- ess_s^2/ess_ss
+  m <- 1
+  while (ess < ess_target) {
+    m <- m+1
+    if(u == 1){
+      new_perm <- cbind(stratified_resample(W[, nchild*(i-1)+1], Nparticles), sample(stratified_resample(W[, nchild*i], Nparticles)))
+    } else{
+      new_perm <- cbind(sample.int(Nparticles, size = Nparticles, replace = TRUE), sample.int(Nparticles, size = Nparticles, replace = TRUE))
+    }
+    # mixture weights
+    lWmix_perm <- rep(0, times = Nparticles)
+    for (n in 1:Nparticles) {
+      # merge the two children nodes
+      mx <- c(x[n, ci[1]:(ci[1]+nv-1)], x[new_perm[n], (ci[1]+nv):ci[2]])
+      lWmix_perm[n] <- sum(x[new_perm[n, 1], ci[1]:(ci[1]+nv-1)])*sum(x[new_perm[n, 2], (ci[1]+nv):ci[2]])/(d*sigmaX) -
+        (sum(cumsum(mx[1:(nvNew-1)]/d)^2) - sum(cumsum(x[new_perm[n, 1], ci[1]:(ci[1]+nv-1)][seq(length.out = (nv-1))]/d)^2) -
+           sum(cumsum(x[new_perm[n, 2], (ci[1]+nv):ci[2]][seq(length.out = (nv-1))]/d)^2))/(2*sigmaX) -
+        sum(x[new_perm[n, 1], ci[1]:(ci[1]+nv-1)])*sum(cumsum(rev(xOld[new_perm[n, 2], (ci[1]+nv):d])))/(d^2*sigmaX)
+    }
+    permutation <- rbind(permutation, new_perm)
+    max.lWmix <- max(lWmix_perm)
+    Wmix <- exp(lWmix_perm - max.lWmix)
+    # build ESS
+    ess_s <- ess_s + sum(Wmix)
+    ess_ss <- ess_ss + sum(Wmix^2)
+    ess <- ess_s^2/ess_ss
+    lWmix <- c(lWmix, lWmix_perm)
+  }
+  # write.table(data.frame("u" = u, "m" = m), file = "data/adaptive_car.csv", sep = ",", append = TRUE, quote = FALSE,
+              # col.names = FALSE, row.names = FALSE)
+  max.lWmix <- max(lWmix)
+  Wmix <- exp(lWmix - max.lWmix)
+  # resampling the new population
+  indices <- stratified_resample(Wmix/sum(Wmix), Nparticles)
+  return(cbind(permutation[indices, 1], permutation[indices, 2]))
 }
 

@@ -1,3 +1,17 @@
+bisection_ess <- function(lW, ess_target){
+  W <- exp(lW - max(lW))
+  sum(W)^2/sum(W^2)
+  ess_alpha <- function(alpha){ sum(W^(alpha))^2/sum(W^(2*alpha)) - ess_target}
+  alpha_star <- bisect(ess_alpha, 0, 1)$root
+  return(alpha_star)
+}
+bisection_cess <- function(lOmega, lW, current_alpha, ess_target){
+  W <- exp(lW - max(lW))
+  omega <- exp(lOmega - max(lOmega))
+  cess_alpha <- function(alpha){ Nparticles*sum((Omega*W)^(alpha-current_alpha))^2/sum(Omega*W^(2*(alpha-current_alpha))) - ess_target}
+  alpha_star <- bisect(ess_alpha, 0, 1)$root
+  return(alpha_star)
+}
 # function returning index of first and last child of node i in level u
 child_indices <- function(i, nv){
   rbind(nv*(i-1)+1, i*nv)

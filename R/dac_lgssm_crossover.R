@@ -121,16 +121,26 @@ dac_lgssm_lightweight_crossover <- function(history, obs, tau, lambda, sigmaY, M
       # lightweight mixture resampling
       if(M == "adaptive") {
         xOld <- history[historyIndex[, ci[1]+nv, nchild*i], ci[1]+nv, 1]
-        indices <- lgssm_adaptive_light(Nparticles, i, u, nv, ci, lW, Nparticles, lambda, tau, x, xOld)
+        out <- lgssm_adaptive_light(Nparticles, i, u, nv, ci, lW, Nparticles, lambda, tau, x, xOld)
+        # update after mixture resampling
+        indices <- out$resampled_indices
+        # update particles
+        xNew[, ci[1]:ci[2]] <- cbind(x[indices[, 1], ci[1]:(ci[1]+nv-1)], x[indices[, 2], (ci[1]+nv):ci[2]])
+        # update history
+        historyIndexNew[, , i] <- historyIndexNew[indices[, 1], , i]
+        # tempering
+        if(!out$target_reached){
+          tempering_out <- lgssm_tempering(ci, nv, lambda, tau, xNew, xOld, out$resampled_particles_lW, Nparticles, 1 - 1e-05, 1e-01)
+          # update particles
+          xNew <- tempering_out$x
+          # update history
+          historyIndexNew[, , i] <- historyIndexNew[tempering_out$resampled_indices, , i]
+        }
       }
       else{
         xOld <- history[historyIndex[, ci[1]+nv, nchild*i], ci[1]+nv, 1]
         indices <- lgssm_light(i, u, nv, ci, W, Nparticles, M, lambda, tau, x, xOld)
       }
-      # update particles
-      xNew[, ci[1]:ci[2]] <- cbind(x[indices[, 1], ci[1]:(ci[1]+nv-1)], x[indices[, 2], (ci[1]+nv):ci[2]])
-      # update history
-      historyIndexNew[, , i] <- historyIndexNew[indices[, 1], , i]
     }
     x <- xNew
     nv <- nvNew

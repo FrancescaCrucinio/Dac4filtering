@@ -48,7 +48,7 @@ for(i in 1:d){
 }
 
 Nparticles <- 1000
-M <- 2*d
+M <- 100
 df <- data.frame()
 
 x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)

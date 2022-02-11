@@ -10,6 +10,7 @@ dac_car_lightweight <- function(history, obs, sigmaX, sigmaY){
   nv <- 1
   x <- matrix(0, nrow = Nparticles, ncol = d)
   lW <- matrix(0, nrow = Nparticles, ncol = d)
+  W <- matrix(0, nrow = Nparticles, ncol = d)
   # history indices
   historyIndex <- array(1:Nparticles, dim = c(Nparticles, d, d))
   for (i in 1:nchild^nlevels){
@@ -17,6 +18,9 @@ dac_car_lightweight <- function(history, obs, sigmaX, sigmaY){
     x[, i] <- rowSums(history[, i:d, drop = FALSE, 1])/d + sqrt(sigmaX) * rnorm(Nparticles)
     # weights
     lW[, i] <- -0.5*(obs[i] - x[, i])^2/sigmaY - 0.5*log(2*pi*sigmaY)
+    max.lW <- max(lW[, i])
+    W[, i] <- exp(lW[, i] - max.lW)
+    W[, i] <- W[, i]/sum(W[, i])
   }
 
   # loop over tree levels excluding leaves

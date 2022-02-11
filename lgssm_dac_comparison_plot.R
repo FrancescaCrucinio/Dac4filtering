@@ -7,6 +7,9 @@ df <- rbind(df, dfnew)
 dfnew <- read.csv("data/resampling/additional_resampling_comparison_d8N100ID1")
 dfnew$N <- "10^2"
 df <- rbind(df, dfnew)
+dfnew <- read.csv("data/resampling/v2_resampling_comparison_d8N100ID1")
+dfnew$N <- "10^2"
+df <- rbind(df, dfnew)
 for (id in 2:50){
   filename <- paste("data/resampling/resampling_comparison_d8N100ID", id, sep = "")
   dfnew <- read.csv(filename)
@@ -14,7 +17,8 @@ for (id in 2:50){
   df <- rbind(df, dfnew)
   filename <- paste("data/resampling/ess2n_resampling_comparison_d8N100ID", id, sep = "")
   filename2 <- paste("data/resampling/additional_resampling_comparison_d8N100ID", id, sep = "")
-  dfnew <- rbind(read.csv(filename), read.csv(filename2))
+  filename3 <- paste("data/resampling/v2_resampling_comparison_d8N100ID", id, sep = "")
+  dfnew <- rbind(read.csv(filename), read.csv(filename2), read.csv(filename3))
   dfnew$N <- "10^2"
   df <- rbind(df, dfnew)
 }
@@ -25,7 +29,8 @@ for (id in 1:50){
   df <- rbind(df, dfnew)
   filename <- paste("data/resampling/ess2n_resampling_comparison_d8N1000ID", id, sep = "")
   filename2 <- paste("data/resampling/additional_resampling_comparison_d8N1000ID", id, sep = "")
-  dfnew <- rbind(read.csv(filename), read.csv(filename2))
+  filename3 <- paste("data/resampling/v2_resampling_comparison_d8N1000ID", id, sep = "")
+  dfnew <- rbind(read.csv(filename), read.csv(filename2), read.csv(filename3))
   dfnew$N <- "10^3"
   df <- rbind(df, dfnew)
 }
@@ -36,7 +41,8 @@ for (id in 1:50){
   df <- rbind(df, dfnew)
   filename <- paste("data/resampling/ess2n_resampling_comparison_d8N10000ID", id, sep = "")
   filename2 <- paste("data/resampling/additional_resampling_comparison_d8N10000ID", id, sep = "")
-  dfnew <- rbind(read.csv(filename), read.csv(filename2))
+  filename3 <- paste("data/resampling/v2_resampling_comparison_d8N10000ID", id, sep = "")
+  dfnew <- rbind(read.csv(filename), read.csv(filename2), read.csv(filename3))
   dfnew$N <- "10^4"
   df <- rbind(df, dfnew)
 }
@@ -74,14 +80,16 @@ ggplot(data = df, aes(x = runtime, y = d_means, group = interaction(algo, mutati
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=20),
         text = element_text(size=15))
-# ggsave("res_time_low.pdf", width = 10, height = 5, dpi = 300)
-df <- read.csv("data/adaptive_car_d32N1000T100_nothreshold_ESS2N.csv", col.names = c("u", "m"))
-df$u <- as.factor(df$u)
+# ggsave("res_time_low_adaptive.pdf", width = 10, height = 5, dpi = 300)
+library(plyr)
+df <- read.csv("data/adaptive_car_d32N1000T100.csv", col.names = c("u", "m"))
+df$u <- as.factor(mapvalues(df$u, from=c(1, 2, 3, 4, 5), to=c(5, 4, 3, 2, 1)))
 # histogram of m
 ggplot(data = df, aes(x = m)) +
   geom_histogram() +
-  facet_grid(~u) +
+  facet_grid(~factor(u, levels=c('5','4','3','2', '1'))) +
   scale_y_continuous(trans='log1p') +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
-        legend.title = element_blank(), legend.text=element_text(size=15))
-# ggsave("m_adaptive32_car_nothreshold_ess2n.pdf", width = 10, height = 5, dpi = 300)
+        legend.title = element_blank(), legend.text=element_text(size=15),
+        text = element_text(size=15))
+# ggsave("m_adaptive32_car.pdf", width = 10, height = 5, dpi = 300)

@@ -121,7 +121,11 @@ dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, M = NULL){
       ci <- child_indices(i, nvNew)
       # lightweight mixture resampling
       if(M == "adaptive") {
-        indices <- lgssm_adaptive_light(Nparticles, i, u, nv, ci, lW, Nparticles, lambda, tau, x, xOld[, ci[1]+nv])
+        out <- lgssm_adaptive_light(Nparticles, i, u, nv, ci, lW, Nparticles, lambda, tau, x, xOld[, ci[1]+nv])
+        indices <- out$resampled_particles
+        if(!out$target_reached){
+          # do tempering
+        }
       }
       else{
         indices <- lgssm_light(i, u, nv, ci, W, Nparticles, M, lambda, tau, x, xOld[, ci[1]+nv])

@@ -1,4 +1,4 @@
-set.seed(1234)
+set.seed(1234*ID)
 # dimension
 d <- 32
 # initial state
@@ -71,3 +71,9 @@ rse <- (res_stpf$m - true_means)^2/true_variances
 df <- data.frame(rbind(df, cbind(t(rse), res_stpf$w1, res_stpf$ks, rep(runtime$toc[[1]] - runtime$tic[[1]], times = d))))
 
 df$algo <- as.factor(rep(c("dac", "nsmc", "stpf"), each = d))
+
+
+plot(1:Time.step, rowMeans(true_means), type = "l")
+lines(1:Time.step, rowMeans(res_dac_light$m), type = "l", col = "red")
+lines(1:Time.step, rowMeans(res_nsmc$m), type = "l", col = "green")
+lines(1:Time.step, rowMeans(res_stpf$m), type = "l", col = "blue")
