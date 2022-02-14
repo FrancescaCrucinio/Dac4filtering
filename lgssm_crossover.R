@@ -1,9 +1,9 @@
 # devtools::load_all("/storage/u1693998/Dac4filtering")
 # ID <- as.numeric(Sys.getenv("SGE_TASK_ID"))
-ID <- 2
+ID <- 1
 set.seed(1234*ID)
 # dimension
-d <- 32
+d <- 8
 # initial state
 mu0 <- rep(0, times = d)
 Sigma0 <- diag(x = 1, d, d)
@@ -47,7 +47,7 @@ for(i in 1:d){
   marginals[, i] <- rnorm(10^5, mean = true_means[Time.step, i], sd = sqrt(true_variances[Time.step, i]))
 }
 
-Nparticles <- 1000
+Nparticles <- 100
 M <- 100
 df <- data.frame()
 

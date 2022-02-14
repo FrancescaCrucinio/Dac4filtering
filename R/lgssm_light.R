@@ -46,7 +46,7 @@ lgssm_adaptive_light <- function(ess_target, i, u, nv, ci, lW, Nparticles, lambd
   # first permutation
   permutation <- 1:Nparticles
   m <- 1
-  while (ess < ess_target) {
+  while (ess < ess_target & m <= ceiling(sqrt(Nparticles))) {
     m <- m+1
     new_perm <- sample.int(Nparticles)
     if(u == 1){
@@ -72,6 +72,7 @@ lgssm_adaptive_light <- function(ess_target, i, u, nv, ci, lW, Nparticles, lambd
   Wmix <- exp(lWmix - max.lWmix)
   # resampling the new population
   indices <- stratified_resample(Wmix/sum(Wmix), Nparticles)
+  print(paste(ess, ">=", ess_target))
   return(list("resampled_indices" = cbind(rep(1:Nparticles, time = m)[indices], permutation[indices]),
               "target_reached" = (ess >= ess_target), "resampled_particles_lW" = lWmix[indices]))
 }
