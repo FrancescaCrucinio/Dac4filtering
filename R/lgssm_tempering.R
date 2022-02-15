@@ -1,4 +1,4 @@
-lgssm_tempering <- function(ci, i, nv, lambda, tau, sigmaY, obs, x, xOld, historyIndex, historyIndexNew, after_mix_lW, ess_target, ess_decay_threshold, mcmc_sd){
+lgssm_tempering_crossover <- function(ci, i, nv, lambda, tau, sigmaY, obs, x, xOld, historyIndex, historyIndexNew, after_mix_lW, ess_target, ess_decay_threshold, mcmc_sd){
   nchild <- 2
 
   Nparticles <- length(after_mix_lW)
@@ -83,6 +83,4 @@ lgssm_tempering <- function(ci, i, nv, lambda, tau, sigmaY, obs, x, xOld, histor
   }
   return(list("x" = x, "history_index_updated" = historyIndexNew))
 }
-
-
 

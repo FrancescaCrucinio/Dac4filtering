@@ -1,62 +1,31 @@
 # read data
-df <- read.csv("data/resampling/resampling_comparison_d8N100ID1")
+df <- rbind(read.csv("data/resampling/resampling_comparison_d8N100ID1"),
+            read.csv("data/resampling/tempering_resampling_comparison_d8N100ID1"))
 df$N <- "10^2"
-dfnew <- read.csv("data/resampling/ess2n_resampling_comparison_d8N100ID1")
-dfnew$N <- "10^2"
-df <- rbind(df, dfnew)
-dfnew <- read.csv("data/resampling/additional_resampling_comparison_d8N100ID1")
-dfnew$N <- "10^2"
-df <- rbind(df, dfnew)
-dfnew <- read.csv("data/resampling/v2_resampling_comparison_d8N100ID1")
-dfnew$N <- "10^2"
-df <- rbind(df, dfnew)
 for (id in 2:50){
-  filename <- paste("data/resampling/resampling_comparison_d8N100ID", id, sep = "")
-  dfnew <- read.csv(filename)
-  dfnew$N <- "10^2"
-  df <- rbind(df, dfnew)
-  filename <- paste("data/resampling/ess2n_resampling_comparison_d8N100ID", id, sep = "")
-  filename2 <- paste("data/resampling/additional_resampling_comparison_d8N100ID", id, sep = "")
-  filename3 <- paste("data/resampling/v2_resampling_comparison_d8N100ID", id, sep = "")
-  dfnew <- rbind(read.csv(filename), read.csv(filename2), read.csv(filename3))
+  dfnew <- rbind(read.csv(paste("data/resampling/resampling_comparison_d8N100ID", id, sep = "")),
+                    read.csv(paste("data/resampling/tempering_resampling_comparison_d8N100ID", id, sep = "")))
   dfnew$N <- "10^2"
   df <- rbind(df, dfnew)
 }
 for (id in 1:50){
-  filename <- paste("data/resampling/resampling_comparison_d8N1000ID", id, sep = "")
-  dfnew <- read.csv(filename)
-  dfnew$N <- "10^3"
-  df <- rbind(df, dfnew)
-  filename <- paste("data/resampling/ess2n_resampling_comparison_d8N1000ID", id, sep = "")
-  filename2 <- paste("data/resampling/additional_resampling_comparison_d8N1000ID", id, sep = "")
-  filename3 <- paste("data/resampling/v2_resampling_comparison_d8N1000ID", id, sep = "")
-  dfnew <- rbind(read.csv(filename), read.csv(filename2), read.csv(filename3))
+  dfnew <- rbind(read.csv(paste("data/resampling/resampling_comparison_d8N1000ID", id, sep = "")),
+                 read.csv(paste("data/resampling/tempering_resampling_comparison_d8N1000ID", id, sep = "")))
   dfnew$N <- "10^3"
   df <- rbind(df, dfnew)
 }
 for (id in 1:50){
-  filename <- paste("data/resampling/resampling_comparison_d8N10000ID", id, sep = "")
-  dfnew <- read.csv(filename)
-  dfnew$N <- "10^4"
-  df <- rbind(df, dfnew)
-  filename <- paste("data/resampling/ess2n_resampling_comparison_d8N10000ID", id, sep = "")
-  filename2 <- paste("data/resampling/additional_resampling_comparison_d8N10000ID", id, sep = "")
-  filename3 <- paste("data/resampling/v2_resampling_comparison_d8N10000ID", id, sep = "")
-  dfnew <- rbind(read.csv(filename), read.csv(filename2), read.csv(filename3))
+  dfnew <- rbind(read.csv(paste("data/resampling/resampling_comparison_d8N10000ID", id, sep = "")),
+                 read.csv(paste("data/resampling/tempering_resampling_comparison_d8N10000ID", id, sep = "")))
   dfnew$N <- "10^4"
   df <- rbind(df, dfnew)
 }
 for (id in 1:50){
-  filename <- paste("data/resampling/resampling_comparison_d8N1e+05ID", id, sep = "")
-  dfnew <- read.csv(filename)
-  dfnew$N <- "10^5"
-  df <- rbind(df, dfnew)
-  filename <- paste("data/resampling/additional_resampling_comparison_d8N1e+05ID", id, sep = "")
-  dfnew <- read.csv(filename)
+  dfnew <- rbind(read.csv(paste("data/resampling/resampling_comparison_d8N1e+05ID", id, sep = "")),
+                 read.csv(paste("data/resampling/tempering_resampling_comparison_d8N1e+05ID", id, sep = "")))
   dfnew$N <- "10^5"
   df <- rbind(df, dfnew)
 }
-df <- df[(df$algo != "dac" & df$algo != "mix"), ]
 df <- df[, -1]
 d <- ncol(df) - 4
 df$d_means <- rowMeans(df[, 1:d])
