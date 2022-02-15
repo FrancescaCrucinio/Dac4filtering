@@ -5,12 +5,10 @@ bisection_ess <- function(lW, ess_target){
   return(alpha_star)
 }
 bisection_cess <- function(lOmega, lW, current_alpha, ess_decay_threshold){
-  print(paste(current_alpha))
   W <- exp(lW - max(lW))
   omega <- exp(lOmega - max(lOmega))
   omega <- omega/sum(omega)
   cess_alpha <- function(alpha){ sum(omega*W^(alpha-current_alpha))^2/sum(omega*W^(2*(alpha-current_alpha))) - ess_decay_threshold}
-  print(paste(cess_alpha(current_alpha), cess_alpha(1)))
   if(sign(cess_alpha(current_alpha)) == sign(cess_alpha(1))){
     return(list("alpha_star" = current_alpha, "same_sign" = TRUE))
   } else{
