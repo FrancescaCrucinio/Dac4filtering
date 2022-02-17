@@ -46,7 +46,7 @@ for(i in 1:d){
 }
 
 Nparticles <- 1000
-M <- 2*d
+M <- 100
 df <- data.frame()
 
 x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
@@ -55,20 +55,20 @@ tic()
 res_dac_light <- dac_time_car(sigmaX, sigmaY, Nparticles, x0, y, marginals = marginals)
 runtime <- toc()
 rse <- (res_dac_light$m - true_means)^2/true_variances
-df <- data.frame(rbind(df, cbind(t(rse), res_dac_light$w1, res_dac_light$ks, rep(runtime$toc[[1]] - runtime$tic[[1]], times = d))))
+df <- data.frame(rbind(df, cbind(t(rse), res_dac_light$w1, res_dac_light$ks, rep(runtime, times = d))))
 # nsmc
 tic()
 res_nsmc <- nsmc_time_car(sigmaX, sigmaY, Nparticles, x0, y, M = M, marginals = marginals)
 runtime <- toc()
 rse <- (res_nsmc$m - true_means)^2/true_variances
-df <- data.frame(rbind(df, cbind(t(rse), res_nsmc$w1, res_nsmc$ks, rep(runtime$toc[[1]] - runtime$tic[[1]], times = d))))
+df <- data.frame(rbind(df, cbind(t(rse), res_nsmc$w1, res_nsmc$ks, rep(runtime, times = d))))
 # stpf
 x0 <- array(mvrnorm(n = Nparticles*M, mu0, Sigma0), dim = c(Nparticles, M, d))
 tic()
 res_stpf <- stpf_time_car(sigmaX, sigmaY, Nparticles, x0, y, marginals = marginals)
 runtime <- toc()
 rse <- (res_stpf$m - true_means)^2/true_variances
-df <- data.frame(rbind(df, cbind(t(rse), res_stpf$w1, res_stpf$ks, rep(runtime$toc[[1]] - runtime$tic[[1]], times = d))))
+df <- data.frame(rbind(df, cbind(t(rse), res_stpf$w1, res_stpf$ks, rep(runtime, times = d))))
 
 df$algo <- as.factor(rep(c("dac", "nsmc", "stpf"), each = d))
 

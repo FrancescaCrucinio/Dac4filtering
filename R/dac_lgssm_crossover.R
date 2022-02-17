@@ -91,12 +91,12 @@ dac_lgssm_lightweight_crossover <- function(history, obs, tau, lambda, sigmaY, M
     } else {
       x[, i] <- 0.5*tau*history[, i, 1]/(tau+lambda) + rnorm(Nparticles)/sqrt(tau+lambda)
     }
-    lW[, i] <- -0.5*(obs[i] - x[, i])^2/sigmaY - 0.5*log(2*pi*sigmaY)
+    lW[, i] <- -0.5*(obs[i] - x[, i])^2/sigmaY
     max.lW <- max(lW[, i])
     W[, i] <- exp(lW[, i] - max.lW)
     W[, i] <- W[, i]/sum(W[, i])
   }
-
+  saveRDS(list("x" = x, "W" = W), file = paste0("/Users/francescacrucinio/Documents/Dac4filtering/test/node0.rds"))
   # loop over tree levels excluding leaves
   for (u in 1:nlevels){
     # number of nodes at this level
@@ -127,23 +127,40 @@ dac_lgssm_lightweight_crossover <- function(history, obs, tau, lambda, sigmaY, M
         indices <- out$resampled_indices
         xNew[, ci[1]:ci[2]] <- cbind(x[indices[, 1], ci[1]:(ci[1]+nv-1)], x[indices[, 2], (ci[1]+nv):ci[2]])
         historyIndexNew[, , i] <- historyIndexNew[indices[, 1], , i]
+
         # tempering
-        if(!out$target_reached){
-          print(paste("tempering"))
-          print(paste(u, i))
+        # if(u==1){
+          # saveRDS(xNew, file = paste0("/Users/francescacrucinio/Documents/Dac4filtering/test/before_node_", i,".rds"))
           tempering_out <- lgssm_tempering_crossover(ci, i, nv, lambda, tau, sigmaY, obs, xNew, history[, , 1], historyIndex,
-                                           historyIndexNew, out$resampled_particles_lW, Nparticles, 1 - 1e-05, 1e-01)
+                                           historyIndexNew, out$resampled_particles_lW, Nparticles, 1 - 1e-05, 1)
           # update particles
           xNew <- tempering_out$x
           # update history
           historyIndexNew <- tempering_out$history_index_updated
-        }
+        # }
+        saveRDS(xNew, file = paste0("/Users/francescacrucinio/Documents/Dac4filtering/test/node_",u, i,".rds"))
+
       }
       else{
         xOld <- history[historyIndex[, ci[1]+nv, nchild*i], ci[1]+nv, 1]
-        indices <- lgssm_light(i, u, nv, ci, W, Nparticles, M, lambda, tau, x, xOld)
+        out <- lgssm_light(Nparticles, i, u, nv, ci, W, Nparticles, M, lambda, tau, x, xOld)
+        indices <- out$resampled_indices
+        xNew[, ci[1]:ci[2]] <- cbind(x[indices[, 1], ci[1]:(ci[1]+nv-1)], x[indices[, 2], (ci[1]+nv):ci[2]])
+        historyIndexNew[, , i] <- historyIndexNew[indices[, 1], , i]
+        # if(!out$target_reached){
+        #   print(paste("tempering"))
+        #   print(paste(u, i))
+        #   tempering_out <- lgssm_tempering_crossover(ci, i, nv, lambda, tau, sigmaY, obs, xNew, history[, , 1], historyIndex,
+        #                                              historyIndexNew, out$resampled_particles_lW, Nparticles, 1 - 1e-05, 1.1)
+        #   # update particles
+        #   xNew <- tempering_out$x
+        #   # update history
+        #   historyIndexNew <- tempering_out$history_index_updated
+        # }
       }
     }
+    saveRDS(xNew, file = paste0("/Users/francescacrucinio/Documents/Dac4filtering/test/node", u,".rds"))
+
     x <- xNew
     nv <- nvNew
     historyIndex <- historyIndexNew

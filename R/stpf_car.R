@@ -12,7 +12,7 @@ stpf_car <- function(xOld, obs, sigmaX, sigmaY){
     for(j in 1:d){
       # propose
       if(j == d){
-        x[i, , j] <- sum(xOld[i, , d])/d +
+        x[i, , j] <- xOld[i, , d]/d +
           rowSums(x[i, , seq(length.out = j-1), drop = FALSE], dims = 2)/d +
           sqrt(sigmaX) * rnorm(M)
       } else{
@@ -27,7 +27,7 @@ stpf_car <- function(xOld, obs, sigmaX, sigmaY){
       lZ[i] <- lZ[i] + log(mean(W)) + max.lW
       # resampling
       W <- W/sum(W)
-      ancestors <- mult_resample(W, M)
+      ancestors <- stratified_resample(W, M)
       xOld[i, , ] <- xOld[i, ancestors, ]
       x[i, , 1:j] <- x[i, ancestors, 1:j]
     }
@@ -35,7 +35,7 @@ stpf_car <- function(xOld, obs, sigmaX, sigmaY){
   # resampling islands
   Wisland <- exp(lZ - max(lZ))
   Wisland <- Wisland/sum(Wisland)
-  ancestors_island <- mult_resample(Wisland, Nparticles)
+  ancestors_island <- stratified_resample(Wisland, Nparticles)
   x <- x[ancestors_island, ,]
   return(x)
 }

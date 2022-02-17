@@ -1,10 +1,10 @@
 # read data
 d <- 32
-df <- read.csv("data/lgssm/v2_lgssm_d32N100ID1")
+df <- read.csv("data/lgssm/tempering_lgssm_d32N100ID1")
 df$N <- "10^2"
 df$run <- 1
 for (id in 2:50){
-  filename <- paste("data/lgssm/v2_lgssm_d32N100ID", id, sep = "")
+  filename <- paste("data/lgssm/tempering_lgssm_d32N100ID", id, sep = "")
   dfnew <- read.csv(filename)
   dfnew$N <- "10^2"
   dfnew$run <- id
