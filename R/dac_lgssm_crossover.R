@@ -101,6 +101,8 @@ dac_lgssm_lightweight_crossover <- function(history, obs, tau, lambda, sigmaY, M
   for (u in 1:nlevels){
     # number of nodes at this level
     nodes <- nchild^(nlevels-u)
+    nodes_dimension <- nchild^(u-1)
+
     # number of variables in each node
     nvNew <- nchild^u
 
@@ -130,16 +132,14 @@ dac_lgssm_lightweight_crossover <- function(history, obs, tau, lambda, sigmaY, M
 
         # tempering
         # if(u==1){
-          # saveRDS(xNew, file = paste0("/Users/francescacrucinio/Documents/Dac4filtering/test/before_node_", i,".rds"))
+        print(paste("u=", u, ", i=", i))
           tempering_out <- lgssm_tempering_crossover(ci, i, nv, lambda, tau, sigmaY, obs, xNew, history[, , 1], historyIndex,
-                                           historyIndexNew, out$resampled_particles_lW, Nparticles, 1 - 1e-05, 1)
+                                           historyIndexNew, out$resampled_particles_lW, Nparticles, 1 - 1e-05, 1/nodes_dimension)
           # update particles
           xNew <- tempering_out$x
           # update history
           historyIndexNew <- tempering_out$history_index_updated
         # }
-        saveRDS(xNew, file = paste0("/Users/francescacrucinio/Documents/Dac4filtering/test/node_",u, i,".rds"))
-
       }
       else{
         xOld <- history[historyIndex[, ci[1]+nv, nchild*i], ci[1]+nv, 1]

@@ -1,9 +1,9 @@
 # devtools::load_all("/storage/u1693998/Dac4filtering")
 # ID <- as.numeric(Sys.getenv("SGE_TASK_ID"))
-ID <- 1
+ID <- 10
 set.seed(1234*ID)
 # dimension
-d <- 8
+d <- 64
 # initial state
 mu0 <- rep(0, times = d)
 Sigma0 <- diag(x = 1, d, d)
