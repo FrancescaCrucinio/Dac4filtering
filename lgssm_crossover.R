@@ -3,7 +3,7 @@
 ID <- 10
 set.seed(1234*ID)
 # dimension
-d <- 64
+d <- 32
 # initial state
 mu0 <- rep(0, times = d)
 Sigma0 <- diag(x = 1, d, d)
@@ -47,7 +47,7 @@ for(i in 1:d){
   marginals[, i] <- rnorm(10^5, mean = true_means[Time.step, i], sd = sqrt(true_variances[Time.step, i]))
 }
 
-Nparticles <- 100
+Nparticles <- 1000
 M <- 100
 df <- data.frame()
 

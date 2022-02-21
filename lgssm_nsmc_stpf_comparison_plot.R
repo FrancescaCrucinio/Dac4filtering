@@ -11,7 +11,7 @@ for (id in 2:50){
   df <- rbind(df, dfnew)
 }
 for (id in 1:50){
-  filename <- paste("data/lgssm/lgssm_d32N1000ID", id, sep = "")
+  filename <- paste("data/lgssm/tempering_lgssm_d32N1000ID", id, sep = "")
   dfnew <- read.csv(filename)
   dfnew$N <- "10^3"
   dfnew$run <- id
@@ -59,7 +59,7 @@ ggplot(data = distances, aes(x = runtime_mean, y = w1, group = interaction(algo,
 # ggsave("lgssm32_w1.pdf", width = 10, height = 8, dpi = 300)
 # Kolmogorov-Smirnov
 ggplot(data = distances, aes(x = runtime_mean, y = ks, group = interaction(algo, N), fill = algo, colour = algo)) +
-  geom_boxplot(coef = 6, width = 0.1) +
+  geom_boxplot(coef = 10, width = 0.1) +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
