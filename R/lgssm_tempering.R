@@ -29,6 +29,7 @@ lgssm_tempering_crossover <- function(ci, i, nv, lambda, tau, sigmaY, obs, x, xO
     lOmega <- newlOmega
   }
   # alpha = 1
+  new_alpha <- 1
   newlOmega <- lOmega + (1 - current_alpha)*after_mix_lW
   omega <- exp(newlOmega - max(newlOmega))
   ess <- sum(omega)^2/sum(omega^2)
@@ -86,7 +87,7 @@ lgssm_mcmc_move <- function(x, ci, i, nv, sigmaY, tau, lambda, xOldv, xOld, hist
   }
   mh_ratio <- r1 + r_obs + new_alpha*r2
   accepted <- runif(Nparticles) <= exp(mh_ratio)
-  print(paste(sum(accepted)/Nparticles))
+  # print(paste(sum(accepted)/Nparticles))
   x[accepted , ] <- propose_x[accepted, ]
   after_mix_lW[accepted] <- after_mix_lW_new[accepted]
   return(list("x" = x, "after_mix_lW" = after_mix_lW))

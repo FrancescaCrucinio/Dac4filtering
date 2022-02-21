@@ -96,7 +96,6 @@ dac_lgssm_lightweight_crossover <- function(history, obs, tau, lambda, sigmaY, M
     W[, i] <- exp(lW[, i] - max.lW)
     W[, i] <- W[, i]/sum(W[, i])
   }
-  saveRDS(list("x" = x, "W" = W), file = paste0("/Users/francescacrucinio/Documents/Dac4filtering/test/node0.rds"))
   # loop over tree levels excluding leaves
   for (u in 1:nlevels){
     # number of nodes at this level
@@ -159,7 +158,6 @@ dac_lgssm_lightweight_crossover <- function(history, obs, tau, lambda, sigmaY, M
         # }
       }
     }
-    saveRDS(xNew, file = paste0("/Users/francescacrucinio/Documents/Dac4filtering/test/node", u,".rds"))
 
     x <- xNew
     nv <- nvNew
