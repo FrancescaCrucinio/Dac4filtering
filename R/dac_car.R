@@ -45,16 +45,21 @@ dac_car_lightweight <- function(history, obs, sigmaX, sigmaY){
         historyIndexNew[, , i] <- historyIndex[, , i]
       }
       # adaptive lightweight mixture resampling
-      xOld <- history[historyIndex[, , nchild*i], , 1]
-      indices <- car_adaptive_light(Nparticles, i, u, nv, nvNew, ci, lW, Nparticles, sigmaX, x, xOld)
+      indices <- car_adaptive_light(Nparticles, i, u, nv, nvNew, ci, lW, Nparticles, sigmaX, x, history[, , 1], historyIndex)
       # update particles
       xNew[, ci[1]:ci[2]] <- cbind(x[indices[, 1], ci[1]:(ci[1]+nv-1)], x[indices[, 2], (ci[1]+nv):ci[2]])
-      # update xOld
-      xOld[, ci[1]:ci[2]] <- xOld[indices[, 1], ci[1]:ci[2]]
       historyIndexNew[, , i] <- historyIndexNew[indices[, 1], , i]
+      # tempering
+      tempering_out <- car_tempering_crossover(ci, i, nv, lambda, tau, sigmaY, obs, xNew, history[, , 1], historyIndex,
+                                                 historyIndexNew, out$resampled_particles_lW, Nparticles, 1 - 1e-05, 1/nodes_dimension)
+      # update particles
+      xNew <- tempering_out$x
+      # update history
+      historyIndexNew <- tempering_out$history_index_updated
     }
     x <- xNew
     nv <- nvNew
+    historyIndex <- historyIndexNew
   }
   return(x)
 }

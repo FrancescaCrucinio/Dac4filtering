@@ -130,15 +130,12 @@ dac_lgssm_lightweight_crossover <- function(history, obs, tau, lambda, sigmaY, M
         historyIndexNew[, , i] <- historyIndexNew[indices[, 1], , i]
 
         # tempering
-        # if(u==1){
-        print(paste("u=", u, ", i=", i))
-          tempering_out <- lgssm_tempering_crossover(ci, i, nv, lambda, tau, sigmaY, obs, xNew, history[, , 1], historyIndex,
-                                           historyIndexNew, out$resampled_particles_lW, Nparticles, 1 - 1e-05, 1/nodes_dimension)
-          # update particles
-          xNew <- tempering_out$x
-          # update history
-          historyIndexNew <- tempering_out$history_index_updated
-        # }
+        tempering_out <- lgssm_tempering_crossover(ci, i, nv, lambda, tau, sigmaY, obs, xNew, history[, , 1], historyIndex,
+                                         historyIndexNew, out$resampled_particles_lW, Nparticles, 1 - 1e-05, 1/nodes_dimension)
+        # update particles
+        xNew <- tempering_out$x
+        # update history
+        historyIndexNew <- tempering_out$history_index_updated
       }
       else{
         xOld <- history[historyIndex[, ci[1]+nv, nchild*i], ci[1]+nv, 1]

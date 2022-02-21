@@ -1,3 +1,4 @@
+ID <- 1
 set.seed(1234*ID)
 # dimension
 d <- 32
@@ -77,3 +78,8 @@ plot(1:Time.step, rowMeans(true_means), type = "l")
 lines(1:Time.step, rowMeans(res_dac_light$m), type = "l", col = "red")
 lines(1:Time.step, rowMeans(res_nsmc$m), type = "l", col = "green")
 lines(1:Time.step, rowMeans(res_stpf$m), type = "l", col = "blue")
+
+
+# history <- array(0, dim = c(Nparticles, d, 2))
+# history[, , 1] <- x0
+
