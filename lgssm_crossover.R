@@ -3,7 +3,7 @@
 ID <- 1
 set.seed(1234*ID)
 # dimension
-d <- 8
+d <- 32
 # initial state
 mu0 <- rep(0, times = d)
 Sigma0 <- diag(x = 1, d, d)
@@ -60,7 +60,7 @@ rse <- (res_dac_light$m - true_means)^2/true_variances
 df <- data.frame(rbind(df, cbind(t(rse), res_dac_light$w1, res_dac_light$ks, rep(runtime, times = d))))
 
 tic()
-res_dac_light <- dac_time_lgssm_crossover(tau, lambda, sigmaY, Nparticles, x0, y, method = "other", marginals = marginals)
+res_dac_light_lt <- dac_time_lgssm_crossover(tau, lambda, sigmaY, Nparticles, x0, y, method = "other", marginals = marginals)
 runtime <- toc()
 rse <- (res_dac_light_lt$m - true_means)^2/true_variances
 df <- data.frame(rbind(df, cbind(t(rse), res_dac_light_lt$w1, res_dac_light_lt$ks, rep(runtime, times = d))))
@@ -89,3 +89,6 @@ lines(1:Time.step, rowMeans(res_dac_light$m), type = "l", col = "red")
 lines(1:Time.step, rowMeans(res_nsmc$m), type = "l", col = "green")
 lines(1:Time.step, rowMeans(res_stpf$m), type = "l", col = "blue")
 
+
+# history <- array(0, dim = c(Nparticles, d, 2))
+# history[, , 1] <- x0
