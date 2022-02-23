@@ -123,7 +123,7 @@ dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, M = NULL){
       ci <- child_indices(i, nvNew)
       # lightweight mixture resampling
       if(M == "adaptive") {
-        out <- lgssm_adaptive_light(Nparticles, i, u, nv, ci, lW, Nparticles, lambda, tau, x, xOld[, ci[1]+nv])
+        out <- lgssm_adaptive_light(Nparticles, i, u, nv, ci, lW, Nparticles, lambda, tau, x, xOld[, ci[1]+nv], 0)
         # update after mixture resampling
         indices <- out$resampled_indices
         xNew[, ci[1]:ci[2]] <- cbind(x[indices[, 1], ci[1]:(ci[1]+nv-1)], x[indices[, 2], (ci[1]+nv):ci[2]])
@@ -141,7 +141,9 @@ dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, M = NULL){
         xOld <- matrix(xOld[left_ancestor_coordinates], nrow = Nparticles)
       }
       else{
-        indices <- lgssm_light(i, u, nv, ci, W, Nparticles, M, lambda, tau, x, xOld[, ci[1]+nv])
+        out <- lgssm_light(i, u, nv, ci, W, Nparticles, M, lambda, tau, x, xOld[, ci[1]+nv])
+        # update after mixture resampling
+        indices <- out$resampled_indices
         xNew[, ci[1]:ci[2]] <- cbind(x[indices[, 1], ci[1]:(ci[1]+nv-1)], x[indices[, 2], (ci[1]+nv):ci[2]])
         xOld[, ci[1]:ci[2]] <- xOld[indices[, 1], ci[1]:ci[2]]
       }

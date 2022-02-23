@@ -27,6 +27,7 @@ for (id in 1:50){
   df <- rbind(df, dfnew)
 }
 df <- df[, -1]
+df <- df[df$algo != "light_ada", ]
 d <- ncol(df) - 4
 df$d_means <- rowMeans(df[, 1:d])
 df <- df[order(df$algo, df$mutation, df$N),]
@@ -49,7 +50,7 @@ ggplot(data = df, aes(x = runtime, y = d_means, group = interaction(algo, mutati
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=20),
         text = element_text(size=15))
-# ggsave("res_time_low_adaptive.pdf", width = 10, height = 5, dpi = 300)
+# ggsave("res_time_low.pdf", width = 10, height = 5, dpi = 300)
 library(plyr)
 df <- read.csv("data/adaptive_car_d32N1000T100.csv", col.names = c("u", "m"))
 df$u <- as.factor(mapvalues(df$u, from=c(1, 2, 3, 4, 5), to=c(5, 4, 3, 2, 1)))

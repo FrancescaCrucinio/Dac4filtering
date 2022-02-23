@@ -1,4 +1,4 @@
-lgssm_light <- function(ess_target, i, u, nv, ci, W, Nparticles, m, lambda, tau, x, xOld){
+lgssm_light <- function(i, u, nv, ci, W, Nparticles, m, lambda, tau, x, xOld){
   # binary tree
   nchild <- 2
   # resample on each children
@@ -24,8 +24,7 @@ lgssm_light <- function(ess_target, i, u, nv, ci, W, Nparticles, m, lambda, tau,
   ess <- sum(Wmix)^2/sum(Wmix^2)
   # resampling the new population
   indices <- stratified_resample(Wmix/sum(Wmix), Nparticles)
-  return(list("resampled_indices" = cbind(indices1[indices], indices2[indices]),
-              "target_reached" = (ess >= ess_target), "resampled_particles_lW" = lWmix[indices]))
+  return(list("resampled_indices" = cbind(indices1[indices], indices2[indices]), "resampled_particles_lW" = lWmix[indices]))
 }
 
 # xOldv is the ci[1]+nv component of xOld (main code)

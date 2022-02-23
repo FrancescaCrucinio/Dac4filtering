@@ -1,9 +1,9 @@
 # devtools::load_all("/storage/u1693998/Dac4filtering")
 # ID <- as.numeric(Sys.getenv("SGE_TASK_ID"))
-ID <- 10
+ID <- 1
 set.seed(1234*ID)
 # dimension
-d <- 32
+d <- 8
 # initial state
 mu0 <- rep(0, times = d)
 Sigma0 <- diag(x = 1, d, d)
@@ -58,6 +58,12 @@ res_dac_light <- dac_time_lgssm_crossover(tau, lambda, sigmaY, Nparticles, x0, y
 runtime <- toc()
 rse <- (res_dac_light$m - true_means)^2/true_variances
 df <- data.frame(rbind(df, cbind(t(rse), res_dac_light$w1, res_dac_light$ks, rep(runtime, times = d))))
+
+tic()
+res_dac_light <- dac_time_lgssm_crossover(tau, lambda, sigmaY, Nparticles, x0, y, method = "other", marginals = marginals)
+runtime <- toc()
+rse <- (res_dac_light_lt$m - true_means)^2/true_variances
+df <- data.frame(rbind(df, cbind(t(rse), res_dac_light_lt$w1, res_dac_light_lt$ks, rep(runtime, times = d))))
 # nsmc
 tic()
 res_nsmc <- nsmc_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, M = M, marginals = marginals)

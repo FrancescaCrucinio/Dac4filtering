@@ -66,8 +66,11 @@ dac_time_lgssm_crossover <- function(tau, lambda, sigmaY, Nparticles, x0, y, met
            light={
              res_dac <- dac_lgssm_lightweight_crossover(history, y[t, ], tau, lambda, sigmaY)
            }, # dac with adaptive lightweight mixture weights
-           {
+           adaptive={
              res_dac <- dac_lgssm_lightweight_crossover(history, y[t, ], tau, lambda, sigmaY, "adaptive")
+           },
+           {
+             res_dac <- dac_lgssm_lightweight_crossover_likelihood_tempering(history, y[t, ], tau, lambda, sigmaY, "adaptive")
            }
     )
     x <- res_dac[, 1:d]

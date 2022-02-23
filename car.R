@@ -1,7 +1,7 @@
 ID <- 1
 set.seed(1234*ID)
 # dimension
-d <- 32
+d <- 8
 # initial state
 mu0 <- rep(0, times = d)
 Sigma0 <- diag(x = 1, d, d)
@@ -25,7 +25,7 @@ y.coeff <- diag(1, d, d)
 
 
 # number of time steps
-Time.step <- 100
+Time.step <- 1
 
 # get observations
 y <- ssm_obs(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step)
@@ -46,7 +46,7 @@ for(i in 1:d){
   marginals[, i] <- rnorm(10^5, mean = true_means[Time.step, i], sd = sqrt(true_variances[Time.step, i]))
 }
 
-Nparticles <- 1000
+Nparticles <- 100
 M <- 100
 df <- data.frame()
 

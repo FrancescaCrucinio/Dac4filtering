@@ -7,7 +7,7 @@ node4 <-  readRDS("test/node4.rds")
 node5 <-  readRDS("test/node5.rds")
 par(mfrow=c(4, 4))
 for (i in 1:16) {
-  kde0 <- kde(x = node0$x[, i], w = Nparticles*node0$W[, i])
+  kde0 <- kde(x = node0$x[, i], w = length(node0$W[, i])*node0$W[, i])
   kde1 <- kde(x = node1[, i], eval.points = kde0$eval.points)
   kde2 <- kde(x = node2[, i], eval.points = kde0$eval.points)
   kde3 <- kde(x = node3[, i], eval.points = kde0$eval.points)
