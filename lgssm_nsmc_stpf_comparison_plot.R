@@ -1,10 +1,10 @@
 # read data
 d <- 32
-df <- read.csv("data/lgssm/tempering_lgssm_d32N100ID1")
+df <- read.csv("data/lgssm_tempering/lgssm_d32N100ID1")
 df$N <- "10^2"
 df$run <- 1
 for (id in 2:50){
-  filename <- paste("data/lgssm/tempering_lgssm_d32N100ID", id, sep = "")
+  filename <- paste("data/lgssm_tempering/lgssm_d32N100ID", id, sep = "")
   dfnew <- read.csv(filename)
   dfnew$N <- "10^2"
   dfnew$run <- id
@@ -48,7 +48,7 @@ distances_mean <- merge(distances_mean, time_means, by=c("algo", "N"))
 # Wasserstein-1
 ggplot(data = distances, aes(x = runtime_mean, y = w1, group = interaction(algo, N), fill = algo, colour = algo)) +
   geom_boxplot(coef = 6, width = 0.1, alpha = 0.1) +
-  geom_point(data = distances_mean, aes(x = runtime, y = w1, group = interaction(algo, N), fill = algo, colour = algo)) +
+  geom_point(data = distances_mean, shape = 4, aes(x = runtime, y = w1, group = interaction(algo, N), fill = algo, colour = algo)) +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))

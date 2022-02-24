@@ -1,7 +1,7 @@
 ID <- 1
 set.seed(1234*ID)
 # dimension
-d <- 8
+d <- 32
 # initial state
 mu0 <- rep(0, times = d)
 Sigma0 <- diag(x = 1, d, d)

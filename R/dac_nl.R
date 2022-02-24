@@ -26,7 +26,7 @@ dac_nl_lightweight <- function(history, obs, sigmaX, eta){
     xMean <- sapply(1:Nparticles, sample_mixture, history[, , , 1], row, col, mixture_weights, simplify = TRUE)
     x[, row, col] <- xMean + sqrt(sigmaX)*rnorm(Nparticles)
     # weights
-    lW <- -0.5*(eta+1)*log(1+(x[, row, col] - obs[row, col])^2/eta)
+    lW <- -0.5*(eta+1)*log(1+sweep(x[, row, col], 2, obs[row, col])^2/eta)
   }
   # loop over tree levels excluding leaves
   # for (u in 1:nlevels){
