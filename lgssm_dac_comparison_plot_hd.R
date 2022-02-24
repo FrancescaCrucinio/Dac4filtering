@@ -1,8 +1,8 @@
 # read data
-df <- read.csv("data/resampling/resampling_comparison_d128N100ID1")
+df <- read.csv("data/resampling/tempering_resampling_comparison_d128N100ID1")
 df$N <- "10^2"
 for (id in 2:50){
-  dfnew <- read.csv(paste("data/resampling/resampling_comparison_d128N100ID", id, sep = ""))
+  dfnew <- read.csv(paste("data/resampling/tempering_resampling_comparison_d128N100ID", id, sep = ""))
   dfnew$N <- "10^2"
   df <- rbind(df, dfnew)
 }

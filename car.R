@@ -25,7 +25,7 @@ y.coeff <- diag(1, d, d)
 
 
 # number of time steps
-Time.step <- 1
+Time.step <- 10
 
 # get observations
 y <- ssm_obs(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step)
@@ -55,21 +55,21 @@ x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
 tic()
 res_dac_light <- dac_time_car(sigmaX, sigmaY, Nparticles, x0, y, marginals = marginals)
 runtime <- toc()
-rse <- (res_dac_light$m - true_means)^2/true_variances
-df <- data.frame(rbind(df, cbind(t(rse), res_dac_light$w1, res_dac_light$ks, rep(runtime, times = d))))
+rse_dac <- (res_dac_light$m - true_means)^2/true_variances
+df <- data.frame(rbind(df, cbind(t(rse_dac), res_dac_light$w1, res_dac_light$ks, rep(runtime, times = d))))
 # nsmc
 tic()
 res_nsmc <- nsmc_time_car(sigmaX, sigmaY, Nparticles, x0, y, M = M, marginals = marginals)
 runtime <- toc()
-rse <- (res_nsmc$m - true_means)^2/true_variances
-df <- data.frame(rbind(df, cbind(t(rse), res_nsmc$w1, res_nsmc$ks, rep(runtime, times = d))))
+rse_nsmc <- (res_nsmc$m - true_means)^2/true_variances
+df <- data.frame(rbind(df, cbind(t(rse_nsmc), res_nsmc$w1, res_nsmc$ks, rep(runtime, times = d))))
 # stpf
 x0 <- array(mvrnorm(n = Nparticles*M, mu0, Sigma0), dim = c(Nparticles, M, d))
 tic()
 res_stpf <- stpf_time_car(sigmaX, sigmaY, Nparticles, x0, y, marginals = marginals)
 runtime <- toc()
-rse <- (res_stpf$m - true_means)^2/true_variances
-df <- data.frame(rbind(df, cbind(t(rse), res_stpf$w1, res_stpf$ks, rep(runtime, times = d))))
+rse_stpf <- (res_stpf$m - true_means)^2/true_variances
+df <- data.frame(rbind(df, cbind(t(rse_stpf), res_stpf$w1, res_stpf$ks, rep(runtime, times = d))))
 
 df$algo <- as.factor(rep(c("dac", "nsmc", "stpf"), each = d))
 

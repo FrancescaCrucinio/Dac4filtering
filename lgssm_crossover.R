@@ -27,7 +27,7 @@ y.error.var <- diag(x = sigmaY, d, d)
 y.coeff <- diag(x = 1, d, d)
 
 # number of time steps
-Time.step <- 1
+Time.step <- 10
 
 # get observations
 y <- ssm_obs(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step)
@@ -54,36 +54,41 @@ df <- data.frame()
 x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
 # dac (lightweight)
 tic()
-res_dac_light <- dac_time_lgssm_crossover(tau, lambda, sigmaY, Nparticles, x0, y, method = "adaptive", marginals = marginals)
+res_dac_light_cv <- dac_time_lgssm_crossover(tau, lambda, sigmaY, Nparticles, x0, y, method = "adaptive", marginals = marginals)
 runtime <- toc()
-rse <- (res_dac_light$m - true_means)^2/true_variances
-df <- data.frame(rbind(df, cbind(t(rse), res_dac_light$w1, res_dac_light$ks, rep(runtime, times = d))))
+rse_cv <- (res_dac_light_cv$m - true_means)^2/true_variances
+# df <- data.frame(rbind(df, cbind(t(rse), res_dac_light$w1, res_dac_light$ks, rep(runtime, times = d))))
 
-tic()
-res_dac_light_lt <- dac_time_lgssm_crossover(tau, lambda, sigmaY, Nparticles, x0, y, method = "other", marginals = marginals)
-runtime <- toc()
-rse <- (res_dac_light_lt$m - true_means)^2/true_variances
-df <- data.frame(rbind(df, cbind(t(rse), res_dac_light_lt$w1, res_dac_light_lt$ks, rep(runtime, times = d))))
+# tic()
+# res_dac_light_cv_lt <- dac_time_lgssm_crossover(tau, lambda, sigmaY, Nparticles, x0, y, method = "other", marginals = marginals)
+# runtime <- toc()
+# rse_cv_lt <- (res_dac_light_cv_lt$m - true_means)^2/true_variances
+#
+# tic()
+# res_dac_light <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "adaptive", marginals = marginals)
+# runtime <- toc()
+# rse <- (res_dac_light$m - true_means)^2/true_variances
+# df <- data.frame(rbind(df, cbind(t(rse_lt), res_dac_light_lt$w1, res_dac_light_lt$ks, rep(runtime, times = d))))
 # nsmc
 tic()
 res_nsmc <- nsmc_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, M = M, marginals = marginals)
 runtime <- toc()
-rse <- (res_nsmc$m - true_means)^2/true_variances
-df <- data.frame(rbind(df, cbind(t(rse), res_nsmc$w1, res_nsmc$ks, rep(runtime, times = d))))
+rse_nsmc <- (res_nsmc$m - true_means)^2/true_variances
+# df <- data.frame(rbind(df, cbind(t(rse), res_nsmc$w1, res_nsmc$ks, rep(runtime, times = d))))
 # stpf
 x0 <- array(mvrnorm(n = Nparticles*M, mu0, Sigma0), dim = c(Nparticles, M, d))
 tic()
 res_stpf <- stpf_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, M = M, marginals = marginals)
 runtime <- toc()
-rse <- (res_stpf$m - true_means)^2/true_variances
-df <- data.frame(rbind(df, cbind(t(rse), res_stpf$w1, res_stpf$ks, rep(runtime, times = d))))
-
-df$algo <- as.factor(rep(c("dac", "nsmc", "stpf"), each = d))
+rse_stpf <- (res_stpf$m - true_means)^2/true_variances
+# df <- data.frame(rbind(df, cbind(t(rse), res_stpf$w1, res_stpf$ks, rep(runtime, times = d))))
+#
+# df$algo <- as.factor(rep(c("dac", "nsmc", "stpf"), each = d))
 
 
 # filename <- paste0("lgssm_d", d, "N", Nparticles, "ID", ID)
 # write.csv(x=df, file=filename)
-
+#
 plot(1:Time.step, rowMeans(true_means), type = "l")
 lines(1:Time.step, rowMeans(res_dac_light$m), type = "l", col = "red")
 lines(1:Time.step, rowMeans(res_nsmc$m), type = "l", col = "green")

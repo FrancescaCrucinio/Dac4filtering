@@ -1,10 +1,12 @@
 # read data
 df <- rbind(read.csv("data/resampling/resampling_comparison_d8N100ID1"),
-            read.csv("data/resampling/tempering_resampling_comparison_d8N100ID1"))
+            read.csv("data/resampling/tempering_resampling_comparison_d8N100ID1"),
+            read.csv("data/resampling/ada_tempering_resampling_comparison_d8N100ID1"))
 df$N <- "10^2"
 for (id in 2:50){
   dfnew <- rbind(read.csv(paste("data/resampling/resampling_comparison_d8N100ID", id, sep = "")),
-                    read.csv(paste("data/resampling/tempering_resampling_comparison_d8N100ID", id, sep = "")))
+                    read.csv(paste("data/resampling/tempering_resampling_comparison_d8N100ID", id, sep = "")),
+                 read.csv(paste("data/resampling/ada_tempering_resampling_comparison_d8N100ID", id, sep = "")))
   dfnew$N <- "10^2"
   df <- rbind(df, dfnew)
 }
@@ -52,7 +54,7 @@ ggplot(data = df, aes(x = runtime, y = d_means, group = interaction(algo, mutati
         text = element_text(size=15))
 # ggsave("res_time_low.pdf", width = 10, height = 5, dpi = 300)
 library(plyr)
-df <- read.csv("data/adaptive_resampling/adaptive_lgssm_d32N1000T100.csv", col.names = c("u", "m"))
+df <- read.csv("data/adaptive_lgssm.csv", col.names = c("u", "m"))
 df$u <- as.factor(mapvalues(df$u, from=c(1, 2, 3, 4, 5), to=c(5, 4, 3, 2, 1)))
 # histogram of m
 ggplot(data = df, aes(x = m)) +

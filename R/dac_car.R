@@ -49,14 +49,22 @@ dac_car_lightweight <- function(history, obs, sigmaX, sigmaY){
       # update particles
       xNew[, ci[1]:ci[2]] <- cbind(x[indices[, 1], ci[1]:(ci[1]+nv-1)], x[indices[, 2], (ci[1]+nv):ci[2]])
       historyIndexNew[, , i] <- historyIndexNew[indices[, 1], , i]
-      # tempering
-      print(paste("u = ", u, "i = ", i))
-      tempering_out <- car_tempering(ci, i, nv, nvNew, sigmaX, sigmaY, obs, xNew, history[, , 1], historyIndex,
-                                               historyIndexNew, out$resampled_particles_lW, Nparticles, 1 - 1e-05, 1/nodes_dimension)
-      # update particles
-      xNew <- tempering_out$x
-      # update history
-      historyIndexNew <- tempering_out$history_index_updated
+      out$target_reached <- FALSE
+      if(!out$target_reached){
+        # tempering
+        tempering_out <- car_tempering(ci, i, nv, nvNew, sigmaX, sigmaY, obs, xNew, history[, , 1], historyIndex,
+                                                 historyIndexNew, out$resampled_particles_lW, Nparticles, 1 - 1e-05, 1/nodes_dimension)
+        # update particles
+        xNew <- tempering_out$x
+        # update history
+        historyIndexNew <- tempering_out$history_index_updated
+      }
+      else{
+        # mcmc move
+        updated_particles <- car_mcmc_move(x, ci, i, nv, nvNew, sigmaY, sigmaX, history[, , 1],
+                                             historyIndex, obs, out$resampled_particles_lW, 1/nodes_dimension, 1)
+        x <- updated_particles$x
+      }
     }
     x <- xNew
     nv <- nvNew

@@ -104,7 +104,7 @@ car_mcmc_move <- function(x, ci, i, nv, nvNew, sigmaY, sigmaX, xOld, historyInde
   r_obs <- rowSums((sweep(x[, ci[1]:ci[2]], 2, obs[ci[1]:ci[2]]))^2-(sweep(propose_x[, ci[1]:ci[2]], 2, obs[ci[1]:ci[2]]))^2)/(2*sigmaY)
   mh_ratio <- r1 + r_obs + new_alpha*r2
   accepted <- runif(Nparticles) <= exp(mh_ratio)
-  print(paste(sum(accepted)/Nparticles))
+  # print(paste(sum(accepted)/Nparticles))
   x[accepted , ] <- propose_x[accepted, ]
   after_mix_lW[accepted] <- after_mix_lW_new[accepted]
   return(list("x" = x, "after_mix_lW" = after_mix_lW))

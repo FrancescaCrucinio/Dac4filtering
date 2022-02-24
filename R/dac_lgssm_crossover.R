@@ -96,6 +96,7 @@ dac_lgssm_lightweight_crossover <- function(history, obs, tau, lambda, sigmaY, M
     W[, i] <- exp(lW[, i] - max.lW)
     W[, i] <- W[, i]/sum(W[, i])
   }
+  # saveRDS(list("x"= x, "W"=W), file = "/Users/francescacrucinio/Documents/Dac4filtering/test/node0.rds")
   # loop over tree levels excluding leaves
   for (u in 1:nlevels){
     # number of nodes at this level
@@ -128,14 +129,22 @@ dac_lgssm_lightweight_crossover <- function(history, obs, tau, lambda, sigmaY, M
         indices <- out$resampled_indices
         xNew[, ci[1]:ci[2]] <- cbind(x[indices[, 1], ci[1]:(ci[1]+nv-1)], x[indices[, 2], (ci[1]+nv):ci[2]])
         historyIndexNew[, , i] <- historyIndexNew[indices[, 1], , i]
-
-        # tempering
-        tempering_out <- lgssm_tempering_crossover(ci, i, nv, lambda, tau, sigmaY, obs, xNew, history[, , 1], historyIndex,
-                                         historyIndexNew, out$resampled_particles_lW, Nparticles, 1 - 1e-05, 1/nodes_dimension)
-        # update particles
-        xNew <- tempering_out$x
-        # update history
-        historyIndexNew <- tempering_out$history_index_updated
+        out$target_reached <- FALSE
+        if(!out$target_reached){
+          # tempering
+          tempering_out <- lgssm_tempering_crossover(ci, i, nv, lambda, tau, sigmaY, obs, xNew, history[, , 1], historyIndex,
+                                           historyIndexNew, out$resampled_particles_lW, Nparticles, 1 - 1e-05, 1/nodes_dimension)
+          # update particles
+          xNew <- tempering_out$x
+          # update history
+          historyIndexNew <- tempering_out$history_index_updated
+        } else {
+          # mcmc move
+          updated_particles <- lgssm_mcmc_move(x, ci, i, nv, sigmaY, tau, lambda,
+                          history[historyIndex[, ci[1]+nv, nchild*i], ci[1]+nv, 1], history[, , 1],
+                          historyIndex, obs, out$resampled_particles_lW, 1/nodes_dimension, 1)
+          x <- updated_particles$x
+        }
       }
       else{
         xOld <- history[historyIndex[, ci[1]+nv, nchild*i], ci[1]+nv, 1]
@@ -145,7 +154,7 @@ dac_lgssm_lightweight_crossover <- function(history, obs, tau, lambda, sigmaY, M
         historyIndexNew[, , i] <- historyIndexNew[indices[, 1], , i]
       }
     }
-
+    # saveRDS(x, file = paste0("/Users/francescacrucinio/Documents/Dac4filtering/test/node", u, ".rds"))
     x <- xNew
     nv <- nvNew
     historyIndex <- historyIndexNew
