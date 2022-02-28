@@ -35,13 +35,13 @@ dac_car_lightweight <- function(history, obs, sigmaX, sigmaY){
     for (i in 1:nodes) {
       # get children indices
       ci <- child_indices(i, nvNew)
-      if(u > 1){
-        # mutation
-        historyIndexNew[, , i] <- car_crossover(i, nodes, x, history, historyIndex, sigmaX)
-      }
-      else{ # at the leaf level all histories are the same
+      # if(u > 1){
+      #   # mutation
+      #   historyIndexNew[, , i] <- car_crossover(i, nodes, x, history, historyIndex, sigmaX)
+      # }
+      # else{ # at the leaf level all histories are the same
         historyIndexNew[, , i] <- historyIndex[, , i]
-      }
+      # }
       # adaptive lightweight mixture resampling
       out <- car_adaptive_light(Nparticles, i, u, nv, nvNew, ci, lW, Nparticles, sigmaX, x, history[, , 1], historyIndex)
       # update after mixture resampling
@@ -50,21 +50,21 @@ dac_car_lightweight <- function(history, obs, sigmaX, sigmaY){
       xNew[, ci[1]:ci[2]] <- cbind(x[indices[, 1], ci[1]:(ci[1]+nv-1)], x[indices[, 2], (ci[1]+nv):ci[2]])
       historyIndexNew[, , i] <- historyIndexNew[indices[, 1], , i]
       out$target_reached <- FALSE
-      if(!out$target_reached){
-        # tempering
-        tempering_out <- car_tempering(ci, i, nv, nvNew, sigmaX, sigmaY, obs, xNew, history[, , 1], historyIndex,
-                                                 historyIndexNew, out$resampled_particles_lW, Nparticles, 1 - 1e-05, 1/nodes_dimension)
-        # update particles
-        xNew <- tempering_out$x
-        # update history
-        historyIndexNew <- tempering_out$history_index_updated
-      }
-      else{
-        # mcmc move
-        updated_particles <- car_mcmc_move(x, ci, i, nv, nvNew, sigmaY, sigmaX, history[, , 1],
-                                             historyIndex, obs, out$resampled_particles_lW, 1/nodes_dimension, 1)
-        x <- updated_particles$x
-      }
+      # if(!out$target_reached){
+      #   # tempering
+      #   tempering_out <- car_tempering(ci, i, nv, nvNew, sigmaX, sigmaY, obs, xNew, history[, , 1], historyIndex,
+      #                                            historyIndexNew, out$resampled_particles_lW, Nparticles, 1 - 1e-05, 1/nodes_dimension)
+      #   # update particles
+      #   xNew <- tempering_out$x
+      #   # update history
+      #   historyIndexNew <- tempering_out$history_index_updated
+      # }
+      # else{
+      #   # mcmc move
+      #   updated_particles <- car_mcmc_move(x, ci, i, nv, nvNew, sigmaY, sigmaX, history[, , 1],
+      #                                        historyIndex, obs, out$resampled_particles_lW, 1/nodes_dimension, 1)
+      #   x <- updated_particles$x
+      # }
     }
     x <- xNew
     nv <- nvNew

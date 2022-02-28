@@ -11,7 +11,7 @@ for (id in 2:50){
   df <- rbind(df, dfnew)
 }
 for (id in 1:50){
-  filename <- paste("data/lgssm/tempering_lgssm_d32N1000ID", id, sep = "")
+  filename <- paste("data/lgssm_tempering/lgssm_d32N1000ID", id, sep = "")
   dfnew <- read.csv(filename)
   dfnew$N <- "10^3"
   dfnew$run <- id
@@ -79,7 +79,7 @@ ggplot(data = distances, aes(x = runtime_mean, y = ks, group = interaction(algo,
 # ggsave("lgssm32_ks.pdf", width = 10, height = 8, dpi = 300)
 # RMSE
 tmp <- aggregate(. ~ algo + N, data = df, FUN = "mean")
-rmse_data <- data.frame(rep(1:Time.step, times = 3), rep(tmp$algo, each = 100), rep(tmp$N, each = 100))
+rmse_data <- data.frame(rep(1:Time.step, times = 4), rep(tmp$algo, each = 100), rep(tmp$N, each = 100))
 colnames(rmse_data) <- c("Time.step", "algo", "N")
 rmse_data <- rmse_data[order(rmse_data$algo, rmse_data$N), ]
 tmp <- tmp[order(tmp$algo, tmp$N), ]
