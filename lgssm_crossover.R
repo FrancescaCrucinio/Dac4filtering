@@ -27,7 +27,7 @@ y.error.var <- diag(x = sigmaY, d, d)
 y.coeff <- diag(x = 1, d, d)
 
 # number of time steps
-Time.step <- 10
+Time.step <- 1
 
 # get observations
 y <- ssm_obs(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step)
@@ -41,59 +41,46 @@ true_variances <- matrix(0, ncol = d, nrow = Time.step)
 for (t in 1:Time.step){
   true_variances[t, ] <- diag(res_KF$Ptt[, , t])
 }
+heatmap(cov2cor(res_KF$Ptt[, , Time.step]), Colv = NA, Rowv = NA)
 # samples from marginals at last time step
 marginals <- matrix(0, nrow = 10^5, ncol = d)
 for(i in 1:d){
   marginals[, i] <- rnorm(10^5, mean = true_means[Time.step, i], sd = sqrt(true_variances[Time.step, i]))
 }
 
-Nparticles <- 1000
+Nparticles <- 100
 M <- 100
-df <- data.frame()
 
 x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
+# dac (lightweight adaptive)
+tic()
+res_dac <- dac_lgssm_lightweight(x0, y[t, ], tau, lambda, sigmaY, "adaptive")
+runtime <- toc()
+cov_res_dac <- cov(res_dac)
+heatmap(cov_res_dac, Colv = NA, Rowv = NA, scale="column")
+
 # dac (lightweight)
 tic()
-res_dac_light_cv <- dac_time_lgssm_crossover(tau, lambda, sigmaY, Nparticles, x0, y, method = "adaptive", marginals = marginals)
+res_dac_light <- dac_lgssm_lightweight(x0, y[t, ], tau, lambda, sigmaY)
 runtime <- toc()
-rse_cv <- (res_dac_light_cv$m - true_means)^2/true_variances
-# df <- data.frame(rbind(df, cbind(t(rse), res_dac_light$w1, res_dac_light$ks, rep(runtime, times = d))))
-
-# tic()
-# res_dac_light_cv_lt <- dac_time_lgssm_crossover(tau, lambda, sigmaY, Nparticles, x0, y, method = "other", marginals = marginals)
-# runtime <- toc()
-# rse_cv_lt <- (res_dac_light_cv_lt$m - true_means)^2/true_variances
-#
-# tic()
-# res_dac_light <- dac_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, method = "adaptive", marginals = marginals)
-# runtime <- toc()
-# rse <- (res_dac_light$m - true_means)^2/true_variances
-# df <- data.frame(rbind(df, cbind(t(rse_lt), res_dac_light_lt$w1, res_dac_light_lt$ks, rep(runtime, times = d))))
+cov_res_dac_light <- cov(res_dac_light)
+heatmap(cov_res_dac_light, Colv = NA, Rowv = NA, scale="column")
 # nsmc
 tic()
-res_nsmc <- nsmc_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, M = M, marginals = marginals)
+res_nsmc <- nsmc_lgssm(x0, y[t, ], tau, lambda, sigmaY, M)
 runtime <- toc()
-rse_nsmc <- (res_nsmc$m - true_means)^2/true_variances
-# df <- data.frame(rbind(df, cbind(t(rse), res_nsmc$w1, res_nsmc$ks, rep(runtime, times = d))))
+cov_res_nsmc <- cov(res_nsmc)
+heatmap(cov_res_nsmc, Colv = NA, Rowv = NA, scale="column")
 # stpf
 x0 <- array(mvrnorm(n = Nparticles*M, mu0, Sigma0), dim = c(Nparticles, M, d))
 tic()
-res_stpf <- stpf_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, M = M, marginals = marginals)
+res_stpf <- stpf_lgssm(x0, y[t, ], tau, lambda, sigmaY)
 runtime <- toc()
-rse_stpf <- (res_stpf$m - true_means)^2/true_variances
-# df <- data.frame(rbind(df, cbind(t(rse), res_stpf$w1, res_stpf$ks, rep(runtime, times = d))))
-#
-# df$algo <- as.factor(rep(c("dac", "nsmc", "stpf"), each = d))
+cov_res_stpf <- cov(matrix(res_stpf, ncol = d, nrow = Nparticles*M))
+heatmap(cov_res_stpf, Colv = NA, Rowv = NA, scale="column")
 
-
-# filename <- paste0("lgssm_d", d, "N", Nparticles, "ID", ID)
-# write.csv(x=df, file=filename)
-#
 plot(1:Time.step, rowMeans(true_means), type = "l")
 lines(1:Time.step, rowMeans(res_dac_light$m), type = "l", col = "red")
 lines(1:Time.step, rowMeans(res_nsmc$m), type = "l", col = "green")
 lines(1:Time.step, rowMeans(res_stpf$m), type = "l", col = "blue")
 
-
-# history <- array(0, dim = c(Nparticles, d, 2))
-# history[, , 1] <- x0

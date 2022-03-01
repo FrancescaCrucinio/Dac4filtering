@@ -133,7 +133,7 @@ dac_lgssm_lightweight_crossover <- function(history, obs, tau, lambda, sigmaY, M
         if(!out$target_reached){
           # tempering
           tempering_out <- lgssm_tempering_crossover(ci, i, nv, lambda, tau, sigmaY, obs, xNew, history[, , 1], historyIndex,
-                                           historyIndexNew, out$resampled_particles_lW, Nparticles, 1 - 1e-05, 1/nodes_dimension)
+                                           historyIndexNew, out$resampled_particles_lW, Nparticles, 1 - 1e-05, 1/sqrt(nodes_dimension))
           # update particles
           xNew <- tempering_out$x
           # update history

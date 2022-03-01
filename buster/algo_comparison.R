@@ -57,7 +57,7 @@ runtime <- toc()
 rse_stpf <- (res_stpf$m - true_means)^2/true_variances
 df <- data.frame(rbind(df, cbind(t(rse_stpf), res_stpf$w1, res_stpf$ks, rep(runtime, times = d))))
 
-df$algo <- as.factor(rep(c("dac_ada", "dac-light", "nsmc", "stpf"), each = d))
+df$algo <- as.factor(rep(c("dac-ada", "dac-light", "nsmc", "stpf"), each = d))
 
 
 filename <- paste0("run_dac/results/lgssm_d", d, "N", Nparticles, "ID", ID)

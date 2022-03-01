@@ -89,7 +89,7 @@ dac_time_lgssm_crossover <- function(tau, lambda, sigmaY, Nparticles, x0, y, met
   return(out)
 }
 
-dac_time_car <- function(sigmaX, sigmaY, Nparticles, x0, y, marginals = NULL){
+dac_time_car <- function(sigmaX, sigmaY, Nparticles, x0, y, method = "adaptive", M = NULL, marginals = NULL){
   # dimension
   d <- ncol(y)
   # time interval
@@ -101,7 +101,15 @@ dac_time_car <- function(sigmaX, sigmaY, Nparticles, x0, y, marginals = NULL){
   history[, , 1] <- x0
 
   for (t in 1:Time.step) {
-    res_dac <- dac_car_lightweight(history, y[t, ], sigmaX, sigmaY)
+    switch(method,
+           light={
+             # dac with lightweight mixture weights (no adaptation)
+             res_dac <- dac_car_lightweight(history, y[t, ], sigmaX, sigmaY)
+           }, # dac with adaptive lightweight mixture weights
+           {
+             res_dac <- dac_car_lightweight(history, y[t, ], sigmaX, sigmaY, "adaptive")
+           }
+    )
     x <- res_dac[, 1:d]
     history[, , 2] <- history[, , 1]
     history[, , 1] <- x

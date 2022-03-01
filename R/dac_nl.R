@@ -29,38 +29,33 @@ dac_nl_lightweight <- function(history, obs, sigmaX, eta){
     lW <- -0.5*(eta+1)*log(1+sweep(x[, row, col], 2, obs[row, col])^2/eta)
   }
   # loop over tree levels excluding leaves
-  # for (u in 1:nlevels){
-  #   # number of nodes at this level
-  #   nodes <- nchild^(nlevels-u)
-  #   # number of variables in each node
-  #   nvNew <- nchild^u
-  #
-  #   # updated particles
-  #   xNew <- matrix(0, nrow = Nparticles, ncol = d)
-  #   # updated history
-  #   historyIndexNew <- array(0, dim = c(Nparticles, d, nodes))
-  #   for (i in 1:nodes) {
-  #     # get children indices
-  #     ci <- child_indices(i, nvNew)
-  #     if(u > 1){
-  #       # mutation
-  #       historyIndexNew[, , i] <- car_crossover(i, nodes, x, history, historyIndex, sigmaX)
-  #     }
-  #     else{ # at the leaf level all histories are the same
-  #       historyIndexNew[, , i] <- historyIndex[, , i]
-  #     }
-  #     # adaptive lightweight mixture resampling
-  #     xOld <- history[historyIndex[, , nchild*i], , 1]
-  #     indices <- car_adaptive_light(Nparticles, i, u, nv, nvNew, ci, lW, Nparticles, sigmaX, x, xOld)
-  #     # update particles
-  #     xNew[, ci[1]:ci[2]] <- cbind(x[indices[, 1], ci[1]:(ci[1]+nv-1)], x[indices[, 2], (ci[1]+nv):ci[2]])
-  #     # update xOld
-  #     xOld[, ci[1]:ci[2]] <- xOld[indices[, 1], ci[1]:ci[2]]
-  #     historyIndexNew[, , i] <- historyIndexNew[indices[, 1], , i]
-  #   }
-  #   x <- xNew
-  #   nv <- nvNew
-  # }
+  for (u in 1:nlevels){
+    # number of nodes at this level
+    nodes <- nchild^(nlevels-u)
+    # number of variables in each node
+    nvNew <- nchild^u
+
+    # updated particles
+    xNew <- matrix(0, nrow = Nparticles, ncol = d)
+    # updated history
+    historyIndexNew <- array(0, dim = c(Nparticles, d, nodes))
+    for (i in 1:nodes) {
+      # get children indices
+      ci <- child_indices_lattice(d, u, i, nvNew, nv)
+      if(u > 1){
+        # mutation
+
+      }
+      else{ # at the leaf level all histories are the same
+        historyIndexNew[, , i] <- historyIndex[, , i]
+      }
+      # adaptive lightweight mixture resampling
+
+    }
+    historyIndex <- historyIndexNew
+    x <- xNew
+    nv <- nvNew
+  }
   return(x)
 }
 

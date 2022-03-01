@@ -32,6 +32,7 @@ for (id in 1:50){
   df <- rbind(df, dfnew)
 }
 df <- df[, -1]
+df$algo[df$algo == "dac_ada"] <- "dac-ada"
 Time.step <- ncol(df) - 6
 colnames(df)[(Time.step+1):(Time.step+3)] <- c("w1", "ks", "runtime")
 
@@ -47,8 +48,8 @@ distances_mean$ks <- aggregate(ks ~ algo + N, data = distances, FUN = "mean")$ks
 distances_mean <- merge(distances_mean, time_means, by=c("algo", "N"))
 # Wasserstein-1
 ggplot(data = distances, aes(x = runtime_mean, y = w1, group = interaction(algo, N), fill = algo, colour = algo)) +
-  geom_boxplot(coef = 6, width = 0.1, alpha = 0.1) +
-  geom_point(data = distances_mean, shape = 4, aes(x = runtime, y = w1, group = interaction(algo, N), fill = algo, colour = algo)) +
+  geom_boxplot(coef = 6, width = 0.1, alpha = 0.1, lwd = 1) +
+  geom_point(data = distances_mean, shape = 4, lwd = 1, aes(x = runtime, y = w1, group = interaction(algo, N), fill = algo, colour = algo)) +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
@@ -63,8 +64,8 @@ ggplot(data = distances, aes(x = runtime_mean, y = w1, group = interaction(algo,
 # ggsave("lgssm32_w1.pdf", width = 10, height = 8, dpi = 300)
 # Kolmogorov-Smirnov
 ggplot(data = distances, aes(x = runtime_mean, y = ks, group = interaction(algo, N), fill = algo, colour = algo)) +
-  geom_boxplot(coef = 10, width = 0.1, alpha = 0.1) +
-  geom_point(data = distances_mean, aes(x = runtime, y = ks, group = interaction(algo, N), fill = algo, colour = algo)) +
+  geom_boxplot(coef = 10, width = 0.1, alpha = 0.1, lwd = 1) +
+  geom_point(data = distances_mean, shape = 4, lwd = 1, aes(x = runtime, y = ks, group = interaction(algo, N), fill = algo, colour = algo)) +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
@@ -74,8 +75,8 @@ ggplot(data = distances, aes(x = runtime_mean, y = ks, group = interaction(algo,
     labels = scales::trans_format("log10", scales::math_format(10^.x))
   ) +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
-        legend.title = element_blank(), legend.text=element_text(size=20),
-        text = element_text(size=15))
+        legend.title = element_blank(), legend.text=element_text(size=25),
+        text = element_text(size=20))
 # ggsave("lgssm32_ks.pdf", width = 10, height = 8, dpi = 300)
 # RMSE
 tmp <- aggregate(. ~ algo + N, data = df, FUN = "mean")

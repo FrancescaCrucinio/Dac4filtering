@@ -1,4 +1,4 @@
-d <- 128
+d <- 8
 # read data
 df <- rbind(read.csv(paste0("data/resampling_tempering/nocrossover_resampling_comparison_d", d, "N100ID1")),
             read.csv(paste0("data/resampling_tempering/crossover_resampling_comparison_d", d, "N100ID1")))
@@ -38,4 +38,4 @@ ggplot(data = df, aes(x = runtime, y = d_means, group = interaction(algo, mutati
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=20),
         text = element_text(size=15))
-# ggsave("res_time_medium.pdf", width = 10, height = 5, dpi = 300)
+# ggsave("res_time_low.pdf", width = 10, height = 5, dpi = 300)

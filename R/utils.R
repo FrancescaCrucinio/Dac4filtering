@@ -20,6 +20,15 @@ bisection_cess <- function(lOmega, lW, current_alpha, ess_decay_threshold){
 child_indices <- function(i, nv){
   rbind(nv*(i-1)+1, i*nv)
 }
+# function returning index of first and last child of node i in level u for 2D lattice
+child_indices_lattice <- function(d, u, i, nvNew, nv){
+  if((u %% 2) == 0){ # connect vertically
+    c((nv*(i-1)+1):(i*nv), (nv*(i-1)+1):(i*nv)+d)
+  } else { # connect horizontally
+    (nvNew*(i-1)+1):(i*nvNew)
+  }
+
+}
 # get row and column indices for mixture resampling
 rc_indices <- function(indices, dims){
   r <- indices -  trunc(indices/dims)*dims

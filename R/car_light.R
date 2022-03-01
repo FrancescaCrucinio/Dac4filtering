@@ -1,3 +1,37 @@
+car_light <- function(i, u, nv, nvNew, ci, W, Nparticles, m, sigmaX, x, xOld, historyIndex){
+  # binary tree
+  nchild <- 2
+  # resample on each children
+  if(u == 1){
+    # child 1
+    indices1 <- stratified_resample(W[, nchild*(i-1)+1], m*Nparticles)
+    # child 2 (with random permutation)
+    indices2 <- sample(stratified_resample(W[, nchild*i], m*Nparticles))
+  }
+  else{
+    # child 1
+    indices1 <- sample.int(Nparticles, size = m*Nparticles, replace = TRUE)
+    # child 2
+    indices2 <- sample.int(Nparticles, size = m*Nparticles, replace = TRUE)
+  }
+  # mixture weights
+  lWmix <- rep(0, times = m*Nparticles)
+  for (n in 1:(m*Nparticles)) {
+    right_ancestor_coordinates <- cbind(historyIndex[indices2[n], (ci[1]+nv):d, nchild*i], (ci[1]+nv):d)
+    right_ancestor <- xOld[right_ancestor_coordinates]
+    # merge the two children nodes
+    mx <- c(x[indices1[n], ci[1]:(ci[1]+nv-1)], x[indices2[n], (ci[1]+nv):ci[2]])
+    lWmix[n] <- sum(x[indices1[n], ci[1]:(ci[1]+nv-1)])*sum(x[indices2[n], (ci[1]+nv):ci[2]])/(d*sigmaX) -
+      (sum(cumsum(mx[1:(nvNew-1)]/d)^2) - sum(cumsum(x[indices1[n], ci[1]:(ci[1]+nv-1)][seq(length.out = (nv-1))]/d)^2) -
+         sum(cumsum(x[indices2[n], (ci[1]+nv):ci[2]][seq(length.out = (nv-1))]/d)^2))/(2*sigmaX) -
+      sum(x[indices1[n], ci[1]:(ci[1]+nv-1)])*sum(cumsum(rev(xOld[indices2[n], (ci[1]+nv):d])))/(d^2*sigmaX)
+  }
+  max.lWmix <- max(lWmix)
+  Wmix <- exp(lWmix - max.lWmix)
+  # resampling the new population
+  indices <- stratified_resample(Wmix/sum(Wmix), Nparticles)
+  return(list("resampled_indices" = cbind(indices1[indices], indices2[indices]), "resampled_particles_lW" = lWmix[indices]))
+}
 car_adaptive_light <- function(ess_target, i, u, nv, nvNew, ci, lW, Nparticles, sigmaX, x, xOld, historyIndex)
 {
   # binary tree

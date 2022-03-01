@@ -10,7 +10,7 @@ nsmc_time_lgssm <- function(tau, lambda, sigmaY, Nparticles, x0, y, M = NULL, ma
 
   if(is.null(M)) {
     # number of particles per island
-    M <- 2*d
+    M <- 100
   }
 
   for (t in 1:Time.step) {

@@ -39,7 +39,7 @@ true_variances <- matrix(0, ncol = d, nrow = Time.step)
 for (t in 1:Time.step){
   true_variances[t, ] <- diag(res_KF$Ptt[, , t])
 }
-
+heatmap(res_KF$Ptt[, , Time.step], Colv = NA, Rowv = NA, scale="column")
 # samples from marginals at last time step
 marginals <- matrix(0, nrow = 10^5, ncol = d)
 for(i in 1:d){
@@ -51,12 +51,18 @@ M <- 100
 df <- data.frame()
 
 x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
+# dac (lightweight adaptive)
+tic()
+res_dac <- dac_time_car(sigmaX, sigmaY, Nparticles, x0, y, method="adaptive", marginals = marginals)
+runtime <- toc()
+rse_dac <- (res_dac$m - true_means)^2/true_variances
+df <- data.frame(rbind(df, cbind(t(rse_dac), res_dac$w1, res_dac$ks, rep(runtime, times = d))))
 # dac (lightweight)
 tic()
-res_dac_light <- dac_time_car(sigmaX, sigmaY, Nparticles, x0, y, marginals = marginals)
+res_dac_light <- dac_time_car(sigmaX, sigmaY, Nparticles, x0, y, method="light", marginals = marginals)
 runtime <- toc()
-rse_dac <- (res_dac_light$m - true_means)^2/true_variances
-df <- data.frame(rbind(df, cbind(t(rse_dac), res_dac_light$w1, res_dac_light$ks, rep(runtime, times = d))))
+rse_dac_light <- (res_dac_light$m - true_means)^2/true_variances
+df <- data.frame(rbind(df, cbind(t(rse_dac_light), res_dac_light$w1, res_dac_light$ks, rep(runtime, times = d))))
 # nsmc
 tic()
 res_nsmc <- nsmc_time_car(sigmaX, sigmaY, Nparticles, x0, y, M = M, marginals = marginals)
@@ -71,13 +77,14 @@ runtime <- toc()
 rse_stpf <- (res_stpf$m - true_means)^2/true_variances
 df <- data.frame(rbind(df, cbind(t(rse_stpf), res_stpf$w1, res_stpf$ks, rep(runtime, times = d))))
 
-df$algo <- as.factor(rep(c("dac", "nsmc", "stpf"), each = d))
+df$algo <- as.factor(rep(c("dac-ada", "dac-light", "nsmc", "stpf"), each = d))
 
 
 plot(1:Time.step, rowMeans(true_means), type = "l")
 lines(1:Time.step, rowMeans(res_dac_light$m), type = "l", col = "red")
 lines(1:Time.step, rowMeans(res_nsmc$m), type = "l", col = "green")
 lines(1:Time.step, rowMeans(res_stpf$m), type = "l", col = "blue")
+lines(1:Time.step, rowMeans(res_dac$m), type = "l", col = "yellow")
 
 
 # history <- array(0, dim = c(Nparticles, d, 2))
