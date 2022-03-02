@@ -1,3 +1,4 @@
+library(ggpubr)
 # read data
 d <- 32
 df <- read.csv("data/lgssm_tempering/lgssm_d32N100ID1")
@@ -47,7 +48,7 @@ distances_mean <- data.frame(aggregate(w1 ~ algo + N, data = distances, FUN = "m
 distances_mean$ks <- aggregate(ks ~ algo + N, data = distances, FUN = "mean")$ks
 distances_mean <- merge(distances_mean, time_means, by=c("algo", "N"))
 # Wasserstein-1
-ggplot(data = distances, aes(x = runtime_mean, y = w1, group = interaction(algo, N), fill = algo, colour = algo)) +
+w1_plot <- ggplot(data = distances, aes(x = runtime_mean, y = w1, group = interaction(algo, N), fill = algo, colour = algo)) +
   geom_boxplot(coef = 6, width = 0.1, alpha = 0.1, lwd = 1) +
   geom_point(data = distances_mean, shape = 4, lwd = 1, aes(x = runtime, y = w1, group = interaction(algo, N), fill = algo, colour = algo)) +
   scale_x_log10(
@@ -60,8 +61,11 @@ ggplot(data = distances, aes(x = runtime_mean, y = w1, group = interaction(algo,
   ) +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=20),
-        text = element_text(size=15))
-# ggsave("lgssm32_w1.pdf", width = 10, height = 8, dpi = 300)
+        text = element_text(size=15), legend.position="none")
+# my_legend <- get_legend(w1_plot)
+# as_ggplot(my_legend)
+# ggsave("lgssm32_w1.pdf", plot = w1_plot, width = 10, height = 8, dpi = 300)
+# ggsave("lgssm32_legend.pdf", width = 10, height = 8, dpi = 300)
 # Kolmogorov-Smirnov
 ggplot(data = distances, aes(x = runtime_mean, y = ks, group = interaction(algo, N), fill = algo, colour = algo)) +
   geom_boxplot(coef = 10, width = 0.1, alpha = 0.1, lwd = 1) +
@@ -76,7 +80,7 @@ ggplot(data = distances, aes(x = runtime_mean, y = ks, group = interaction(algo,
   ) +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=25),
-        text = element_text(size=20))
+        text = element_text(size=20), legend.position="none")
 # ggsave("lgssm32_ks.pdf", width = 10, height = 8, dpi = 300)
 # RMSE
 tmp <- aggregate(. ~ algo + N, data = df, FUN = "mean")

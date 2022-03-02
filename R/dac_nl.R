@@ -1,17 +1,22 @@
-dac_nl_lightweight <- function(history, obs, sigmaX, eta){
+dac_nl_lightweight <- function(history, obs, sigmaX, nu, M = NULL){
+  if(is.null(M)) {
+    # number of samples for lightweight mixture (no adaptation)
+    M <- ceiling(sqrt(Nparticles))
+  }
   # dimension and number of particles
   d <- ncol(history[, , , 1])
   Nparticles <- nrow(history[, , , 1])
   # tree topology
   nchild <- 2
-  nlevels <- log2(d)
+  nlevels <- log2(d^2)
   # leaves
   # number of variables
   nv <- 1
   x <- array(0, dim = c(Nparticles, d, d))
   lW <- array(0, dim = c(Nparticles, d, d))
+  W <- array(0, dim = c(Nparticles, d, d))
   # history indices
-  historyIndex <- array(1:Nparticles, dim = c(Nparticles, d, d))
+  historyIndex <- array(1:Nparticles, dim = c(Nparticles, d^2, d))
   # leaves
   for (col in 1:d){
     for (row in 1:d){
@@ -22,37 +27,55 @@ dac_nl_lightweight <- function(history, obs, sigmaX, eta){
       if (col > 1) mixture_weights[2] <- 0.5
       if (col < d-1) mixture_weights[4] <- 0.5
       mixture_weights <- mixture_weights/sum(mixture_weights)
+      xMean <- sapply(1:Nparticles, sample_mixture, history[, , , 1], row, col, mixture_weights, simplify = TRUE)
+      x[, row, col] <- xMean + sqrt(sigmaX)*rnorm(Nparticles)
+      # weights
+      lW[, row, col] <- -0.5*(nu+d)*log(1+(x[, row, col] - obs[row, col])^2/nu)
+      max.lW <- max(lW[, row, col])
+      W[, row, col] <- exp(lW[, row, col] - max.lW)
+      W[, row, col] <- W[, row, col]/sum(W[, row, col])
     }
-    xMean <- sapply(1:Nparticles, sample_mixture, history[, , , 1], row, col, mixture_weights, simplify = TRUE)
-    x[, row, col] <- xMean + sqrt(sigmaX)*rnorm(Nparticles)
-    # weights
-    lW <- -0.5*(eta+1)*log(1+sweep(x[, row, col], 2, obs[row, col])^2/eta)
   }
+  x <- matrix(x, nrow = Nparticles, ncol = d^2)
+  lW <- matrix(lW, nrow = Nparticles, ncol = d^2)
+  W <- matrix(W, nrow = Nparticles, ncol = d^2)
+  obs <- c(t(obs))
   # loop over tree levels excluding leaves
   for (u in 1:nlevels){
+
     # number of nodes at this level
     nodes <- nchild^(nlevels-u)
     # number of variables in each node
     nvNew <- nchild^u
 
     # updated particles
-    xNew <- matrix(0, nrow = Nparticles, ncol = d)
+    xNew <- matrix(0, nrow = Nparticles, ncol = d^2)
     # updated history
-    historyIndexNew <- array(0, dim = c(Nparticles, d, nodes))
+    # historyIndexNew <- array(0, dim = c(Nparticles, d^2, nodes))
     for (i in 1:nodes) {
+      print(paste("u = ", u, "i = ", i))
       # get children indices
-      ci <- child_indices_lattice(d, u, i, nvNew, nv)
-      if(u > 1){
-        # mutation
+      ci <- child_indices_lattice(d, u, i, nv, nodes)
+      print(paste(c(ci)))
+      # if(u > 1){
+      #   # mutation
+      #
+      # }
+      # else{ # at the leaf level all histories are the same
+        # historyIndexNew[, , i] <- historyIndex[, , i]
+      # }
+      # lightweight mixture resampling
+      if(M == "adaptive") {
 
       }
-      else{ # at the leaf level all histories are the same
-        historyIndexNew[, , i] <- historyIndex[, , i]
+      else{
+        out <- nl_light(i, u, nv, ci, W, Nparticles, M, eta, x)
+        indices <- out$resampled_indices
+        xNew[, c(ci)] <- cbind(x[indices[, 1], ci[, 1]], x[indices[, 2], ci[, 2]])
+        # historyIndexNew[, , i] <- historyIndexNew[indices[, 1], , i]
       }
-      # adaptive lightweight mixture resampling
-
     }
-    historyIndex <- historyIndexNew
+    # historyIndex <- historyIndexNew
     x <- xNew
     nv <- nvNew
   }
