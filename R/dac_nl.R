@@ -4,42 +4,29 @@ dac_nl_lightweight <- function(history, obs, sigmaX, nu, M = NULL){
     M <- ceiling(sqrt(Nparticles))
   }
   # dimension and number of particles
-  d <- ncol(history[, , , 1])
-  Nparticles <- nrow(history[, , , 1])
+  d <- nrow(history[, , , 1])
+  Nparticles <- dim(history[, , , 1])[3]
   # tree topology
   nchild <- 2
-  nlevels <- log2(d^2)
+  nlevels <- log2(d)
   # leaves
   # number of variables
   nv <- 1
-  x <- array(0, dim = c(Nparticles, d, d))
-  lW <- array(0, dim = c(Nparticles, d, d))
-  W <- array(0, dim = c(Nparticles, d, d))
+  x <- array(0, dim = c(d, d, Nparticles))
+  lW <- array(0, dim = c(d, d, Nparticles))
   # history indices
-  historyIndex <- array(1:Nparticles, dim = c(Nparticles, d^2, d))
+  # historyIndex <- array(1:Nparticles, dim = c(Nparticles, d, d))
   # leaves
   for (col in 1:d){
     for (row in 1:d){
-      mixture_weights <- rep(0, times = 5)
-      mixture_weights[1] <- 1
-      if (row > 1) mixture_weights[3] <- 0.5
-      if (row < d-1) mixture_weights[5] <- 0.5
-      if (col > 1) mixture_weights[2] <- 0.5
-      if (col < d-1) mixture_weights[4] <- 0.5
-      mixture_weights <- mixture_weights/sum(mixture_weights)
-      xMean <- sapply(1:Nparticles, sample_mixture, history[, , , 1], row, col, mixture_weights, simplify = TRUE)
-      x[, row, col] <- xMean + sqrt(sigmaX)*rnorm(Nparticles)
+      out_neighbours <- get_neighbours_weights(row, col, d)
+      xMean <- sapply(1:Nparticles, sample_mixture, out_neighbours$mixture_weights,
+                      out_neighbours$current_x_neighbours, history[, , , 1], simplify = TRUE)
       # weights
-      lW[, row, col] <- -0.5*(nu+d)*log(1+(x[, row, col] - obs[row, col])^2/nu)
-      max.lW <- max(lW[, row, col])
-      W[, row, col] <- exp(lW[, row, col] - max.lW)
-      W[, row, col] <- W[, row, col]/sum(W[, row, col])
+      x[row, col, ] <- xMean + sqrt(sigmaX)*rnorm(Nparticles)
+      lW[row, col, ] <- -0.5*(nu+1)*log(1+(x[row, col, ] - obs[row, col])^2/nu)
     }
   }
-  x <- matrix(x, nrow = Nparticles, ncol = d^2)
-  lW <- matrix(lW, nrow = Nparticles, ncol = d^2)
-  W <- matrix(W, nrow = Nparticles, ncol = d^2)
-  obs <- c(t(obs))
   # loop over tree levels excluding leaves
   for (u in 1:nlevels){
 
@@ -49,30 +36,36 @@ dac_nl_lightweight <- function(history, obs, sigmaX, nu, M = NULL){
     nvNew <- nchild^u
 
     # updated particles
-    xNew <- matrix(0, nrow = Nparticles, ncol = d^2)
+    xNew <- array(0, dim = c(d, d, Nparticles))
     # updated history
     # historyIndexNew <- array(0, dim = c(Nparticles, d^2, nodes))
     for (i in 1:nodes) {
-      print(paste("u = ", u, "i = ", i))
-      # get children indices
-      ci <- child_indices_lattice(d, u, i, nv, nodes)
-      print(paste(c(ci)))
-      # if(u > 1){
-      #   # mutation
-      #
-      # }
-      # else{ # at the leaf level all histories are the same
-        # historyIndexNew[, , i] <- historyIndex[, , i]
-      # }
-      # lightweight mixture resampling
-      if(M == "adaptive") {
-
-      }
-      else{
-        out <- nl_light(i, u, nv, ci, W, Nparticles, M, eta, x)
+      # row indices of children (colum 1 = left child, column 2 = right child)
+      cir <- matrix(c(((i-1)*nvNew+1):((2*i-1)*nv), ((2*i-1)*nv+1):(i*nvNew)), ncol = 2)
+      for (j in 1:nodes) {
+        # column indices of children (colum 1 = left child, column 2 = right child)
+        cic <- matrix(c(((j-1)*nvNew+1):((2*j-1)*nv), ((2*j-1)*nv+1):(j*nvNew)), ncol = 2)
+        #### HORIZONTAL MERGE ###
+        ### Step 1
+        left_child <- x[cir[, 1], cic[, 1], , drop = FALSE]
+        right_child <- x[cir[, 1], cic[, 2], , drop = FALSE]
+        lW_left <- lW[2*i-1, 2*j-1, ]
+        lW_right <- lW[2*i-1, 2*j, ]
+        out <- nl_light(u, left_child, right_child, lW_left, lW_right, Nparticles, M)
         indices <- out$resampled_indices
-        xNew[, c(ci)] <- cbind(x[indices[, 1], ci[, 1]], x[indices[, 2], ci[, 2]])
-        # historyIndexNew[, , i] <- historyIndexNew[indices[, 1], , i]
+        xTop <- array(rbind(left_child[, ,indices[, 1], drop = FALSE], right_child[, , indices[, 2], drop = FALSE]), dim = c(nv, nvNew, Nparticles))
+        ### Step 2
+        left_child <- x[cir[, 2], cic[, 1], , drop = FALSE]
+        right_child <- x[cir[, 2], cic[, 2], , drop = FALSE]
+        lW_left <- lW[2*i, 2*j-1, ]
+        lW_right <- lW[2*i, 2*j, ]
+        out <- nl_light(u, left_child, right_child, lW_left, lW_right, Nparticles, M)
+        indices <- out$resampled_indices
+        xBottom <- array(rbind(left_child[, ,indices[, 1], drop = FALSE], right_child[, , indices[, 2], drop = FALSE]), dim = c(nv, nvNew, Nparticles))
+        #### VERTICAL MERGE ###
+        out <- nl_light(u+1, xTop, xBottom, lW_left, lW_right, Nparticles, M)
+        indices <- out$resampled_indices
+        xNew[c(cir), c(cic), ] <- array(rbind(xTop[, , indices[, 1], drop = FALSE], xBottom[, , indices[, 2], drop = FALSE]), dim = c(nvNew, nvNew, Nparticles))
       }
     }
     # historyIndex <- historyIndexNew
@@ -82,15 +75,4 @@ dac_nl_lightweight <- function(history, obs, sigmaX, nu, M = NULL){
   return(x)
 }
 
-sample_mixture <- function(n, xOld, row, col, mixture_weights){
-  # sample component of mixture
-  mixture_component <- sample.int(5, size = 1, prob = mixture_weights)
-  switch(mixture_component,
-         {xMean <- xOld[n, row, col]},
-         {xMean <- xOld[n, row, col-1]},
-         {xMean <- xOld[n, row-1, col]},
-         {xMean <- xOld[n, row, col+1]},
-         {xMean <- xOld[n, row+1, col]}
-  )
-  return(xMean)
-}
+

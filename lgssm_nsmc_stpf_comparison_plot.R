@@ -1,25 +1,25 @@
 library(ggpubr)
 # read data
-d <- 32
-df <- read.csv("data/lgssm_tempering/lgssm_d32N100ID1")
+d <- 256
+df <- read.csv(paste0("data/lgssm_tempering/lgssm_d", d, "N100ID1"))
 df$N <- "10^2"
 df$run <- 1
 for (id in 2:50){
-  filename <- paste("data/lgssm_tempering/lgssm_d32N100ID", id, sep = "")
+  filename <- paste0("data/lgssm_tempering/lgssm_d", d, "N100ID", id, sep = "")
   dfnew <- read.csv(filename)
   dfnew$N <- "10^2"
   dfnew$run <- id
   df <- rbind(df, dfnew)
 }
 for (id in 1:50){
-  filename <- paste("data/lgssm_tempering/lgssm_d32N1000ID", id, sep = "")
+  filename <- paste0("data/lgssm_tempering/lgssm_d", d, "N1000ID", id, sep = "")
   dfnew <- read.csv(filename)
   dfnew$N <- "10^3"
   dfnew$run <- id
   df <- rbind(df, dfnew)
 }
 for (id in 1:50){
-  filename <- paste("data/lgssm/lgssm_d32N10000ID", id, sep = "")
+  filename <- paste("data//lgssm_tempering/lgssm_d32N10000ID", id, sep = "")
   dfnew <- read.csv(filename)
   dfnew$N <- "10^4"
   dfnew$run <- id
@@ -33,7 +33,7 @@ for (id in 1:50){
   df <- rbind(df, dfnew)
 }
 df <- df[, -1]
-df$algo[df$algo == "dac_ada"] <- "dac-ada"
+df <- df[df$algo != "dac_ada", ]
 Time.step <- ncol(df) - 6
 colnames(df)[(Time.step+1):(Time.step+3)] <- c("w1", "ks", "runtime")
 
@@ -48,7 +48,8 @@ distances_mean <- data.frame(aggregate(w1 ~ algo + N, data = distances, FUN = "m
 distances_mean$ks <- aggregate(ks ~ algo + N, data = distances, FUN = "mean")$ks
 distances_mean <- merge(distances_mean, time_means, by=c("algo", "N"))
 # Wasserstein-1
-w1_plot <- ggplot(data = distances, aes(x = runtime_mean, y = w1, group = interaction(algo, N), fill = algo, colour = algo)) +
+# w1_plot <-
+ggplot(data = distances, aes(x = runtime_mean, y = w1, group = interaction(algo, N), fill = algo, colour = algo)) +
   geom_boxplot(coef = 6, width = 0.1, alpha = 0.1, lwd = 1) +
   geom_point(data = distances_mean, shape = 4, lwd = 1, aes(x = runtime, y = w1, group = interaction(algo, N), fill = algo, colour = algo)) +
   scale_x_log10(
@@ -64,7 +65,7 @@ w1_plot <- ggplot(data = distances, aes(x = runtime_mean, y = w1, group = intera
         text = element_text(size=15), legend.position="none")
 # my_legend <- get_legend(w1_plot)
 # as_ggplot(my_legend)
-# ggsave("lgssm32_w1.pdf", plot = w1_plot, width = 10, height = 8, dpi = 300)
+# ggsave("lgssm256_w1.pdf", width = 10, height = 8, dpi = 300)
 # ggsave("lgssm32_legend.pdf", width = 10, height = 8, dpi = 300)
 # Kolmogorov-Smirnov
 ggplot(data = distances, aes(x = runtime_mean, y = ks, group = interaction(algo, N), fill = algo, colour = algo)) +
@@ -81,10 +82,10 @@ ggplot(data = distances, aes(x = runtime_mean, y = ks, group = interaction(algo,
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=25),
         text = element_text(size=20), legend.position="none")
-# ggsave("lgssm32_ks.pdf", width = 10, height = 8, dpi = 300)
+# ggsave("lgssm256_ks.pdf", width = 10, height = 8, dpi = 300)
 # RMSE
 tmp <- aggregate(. ~ algo + N, data = df, FUN = "mean")
-rmse_data <- data.frame(rep(1:Time.step, times = 4), rep(tmp$algo, each = 100), rep(tmp$N, each = 100))
+rmse_data <- data.frame(rep(1:Time.step, times = 3), rep(tmp$algo, each = 100), rep(tmp$N, each = 100))
 colnames(rmse_data) <- c("Time.step", "algo", "N")
 rmse_data <- rmse_data[order(rmse_data$algo, rmse_data$N), ]
 tmp <- tmp[order(tmp$algo, tmp$N), ]
@@ -96,4 +97,4 @@ ggplot(data = rmse_data, aes(x = Time.step, y = rmse, group = algo, colour = alg
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=20),
         text = element_text(size=15))
-# ggsave("lgssm32_rmse.pdf", width = 12, height = 8, dpi = 300)
+# ggsave("lgssm256_rmse.pdf", width = 12, height = 8, dpi = 300)

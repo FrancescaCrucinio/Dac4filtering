@@ -1,4 +1,5 @@
-d <- 8
+library(ggpubr)
+d <- 1024
 # read data
 df <- rbind(read.csv(paste0("data/resampling_tempering/nocrossover_resampling_comparison_d", d, "N100ID1")),
             read.csv(paste0("data/resampling_tempering/crossover_resampling_comparison_d", d, "N100ID1")))
@@ -13,6 +14,12 @@ for (id in 1:50){
   dfnew <- rbind(read.csv(paste0("data/resampling_tempering/nocrossover_resampling_comparison_d", d, "N1000ID", id, sep = "")),
                  read.csv(paste0("data/resampling_tempering/crossover_resampling_comparison_d", d, "N1000ID", id, sep = "")))
   dfnew$N <- "10^3"
+  df <- rbind(df, dfnew)
+}
+for (id in 1:50){
+  dfnew <- rbind(read.csv(paste0("data/resampling_tempering/nocrossover_resampling_comparison_d", d, "N10000ID", id, sep = "")),
+                 read.csv(paste0("data/resampling_tempering/crossover_resampling_comparison_d", d, "N10000ID", id, sep = "")))
+  dfnew$N <- "10^4"
   df <- rbind(df, dfnew)
 }
 df <- df[, -1]
@@ -37,5 +44,8 @@ ggplot(data = df, aes(x = runtime, y = d_means, group = interaction(algo, mutati
   guides(alpha = "none") +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=20),
-        text = element_text(size=15))
-# ggsave("res_time_low.pdf", width = 10, height = 5, dpi = 300)
+        text = element_text(size=15), legend.position="none")
+# my_legend <- get_legend(p)
+# as_ggplot(my_legend)
+# ggsave("resampling_legend.pdf", width = 10, height = 8, dpi = 300)
+# ggsave("res_time_high.pdf", width = 10, height = 5, dpi = 300)

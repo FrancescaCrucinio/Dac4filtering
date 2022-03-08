@@ -20,38 +20,6 @@ bisection_cess <- function(lOmega, lW, current_alpha, ess_decay_threshold){
 child_indices <- function(i, nv){
   rbind(nv*(i-1)+1, i*nv)
 }
-# function returning index of first and last child of node i in level u for 2D lattice
-# (each column corresponds to one child)
-child_indices_lattice <- function(d, u, i, nv, nodes){
-  if((u %% 2) == 0){ # connect vertically
-    matrix(c((nv*(i-1)+1):(i*nv), (nv*(i-1)+1):(i*nv)+d), ncol = 2)
-  } else { # connect horizontally
-    if(u == 1){
-      matrix((2*(i-1)+1):(i*2), ncol = 2)
-    } else {
-      nvOld <- nchild^(u-2)
-      matrix(c((nvOld*(i-1)+1):(i*nvOld), (nvOld*(i-1)+1):(i*nvOld)+d,
-               (nvOld*i+1):((i+1)*nvOld), (nvOld*i+1):((i+1)*nvOld)+d), ncol = 2)
-    }
-  }
-}
-# function returning the indices of the neighbours of i on a 2D lattice
-neighbours_lattice <- function(d, i){
-  # check for boundary
-  if((i %% d) == 1){
-    x_neighbours <- c(i-d, i+1, i+d)
-  } else if((i %% d) == 0){
-    x_neighbours <- c(i-d, i-1, i+d)
-  } else {
-    x_neighbours <- c(i-d, i-1, i+1, i+d)
-  }
-  valid <- (x_neighbours <= d^2) & (x_neighbours > 0)
-  return(x_neighbours[valid])
-}
-# function checking if given indices are in current node
-in_node <- function(x, ci){
-  x[x %in% ci]
-}
 # get row and column indices for mixture resampling
 rc_indices <- function(indices, dims){
   r <- indices -  trunc(indices/dims)*dims
