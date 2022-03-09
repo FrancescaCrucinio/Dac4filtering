@@ -25,13 +25,6 @@ for (id in 1:50){
   dfnew$run <- id
   df <- rbind(df, dfnew)
 }
-for (id in 1:50){
-  filename <- paste("data/lgssm/v2_lgssm_d32N1e+05ID", id, sep = "")
-  dfnew <- read.csv(filename)
-  dfnew$N <- "10^5"
-  dfnew$run <- id
-  df <- rbind(df, dfnew)
-}
 df <- df[, -1]
 df <- df[df$algo != "dac_ada", ]
 Time.step <- ncol(df) - 6
@@ -66,7 +59,7 @@ ggplot(data = distances, aes(x = runtime_mean, y = w1, group = interaction(algo,
 # my_legend <- get_legend(w1_plot)
 # as_ggplot(my_legend)
 # ggsave("lgssm256_w1.pdf", width = 10, height = 8, dpi = 300)
-# ggsave("lgssm32_legend.pdf", width = 10, height = 8, dpi = 300)
+# ggsave("lgssm32_legend.pdf", width = 6, height = 1, dpi = 300)
 # Kolmogorov-Smirnov
 ggplot(data = distances, aes(x = runtime_mean, y = ks, group = interaction(algo, N), fill = algo, colour = algo)) +
   geom_boxplot(coef = 10, width = 0.1, alpha = 0.1, lwd = 1) +

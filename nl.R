@@ -1,5 +1,5 @@
 set.seed(1234)
-d <- 4
+d <- 32
 sigmaX <- 1
 nu <- 10
 delta <- 1
@@ -23,4 +23,4 @@ for (t in 1:Time.step){
   history <- res
 }
 apply(res, c(1,2), mean)
-mean((apply(res, c(1,2), mean) - nl_data$x[, , Time.step+1])^2)
+m((apply(res, c(1,2), mean) - nl_data$x[, , Time.step+1])^2)

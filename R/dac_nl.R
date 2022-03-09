@@ -4,8 +4,8 @@ dac_nl_lightweight <- function(history, obs, sigmaX, nu, M = NULL){
     M <- ceiling(sqrt(Nparticles))
   }
   # dimension and number of particles
-  d <- nrow(history[, , ])
-  Nparticles <- dim(history[, , ])[3]
+  d <- nrow(history)
+  Nparticles <- dim(history)[3]
   # tree topology
   nchild <- 2
   nlevels <- log2(d)
@@ -53,25 +53,26 @@ dac_nl_lightweight <- function(history, obs, sigmaX, nu, M = NULL){
         # merge
         xleft <- x[cir[, 1], cic[, 1], , drop = FALSE]
         xright <- x[cir[, 1], cic[, 2], , drop = FALSE]
-        out_top_merge <- nl_merge(lW, xleft, xright, historyIndex, 2*i-1, 2*i-1, 2*j-1, 2*j, nv, nvNew, u, M, Nparticles)
-        print("step1 ok")
+        out_top_merge <- nl_merge(lW, x, history, historyIndex, 2*i-1, 2*i-1, 2*j-1, 2*j, cir[, 1], cic[, 1],
+                                  cir[, 1], cic[, 2], nv, nvNew, u, M)
+
         ### Step 2
         # crossover
         historyIndexBottom <- nl_crossover(x, history, historyIndex[, , , 2*i, 2*j-1], historyIndex[, , , 2*i, 2*j],
                                            2*i, 2*i, 2*j-1, 2*j, cir[, 2], c(cic), sigmaX, u)
         xleft <- x[cir[, 2], cic[, 1], , drop = FALSE]
         xright <- x[cir[, 2], cic[, 2], , drop = FALSE]
-        out_bottom_merge <- nl_merge(lW, xleft, xright, historyIndex, 2*i, 2*i, 2*j-1, 2*j, nv, nvNew, u, M, Nparticles)
-        print("step2 ok")
+        out_bottom_merge <- nl_merge(lW, x, history, historyIndex, 2*i, 2*i, 2*j-1, 2*j, cir[, 2], cic[, 1],
+                                     cir[, 2], cic[, 2], nv, nvNew, u, M)
         #### VERTICAL MERGE ###
         # crossover
         historyIndexNew[, , , i, j] <- nl_crossover(x, history, historyIndexTop, historyIndexBottom,
                                                     2*i, 2*i, 2*j-1, 2*j, c(cir), c(cic), sigmaX, u+1)
-        xTop <- out_top_merge$x
-        xBottom <- out_bottom_merge$x
-        out_merge <- nl_merge(lW, xTop, xBottom, historyIndexNew, 2*i, 2*i, 2*j-1, 2*j, nvNew, nvNew, u+1, M, Nparticles)
+        x[cir[, 1], c(cic), ] <- out_top_merge$x
+        x[cir[, 2], c(cic), ] <- out_bottom_merge$x
+        out_merge <- nl_merge(lW, x, history, historyIndex, 2*i, 2*i, 2*j-1, 2*j, cir[, 1], c(cic),
+                              cir[, 2], c(cic), nvNew, nvNew, u+1, M)
         xNew[c(cir), c(cic), ] <- out_merge$x
-        print("vertical ok")
       }
     }
     historyIndex <- historyIndexNew

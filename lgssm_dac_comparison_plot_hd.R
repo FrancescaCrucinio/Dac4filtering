@@ -31,7 +31,7 @@ time_means <- time_means[order(time_means$algo, time_means$mutation, time_means$
 df$runtime <- rep(time_means$elapsed, each = 50)
 aggregate(d_means ~ algo + mutation + N, data = df, FUN = "mean")
 # time
-ggplot(data = df, aes(x = runtime, y = d_means, group = interaction(algo, mutation, N), fill = algo, colour = algo)) +
+p <- ggplot(data = df, aes(x = runtime, y = d_means, group = interaction(algo, mutation, N), fill = algo, colour = algo)) +
   geom_boxplot(aes(alpha = as.factor(mutation)), coef = 6, width = 20) +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
@@ -44,8 +44,8 @@ ggplot(data = df, aes(x = runtime, y = d_means, group = interaction(algo, mutati
   guides(alpha = "none") +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=20),
-        text = element_text(size=15), legend.position="none")
+        text = element_text(size=15), legend.position="bottom")
 # my_legend <- get_legend(p)
 # as_ggplot(my_legend)
-# ggsave("resampling_legend.pdf", width = 10, height = 8, dpi = 300)
+# ggsave("resampling_legend.pdf", width = 6, height = 1, dpi = 300)
 # ggsave("res_time_high.pdf", width = 10, height = 5, dpi = 300)

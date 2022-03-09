@@ -1,4 +1,5 @@
-nl_light <- function(u, left_child, right_child, lW_left, lW_right, Nparticles, m){
+nl_light <- function(u, x, history, historyIndex_left, historyIndex_right, cir_right, cic_right,
+                     lW_left, lW_right, sigmaX, Nparticles, m, d){
   # binary tree
   nchild <- 2
   # resample on each children
@@ -22,9 +23,20 @@ nl_light <- function(u, left_child, right_child, lW_left, lW_right, Nparticles, 
   }
   # mixture weights
   lWmix <- rep(0, times = m*Nparticles)
-  # for (n in 1:m*Nparticles){
-  #   # compute Rf
-  # }
+  for (n in 1:m*Nparticles){
+    left_ancestor_coordinates <- cbind(1:d, rep(1:d, each = d), c(historyIndex_left[indices1[n], , ]))
+    right_ancestor_coordinates <- cbind(1:d, rep(1:d, each = d), c(historyIndex_right[indices2[n], , ]))
+    left_ancestor <- matrix(history[left_ancestor_coordinates], nrow = d)
+    right_ancestor <- matrix(history[right_ancestor_coordinates], nrow = d)
+
+    for (col in cic_right) {
+      for (row in cir_right) {
+        out_neighbours <- get_neighbours_weights(row, col, d)
+        lWmix[n] <- lWmix[n] + log(sum(out_neighbours$mixture_weights * dnorm(x[row, col, indices2[n]], mean = left_ancestor[row, col], sd = sqrt(sigmaX)))) -
+          log(sum(out_neighbours$mixture_weights * dnorm(x[row, col, indices2[n]], mean = right_ancestor[row, col], sd = sqrt(sigmaX))))
+      }
+    }
+  }
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
   # resampling the new population
