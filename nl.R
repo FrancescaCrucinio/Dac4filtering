@@ -1,5 +1,5 @@
 set.seed(1234)
-d <- 32
+d <- 8
 sigmaX <- 1
 nu <- 10
 delta <- 1
@@ -15,12 +15,23 @@ nl_data <- nl_obs(d, sigmaX, nu, delta, y.error.prec, Time.step)
 obs <- matrix(unlist(nl_data$y), ncol = d, nrow = d)
 
 Nparticles <- 100
+M <- 100
 # initial state
 history <- sqrt(sigmaX)*array(rnorm(Nparticles*d^2), dim = c(d, d, Nparticles))
+xOld <- sqrt(sigmaX)*array(rnorm(Nparticles*M*d^2), dim = c(d, d, Nparticles, M))
+xOld2 <- history
 for (t in 1:Time.step){
   print(paste(t))
   res <- dac_nl_lightweight(history, obs, sigmaX, nu)
+  res_stpf <- stpf_nl(xOld, obs, nu, sigmaX)
+  res_nsmc <- nsmc_nl(xOld2, obs, nu, sigmaX, M)
   history <- res
+  xOld <- res_stpf
+  xOld2 <- res_nsmc
 }
 apply(res, c(1,2), mean)
-m((apply(res, c(1,2), mean) - nl_data$x[, , Time.step+1])^2)
+apply(res_stpf, c(1, 2), mean)
+
+mean((apply(res, c(1,2), mean) - nl_data$x[, , Time.step+1])^2)
+mean((apply(res_nsmc, c(1,2), mean) - nl_data$x[, , Time.step+1])^2)
+mean((apply(res_stpf, c(1, 2), mean) - nl_data$x[, , Time.step+1])^2)

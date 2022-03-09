@@ -21,7 +21,7 @@ dac_nl_lightweight <- function(history, obs, sigmaX, nu, M = NULL){
     for (row in 1:d){
       out_neighbours <- get_neighbours_weights(row, col, d)
       xMean <- sapply(1:Nparticles, sample_mixture, out_neighbours$mixture_weights,
-                      out_neighbours$current_x_neighbours, history[, , ], simplify = TRUE)
+                      out_neighbours$current_x_neighbours, history, simplify = TRUE)
       # weights
       x[row, col, ] <- xMean + sqrt(sigmaX)*rnorm(Nparticles)
       lW[row, col, ] <- -0.5*(nu+1)*log(1+(x[row, col, ] - obs[row, col])^2/nu)
