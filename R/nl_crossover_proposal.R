@@ -3,7 +3,7 @@ nl_crossover_proposal <- function(x, history, historyIndex_left, historyIndex_ri
   # binary tree
   nchild <- 2
 
-  merged_history <- array(0, dim = dim(historyIndex_left))
+  merged_history <- historyIndex_left
   for (n in 1:Nparticles){
     crossover_point <- sample.int(d^2-1, 1)
     # crossover_point_col <- crossover_point -  trunc(crossover_point/d)*d

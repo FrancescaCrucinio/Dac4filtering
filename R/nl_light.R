@@ -32,8 +32,10 @@ nl_light <- function(u, x, history, historyIndex_left, historyIndex_right, cir_r
     for (col in cic_right) {
       for (row in cir_right) {
         out_neighbours <- get_neighbours_weights(row, col, d)
-        lWmix[n] <- lWmix[n] + log(sum(out_neighbours$mixture_weights * dnorm(x[row, col, indices2[n]], mean = left_ancestor[row, col], sd = sqrt(sigmaX)))) -
-          log(sum(out_neighbours$mixture_weights * dnorm(x[row, col, indices2[n]], mean = right_ancestor[row, col], sd = sqrt(sigmaX))))
+        valid_weights <- out_neighbours$mixture_weights[out_neighbours$mixture_weights>0]
+        valid_current_neighbours <- out_neighbours$current_x_neighbours[out_neighbours$mixture_weights>0, ]
+        lWmix[n] <- lWmix[n] + log(sum(valid_weights * dnorm(x[row, col, indices2[n]], mean = left_ancestor[valid_current_neighbours], sd = sqrt(sigmaX)))) -
+          log(sum(valid_weights * dnorm(x[row, col, indices2[n]], mean = right_ancestor[valid_current_neighbours], sd = sqrt(sigmaX))))
       }
     }
   }
@@ -44,27 +46,79 @@ nl_light <- function(u, x, history, historyIndex_left, historyIndex_right, cir_r
   return(list("resampled_indices" = cbind(indices1[indices], indices2[indices]), "resampled_particles_lW" = lWmix[indices]))
 }
 
+nl_adaptive_light <- function(ess_target, u, x, history, historyIndex_left, historyIndex_right, cir_right, cic_right,
+                              lW_left, lW_right, sigmaX, Nparticles, m, d){
+  # binary tree
+  nchild <- 2
+  # mixture weights
+  lWmix <- rep(0, times = Nparticles)
+  for (n in 1:Nparticles){
+    left_ancestor_coordinates <- cbind(1:d, rep(1:d, each = d), c(historyIndex_left[n, , ]))
+    right_ancestor_coordinates <- cbind(1:d, rep(1:d, each = d), c(historyIndex_right[n, , ]))
+    left_ancestor <- matrix(history[left_ancestor_coordinates], nrow = d)
+    right_ancestor <- matrix(history[right_ancestor_coordinates], nrow = d)
 
-#
-# valid_neighbours <- sapply(c(ci), neighbours_lattice, d = d)
-# u_valid_neighbours <- lapply(valid_neighbours, in_node, ci = c(ci))
-# left_valid_neighbours <- lapply(valid_neighbours[1:nv], in_node, ci = ci[, 1])
-# right_valid_neighbours <- lapply(valid_neighbours[(nv+1):nvNew], in_node, ci = ci[, 2])
-#
-# # mixture weights
-# lWmix <- rep(0, times = m*Nparticles)
-# for (n in 1:m*Nparticles){
-#   # merged x
-#   mx <- x[indices1[n], ]
-#   mx[ci[, 2]] <-x[indices2[n], ci[, 2]]
-#   current_node_fit <- obs[c(ci)] - mx
-#   neighbours_fit <- lapply(u_valid_neighbours, neighbours_fit_fun, mx, obs)
-#   left_neighbours_fit <- lapply(left_valid_neighbours, neighbours_fit_fun, x[indices1[n], ], obs)
-#   right_neighbours_fit <- lapply(right_valid_neighbours, neighbours_fit_fun, x[indices2[n], ], obs)
-#   product_neighbours_fit <- unlist(sapply(1:nvNew, neighbours_fit_product, current_node_fit, neighbours_fit))
-#   left_product_neighbours_fit <- unlist(sapply(1:nv, neighbours_fit_product, current_node_fit, left_neighbours_fit))
-#   right_product_neighbours_fit <- unlist(sapply((nv+1):nvNew, neighbours_fit_product, current_node_fit, right_neighbours_fit))
-#   lWmix[n] <- 0.5*(nu+d)*log(1 + sum(sum(current_node_fit^2/100, 0*product_neighbours_fit))/nu) -
-#     0.5*(nu+d)*log(1 + sum(sum(current_node_fit[ci[, 1]]^2, 0*left_product_neighbours_fit))/nu) -
-#     0.5*(nu+d)*log(1 + sum(sum(current_node_fit[ci[, 2]]^2, 0*right_product_neighbours_fit))/nu)
-# }
+    for (col in cic_right) {
+      for (row in cir_right) {
+        out_neighbours <- get_neighbours_weights(row, col, d)
+        valid_weights <- out_neighbours$mixture_weights[out_neighbours$mixture_weights>0]
+        valid_current_neighbours <- out_neighbours$current_x_neighbours[out_neighbours$mixture_weights>0, ]
+        lWmix[n] <- lWmix[n] + log(sum(valid_weights * dnorm(x[row, col, n], mean = left_ancestor[valid_current_neighbours], sd = sqrt(sigmaX)))) -
+          log(sum(valid_weights * dnorm(x[row, col, n], mean = right_ancestor[valid_current_neighbours], sd = sqrt(sigmaX))))
+      }
+    }
+  }
+  if(u == 1){
+    lWmix <- lWmix + c(lW_left) + c(lW_right)
+  }
+  max.lWmix <- max(lWmix)
+  Wmix <- exp(lWmix - max.lWmix)
+  # build ESS
+  ess_s <- sum(Wmix)
+  ess_ss <- sum(Wmix^2)
+  ess <- ess_s^2/ess_ss
+  # first permutation
+  permutation <- 1:Nparticles
+  m <- 1
+  while (ess < ess_target & m<=ceiling(sqrt(Nparticles))) {
+    m <- m+1
+    new_perm <- sample.int(Nparticles)
+    # mixture weights
+    lWmix_perm <- rep(0, times = Nparticles)
+    for (n in 1:Nparticles) {
+      left_ancestor_coordinates <- cbind(1:d, rep(1:d, each = d), c(historyIndex_left[n, , ]))
+      right_ancestor_coordinates <- cbind(1:d, rep(1:d, each = d), c(historyIndex_right[new_perm[n], , ]))
+      left_ancestor <- matrix(history[left_ancestor_coordinates], nrow = d)
+      right_ancestor <- matrix(history[right_ancestor_coordinates], nrow = d)
+
+      for (col in cic_right) {
+        for (row in cir_right) {
+          out_neighbours <- get_neighbours_weights(row, col, d)
+          valid_weights <- out_neighbours$mixture_weights[out_neighbours$mixture_weights>0]
+          valid_current_neighbours <- out_neighbours$current_x_neighbours[out_neighbours$mixture_weights>0, ]
+          lWmix_perm[n] <- lWmix_perm[n] + log(sum(valid_weights * dnorm(x[row, col, n], mean = left_ancestor[valid_current_neighbours], sd = sqrt(sigmaX)))) -
+            log(sum(valid_weights * dnorm(x[row, col, new_perm[n]], mean = right_ancestor[valid_current_neighbours], sd = sqrt(sigmaX))))
+        }
+      }
+    }
+    if(u == 1){
+      lWmix_perm <- lWmix_perm + c(lW_left) + c(lW_right)
+    }
+    permutation <- c(permutation, new_perm)
+    max.lWmix <- max(lWmix_perm)
+    Wmix <- exp(lWmix_perm - max.lWmix)
+    # build ESS
+    ess_s <- ess_s + sum(Wmix)
+    ess_ss <- ess_ss + sum(Wmix^2)
+    ess <- ess_s^2/ess_ss
+    lWmix <- c(lWmix, lWmix_perm)
+  }
+  # write.table(data.frame("u" = u, "m" = m), file = "data/adaptive_nl.csv", sep = ",", append = TRUE, quote = FALSE,
+  #             col.names = FALSE, row.names = FALSE)
+  max.lWmix <- max(lWmix)
+  Wmix <- exp(lWmix - max.lWmix)
+  # resampling the new population
+  indices <- stratified_resample(Wmix/sum(Wmix), Nparticles)
+  return(list("resampled_indices" = cbind(rep(1:Nparticles, times = m)[indices], permutation[indices]),
+              "target_reached" = (ess >= ess_target), "resampled_particles_lW" = lWmix[indices]))
+}

@@ -53,7 +53,7 @@ df <- data.frame()
 x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
 # dac (lightweight adaptive)
 tic()
-res_dac <- dac_time_car(sigmaX, sigmaY, Nparticles, x0, y, method="adaptive", marginals = marginals)
+res_dac <- dac_time_car(sigmaX, sigmaY, Nparticles, x0, y, method="light", marginals = marginals)
 runtime <- toc()
 rse_dac <- (res_dac$m - true_means)^2/true_variances
 df <- data.frame(rbind(df, cbind(t(rse_dac), res_dac$w1, res_dac$ks, rep(runtime, times = d))))

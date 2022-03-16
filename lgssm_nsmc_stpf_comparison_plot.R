@@ -18,7 +18,7 @@ for (id in 1:50){
   dfnew$run <- id
   df <- rbind(df, dfnew)
 }
-for (id in 1:50){
+for (id in 1:22){
   filename <- paste("data//lgssm_tempering/lgssm_d32N10000ID", id, sep = "")
   dfnew <- read.csv(filename)
   dfnew$N <- "10^4"
