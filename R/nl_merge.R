@@ -1,4 +1,4 @@
-nl_merge <- function(lW, x, history, historyIndex, node_row_left, node_row_right,
+nl_merge <- function(lW, obs, x, history, historyIndex, node_row_left, node_row_right,
                                 node_col_left, node_col_right, cir_left, cic_left, cir_right, cic_right, nv, nvNew, u, M, covariance = FALSE){
   Nparticles <- dim(history)[3]
   d <- dim(history)[2]
@@ -9,17 +9,21 @@ nl_merge <- function(lW, x, history, historyIndex, node_row_left, node_row_right
   historyIndex_right <- historyIndex[, , , node_row_right, node_col_right]
   if(covariance){
     if(is.null(M)){
-      out <- nl_adaptive_light_covariance(Nparticles, u, x, history, historyIndex_left, historyIndex_right, cir_left, cir_right, cic_left, cic_right,
+      out <- nl_adaptive_light_covariance(Nparticles, u, obs, x, history, historyIndex_left, historyIndex_right, cir_left, cir_right, cic_left, cic_right,
                                lW_left, lW_right, sigmaX, Nparticles, M, d, nchild^(u-1))
+      target_reached <- out$target_reached
     } else {
-      out <- nl_light_covariance(u, x, history, historyIndex_left, historyIndex_right, cir_left, cir_right, cic_left, cic_right,
+      target_reached <- TRUE
+      out <- nl_light_covariance(u, obs, x, history, historyIndex_left, historyIndex_right, cir_left, cir_right, cic_left, cic_right,
                       lW_left, lW_right, sigmaX, Nparticles, M, d, nchild^(u-1))
     }
   } else{
     if(is.null(M)){
       out <- nl_adaptive_light(Nparticles, u, x, history, historyIndex_left, historyIndex_right, cir_right, cic_right,
                                lW_left, lW_right, sigmaX, Nparticles, M, d)
+      target_reached <- out$target_reached
     } else {
+      target_reached <- TRUE
       out <- nl_light(u, x, history, historyIndex_left, historyIndex_right, cir_right, cic_right,
                       lW_left, lW_right, sigmaX, Nparticles, M, d)
     }
@@ -28,5 +32,5 @@ nl_merge <- function(lW, x, history, historyIndex, node_row_left, node_row_right
   indices <- out$resampled_indices
   merged_x <- array(rbind(x[cir_left, cic_left, indices[, 1], drop = FALSE], x[cir_right, cic_right, indices[, 2], drop = FALSE]),
                     dim = c(nv, nvNew, Nparticles))
-  return(list("x" = merged_x, "indices" = indices))
+  return(list("x" = merged_x, "indices" = indices, "target_reached" = target_reached))
 }

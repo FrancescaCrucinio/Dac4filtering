@@ -54,7 +54,7 @@ dac_nl_lightweight <- function(history, obs, sigmaX, nu, M = NULL, covariance = 
         # merge
         xleft <- x[cir[, 1], cic[, 1], , drop = FALSE]
         xright <- x[cir[, 1], cic[, 2], , drop = FALSE]
-        out_top_merge <- nl_merge(lW, x, history, historyIndex, 2*i-1, 2*i-1, 2*j-1, 2*j, cir[, 1], cic[, 1],
+        out_top_merge <- nl_merge(lW, obs, x, history, historyIndex, 2*i-1, 2*i-1, 2*j-1, 2*j, cir[, 1], cic[, 1],
                                   cir[, 1], cic[, 2], nv, nvNew, u, M, covariance)
         historyIndex[, , , 2*i-1, 2*j-1] <- historyIndexTop[out_top_merge$indices[, 1], , , drop = FALSE]
         ### Step 2
@@ -63,7 +63,7 @@ dac_nl_lightweight <- function(history, obs, sigmaX, nu, M = NULL, covariance = 
                                            2*i, 2*i, 2*j-1, 2*j, cir[, 2], c(cic), sigmaX, u)
         xleft <- x[cir[, 2], cic[, 1], , drop = FALSE]
         xright <- x[cir[, 2], cic[, 2], , drop = FALSE]
-        out_bottom_merge <- nl_merge(lW, x, history, historyIndex, 2*i, 2*i, 2*j-1, 2*j, cir[, 2], cic[, 1],
+        out_bottom_merge <- nl_merge(lW, obs, x, history, historyIndex, 2*i, 2*i, 2*j-1, 2*j, cir[, 2], cic[, 1],
                                      cir[, 2], cic[, 2], nv, nvNew, u, M, covariance)
         historyIndex[, , , 2*i, 2*j-1] <- historyIndexBottom[out_bottom_merge$indices[, 1], , , drop = FALSE]
         #### VERTICAL MERGE ###
@@ -72,7 +72,7 @@ dac_nl_lightweight <- function(history, obs, sigmaX, nu, M = NULL, covariance = 
                                                     2*i, 2*i, 2*j-1, 2*j, c(cir), c(cic), sigmaX, u+1)
         x[cir[, 1], c(cic), ] <- out_top_merge$x
         x[cir[, 2], c(cic), ] <- out_bottom_merge$x
-        out_merge <- nl_merge(lW, x, history, historyIndex, 2*i, 2*i, 2*j-1, 2*j, cir[, 1], c(cic),
+        out_merge <- nl_merge(lW, obs, x, history, historyIndex, 2*i, 2*i, 2*j-1, 2*j, cir[, 1], c(cic),
                               cir[, 2], c(cic), nvNew, nvNew, u+1, M, covariance)
         xNew[c(cir), c(cic), ] <- out_merge$x
         historyIndexNew[, , , i, j] <- historyIndexNew[out_merge$indices[, 1], , , i, j]
@@ -137,25 +137,34 @@ dac_nl_adaptive_lightweight <- function(history, obs, sigmaX, nu, M = NULL, cova
         # merge
         xleft <- x[cir[, 1], cic[, 1], , drop = FALSE]
         xright <- x[cir[, 1], cic[, 2], , drop = FALSE]
-        out_top_merge <- nl_merge(lW, x, history, historyIndex, 2*i-1, 2*i-1, 2*j-1, 2*j, cir[, 1], cic[, 1],
+        out_top_merge <- nl_merge(lW, obs, x, history, historyIndex, 2*i-1, 2*i-1, 2*j-1, 2*j, cir[, 1], cic[, 1],
                                   cir[, 1], cic[, 2], nv, nvNew, u, M, covariance)
+        x[cir[, 1], c(cic), ] <- out_top_merge$x
         historyIndex[, , , 2*i-1, 2*j-1] <- historyIndexTop[out_top_merge$indices[, 1], , , drop = FALSE]
+        # if(!out$target_reached){
+        #   # tempering
+        #   tempering_out <-
+        #   # update particles
+        #   xNew <- tempering_out$x
+        #   # update history
+        #   historyIndexNew <- tempering_out$history_index_updated
+        # }
         ### Step 2
         # crossover
         historyIndexBottom <- nl_crossover(x, history, historyIndex[, , , 2*i, 2*j-1], historyIndex[, , , 2*i, 2*j],
                                            2*i, 2*i, 2*j-1, 2*j, cir[, 2], c(cic), sigmaX, u)
         xleft <- x[cir[, 2], cic[, 1], , drop = FALSE]
         xright <- x[cir[, 2], cic[, 2], , drop = FALSE]
-        out_bottom_merge <- nl_merge(lW, x, history, historyIndex, 2*i, 2*i, 2*j-1, 2*j, cir[, 2], cic[, 1],
+        out_bottom_merge <- nl_merge(lW, obs, x, history, historyIndex, 2*i, 2*i, 2*j-1, 2*j, cir[, 2], cic[, 1],
                                      cir[, 2], cic[, 2], nv, nvNew, u, M, covariance)
+        x[cir[, 2], c(cic), ] <- out_bottom_merge$x
         historyIndex[, , , 2*i, 2*j-1] <- historyIndexBottom[out_bottom_merge$indices[, 1], , , drop = FALSE]
         #### VERTICAL MERGE ###
         # crossover
         historyIndexNew[, , , i, j] <- nl_crossover(x, history, historyIndex[, , , 2*i-1, 2*j-1], historyIndex[, , , 2*i, 2*j-1],
                                                     2*i, 2*i, 2*j-1, 2*j, c(cir), c(cic), sigmaX, u+1)
-        x[cir[, 1], c(cic), ] <- out_top_merge$x
-        x[cir[, 2], c(cic), ] <- out_bottom_merge$x
-        out_merge <- nl_merge(lW, x, history, historyIndex, 2*i, 2*i, 2*j-1, 2*j, cir[, 1], c(cic),
+
+        out_merge <- nl_merge(lW, obs, x, history, historyIndex, 2*i, 2*i, 2*j-1, 2*j, cir[, 1], c(cic),
                               cir[, 2], c(cic), nvNew, nvNew, u+1, M, covariance)
         xNew[c(cir), c(cic), ] <- out_merge$x
         historyIndexNew[, , , i, j] <- historyIndexNew[out_merge$indices[, 1], , , i, j]

@@ -1,6 +1,7 @@
 nl_obs <- function(d, sigmaX, nu, delta, y.error.prec, Time.step){
   x <- array(0, dim = c(d, d, Time.step+1))
   y <- array(0, dim = c(d, d, Time.step))
+  y_iid <- array(0, dim = c(d, d, Time.step))
   # initial state
   x[, , 1] <- sqrt(sigmaX)*matrix(rnorm(d^2), nrow = d)
 
@@ -14,7 +15,7 @@ nl_obs <- function(d, sigmaX, nu, delta, y.error.prec, Time.step){
       }
     }
     y[, , t-1] <- matrix(rmvt(1, mu = c(x[, , t]), df = nu, sigma = inv(y.error.prec)), ncol = d)
-
+    y_iid[, , t-1] <- matrix(rmvt(1, mu = c(x[, , t]), df = nu, sigma = diag(1/diag(y.error.prec), d^2, d^2)), ncol = d)
   }
-  return(list("x" = x, "y" = y))
+  return(list("x" = x, "y" = y, "yiid" = y_iid))
 }

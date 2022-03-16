@@ -1,7 +1,7 @@
 ID <- 1
 set.seed(1234*ID)
 # dimension
-d <- 32
+d <- 128
 # initial state
 mu0 <- rep(0, times = d)
 Sigma0 <- diag(x = 1, d, d)
@@ -25,7 +25,7 @@ y.coeff <- diag(1, d, d)
 
 
 # number of time steps
-Time.step <- 10
+Time.step <- 1
 
 # get observations
 y <- ssm_obs(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step)
@@ -47,13 +47,13 @@ for(i in 1:d){
 }
 
 Nparticles <- 100
-M <- 100
+M <- 10
 df <- data.frame()
 
 x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
 # dac (lightweight adaptive)
 tic()
-res_dac <- dac_time_car(sigmaX, sigmaY, Nparticles, x0, y, method="light", marginals = marginals)
+res_dac <- dac_time_car(sigmaX, sigmaY, Nparticles, x0, y, method="adaptive", marginals = marginals)
 runtime <- toc()
 rse_dac <- (res_dac$m - true_means)^2/true_variances
 df <- data.frame(rbind(df, cbind(t(rse_dac), res_dac$w1, res_dac$ks, rep(runtime, times = d))))

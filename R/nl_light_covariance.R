@@ -1,4 +1,4 @@
-nl_light_covariance <- function(u, x, history, historyIndex_left, historyIndex_right, cir_left, cir_right, cic_left, cic_right,
+nl_light_covariance <- function(u, obs, x, history, historyIndex_left, historyIndex_right, cir_left, cir_right, cic_left, cic_right,
                      lW_left, lW_right, sigmaX, Nparticles, m, d, nodes_dimension){
   # binary tree
   nchild <- 2
@@ -83,7 +83,7 @@ nl_light_covariance <- function(u, x, history, historyIndex_left, historyIndex_r
 }
 
 
-nl_adaptive_light_covariance <- function(ess_target, u, x, history, historyIndex_left, historyIndex_right, cir_left, cir_right, cic_left, cic_right,
+nl_adaptive_light_covariance <- function(ess_target, u, obs, x, history, historyIndex_left, historyIndex_right, cir_left, cir_right, cic_left, cic_right,
                                          lW_left, lW_right, sigmaX, Nparticles, m, d, nodes_dimension){
   # binary tree
   nchild <- 2
