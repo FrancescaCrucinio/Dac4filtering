@@ -1,5 +1,5 @@
 set.seed(1234)
-d <- 32
+d <- 8
 sigmaX <- 1
 nu <- 10
 delta <- 1
@@ -12,7 +12,7 @@ y.error.prec[vertical_neighbours[(vertical_neighbours <= d^4)]] <- 1/4
 y.error.prec[upper.tri(y.error.prec)] = t(y.error.prec)[upper.tri(y.error.prec)]
 
 nl_data <- nl_obs(d, sigmaX, nu, delta, y.error.prec, Time.step)
-y <- nl_data$y
+y <- nl_data$yiid
 
 Nparticles <- 100
 M <- 100
@@ -27,13 +27,13 @@ for (t in 1:Time.step){
   history <- res
 }
 toc()
-tic()
-for (t in 1:Time.step){
-  print(paste(t))
-  res_t <- dac_nl_lightweight(history, y[, , t], sigmaX, nu, covariance = TRUE)
-  history <- res_t
-}
-toc()
+# tic()
+# for (t in 1:Time.step){
+#   print(paste(t))
+#   res_t <- dac_nl_lightweight(history, y[, , t], sigmaX, nu, covariance = TRUE)
+#   history <- res_t
+# }
+# toc()
 tic()
 for (t in 1:Time.step){
   print(paste(t))
@@ -48,10 +48,8 @@ for (t in 1:Time.step){
   xOld2 <- res_nsmc
 }
 toc()
-apply(res, c(1,2), mean)
-apply(res_stpf, c(1, 2), mean)
 
 mean((apply(res, c(1,2), mean) - nl_data$x[, , Time.step+1])^2)
-mean((apply(res_t, c(1,2), mean) - nl_data$x[, , Time.step+1])^2)
+# mean((apply(res_t, c(1,2), mean) - nl_data$x[, , Time.step+1])^2)
 mean((apply(res_nsmc, c(1,2), mean) - nl_data$x[, , Time.step+1])^2)
 mean((apply(res_stpf, c(1, 2), mean) - nl_data$x[, , Time.step+1])^2)

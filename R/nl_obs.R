@@ -12,10 +12,11 @@ nl_obs <- function(d, sigmaX, nu, delta, y.error.prec, Time.step){
         mixture_component <- sample.int(5, size = 1, prob = out_neighbours$mixture_weights)
         component_coordinates <- out_neighbours$current_x_neighbours[mixture_component, ]
         x[row, col, t] <- x[component_coordinates[1], component_coordinates[2], t-1] + sqrt(sigmaX)*rnorm(1)
+        y_iid[row, col, t-1] <- x[row, col, t] + rt(1, df = nu)
       }
     }
     y[, , t-1] <- matrix(rmvt(1, mu = c(x[, , t]), df = nu, sigma = inv(y.error.prec)), ncol = d)
-    y_iid[, , t-1] <- matrix(rmvt(1, mu = c(x[, , t]), df = nu, sigma = diag(1/diag(y.error.prec), d^2, d^2)), ncol = d)
+
   }
   return(list("x" = x, "y" = y, "yiid" = y_iid))
 }
