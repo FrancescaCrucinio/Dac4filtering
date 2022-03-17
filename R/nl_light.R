@@ -1,5 +1,6 @@
 nl_light <- function(u, x, history, historyIndex_left, historyIndex_right, cir_right, cic_right,
-                     lW_left, lW_right, sigmaX, Nparticles, m, d){
+                     lW_left, lW_right, sigmaX, m, d){
+  Nparticles <- dim(history)[3]
   # binary tree
   nchild <- 2
   # resample on each children
@@ -23,12 +24,11 @@ nl_light <- function(u, x, history, historyIndex_left, historyIndex_right, cir_r
   }
   # mixture weights
   lWmix <- rep(0, times = m*Nparticles)
-  for (n in 1:m*Nparticles){
+  for (n in 1:(m*Nparticles)){
     left_ancestor_coordinates <- cbind(1:d, rep(1:d, each = d), c(historyIndex_left[indices1[n], , ]))
     right_ancestor_coordinates <- cbind(1:d, rep(1:d, each = d), c(historyIndex_right[indices2[n], , ]))
     left_ancestor <- matrix(history[left_ancestor_coordinates], nrow = d)
     right_ancestor <- matrix(history[right_ancestor_coordinates], nrow = d)
-
     for (col in cic_right) {
       for (row in cir_right) {
         out_neighbours <- get_neighbours_weights(row, col, d)
@@ -46,8 +46,14 @@ nl_light <- function(u, x, history, historyIndex_left, historyIndex_right, cir_r
   return(list("resampled_indices" = cbind(indices1[indices], indices2[indices]), "resampled_particles_lW" = lWmix[indices]))
 }
 
-nl_adaptive_light <- function(ess_target, u, x, history, historyIndex_left, historyIndex_right, cir_right, cic_right,
-                              lW_left, lW_right, sigmaX, Nparticles, m, d){
+nl_adaptive_light <- function(ess_target, u_info, x, history, historyIndex_left, historyIndex_right, cir_right, cic_right,
+                              lW_left, lW_right, sigmaX, m, d){
+  Nparticles <- dim(history)[3]
+  if(u_info$direction == "v"){
+    u <- u_info$u+1
+  } else {
+    u <- u_info$u
+  }
   # binary tree
   nchild <- 2
   # mixture weights
@@ -57,7 +63,6 @@ nl_adaptive_light <- function(ess_target, u, x, history, historyIndex_left, hist
     right_ancestor_coordinates <- cbind(1:d, rep(1:d, each = d), c(historyIndex_right[n, , ]))
     left_ancestor <- matrix(history[left_ancestor_coordinates], nrow = d)
     right_ancestor <- matrix(history[right_ancestor_coordinates], nrow = d)
-
     for (col in cic_right) {
       for (row in cir_right) {
         out_neighbours <- get_neighbours_weights(row, col, d)
@@ -113,8 +118,8 @@ nl_adaptive_light <- function(ess_target, u, x, history, historyIndex_left, hist
     ess <- ess_s^2/ess_ss
     lWmix <- c(lWmix, lWmix_perm)
   }
-  # write.table(data.frame("u" = u, "m" = m), file = "data/adaptive_nl.csv", sep = ",", append = TRUE, quote = FALSE,
-  #             col.names = FALSE, row.names = FALSE)
+  write.table(data.frame("u" = u_info$u, "direction" = u_info$direction, "m" = m), file = "data/adaptive_nl.csv", sep = ",", append = TRUE, quote = FALSE,
+              col.names = FALSE, row.names = FALSE)
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
   # resampling the new population
