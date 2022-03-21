@@ -44,8 +44,8 @@ p <- ggplot(data = df, aes(x = runtime, y = d_means, group = interaction(algo, m
   guides(alpha = "none") +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=20),
-        text = element_text(size=15), legend.position="bottom")
+        text = element_text(size=15), legend.position="none")
 # my_legend <- get_legend(p)
 # as_ggplot(my_legend)
 # ggsave("resampling_legend.pdf", width = 6, height = 1, dpi = 300)
-# ggsave("res_time_high.pdf", width = 10, height = 5, dpi = 300)
+# ggsave("res_time_high.pdf", width = 10, height = 3, dpi = 300)

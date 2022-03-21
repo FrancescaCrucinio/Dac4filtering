@@ -79,8 +79,8 @@ write.table(res_dac_v2, file = filename, append = FALSE, sep = " ", dec = ".",
             row.names = TRUE, col.names = TRUE)
 
 df$algo <- as.factor(c("dac", "light", "light_ada_temp"))
-df$mutation <- as.factor(c(1,1,1))
+df$mutation <- as.factor(c(0,0,0))
 
-filename <- paste0("results/crossover_resampling_comparison_d", d, "N", Nparticles, "ID", ID, "step", timeinterval)
+filename <- paste0("run_dac/results/nocrossover_resampling_comparison_d", d, "N", Nparticles, "ID", ID, "step", timeinterval)
 write.csv(x=df, file=filename)
 
