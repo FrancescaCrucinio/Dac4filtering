@@ -56,6 +56,14 @@ dac_nl_lightweight <- function(history, obs, sigmaX, nu, M = NULL, covariance = 
                                   cir[, 1], cic[, 2], nv, nvNew, list("u" = u, "direction" = "h"), M, covariance)
         x[cir[, 1], c(cic), ] <- out_top_merge$x
         historyIndex[, , , 2*i-1, 2*j-1] <- historyIndexTop[out_top_merge$indices[, 1], , , drop = FALSE]
+        # tempering
+        tempering_out_top <- nl_tempering(Nparticles, 1-1e-05, x, history, historyIndex[, , , 2*i-1, 2*j-1], historyIndex[, , , 2*i-1, 2*j],
+                                      obs, nv, nu, out_top_merge$after_mix_lW, c(cir), c(cic), cir[, 1], cir[, 1], cic[, 1], cic[, 2],
+                                      sqrt(1/nodes_dimension))
+        # update particles
+        xNew <- tempering_out_top$x
+        # update history
+        historyIndexNew <- tempering_out_top$history_index_updated
         ### Step 2
         # crossover
         historyIndexBottom <- nl_crossover(x, history, historyIndex[, , , 2*i, 2*j-1], historyIndex[, , , 2*i, 2*j],
@@ -64,14 +72,29 @@ dac_nl_lightweight <- function(history, obs, sigmaX, nu, M = NULL, covariance = 
                                      cir[, 2], cic[, 2], nv, nvNew, list("u" = u, "direction" = "h"), M, covariance)
         x[cir[, 2], c(cic), ] <- out_bottom_merge$x
         historyIndex[, , , 2*i, 2*j-1] <- historyIndexBottom[out_bottom_merge$indices[, 1], , , drop = FALSE]
+        # tempering
+        tempering_out_bottom <- nl_tempering(Nparticles, 1-1e-05, x, history, historyIndex[, , , 2*i, 2*j-1], historyIndex[, , , 2*i, 2*j],
+                                          obs, nv, nu, out_bottom_merge$after_mix_lW, c(cir), c(cic), cir[, 2], cir[, 2], cic[, 1], cic[, 2],
+                                          sqrt(1/nodes_dimension))
+        # update particles
+        xNew <- tempering_out_bottom$x
+        # update history
+        historyIndexNew <- tempering_out_bottom$history_index_updated
         #### VERTICAL MERGE ###
         # crossover
-        historyIndexNew[, , , i, j] <- nl_crossover(x, history, historyIndex[, , , 2*i-1, 2*j-1], historyIndex[, , , 2*i, 2*j-1],
+        historyIndexNew[, , , i, j] <- nl_crossover(xNew, history, historyIndex[, , , 2*i-1, 2*j-1], historyIndex[, , , 2*i, 2*j-1],
                                                     2*i, 2*i, 2*j-1, 2*j, c(cir), c(cic), sigmaX, u+1)
-        out_merge <- nl_merge(lW, obs, x, history, historyIndex, 2*i, 2*i, 2*j-1, 2*j, cir[, 1], c(cic),
+        out_merge <- nl_merge(lW, obs, xNew, history, historyIndex, 2*i, 2*i, 2*j-1, 2*j, cir[, 1], c(cic),
                               cir[, 2], c(cic), nvNew, nvNew, list("u" = u, "direction" = "v"), M, covariance)
         xNew[c(cir), c(cic), ] <- out_merge$x
         historyIndexNew[, , , i, j] <- historyIndexNew[out_merge$indices[, 1], , , i, j]
+        # tempering
+        tempering_out_merge <- nl_tempering(Nparticles, 1-1e-05, xNew, history, historyIndex[, , , 2*i-1, 2*j-1], historyIndex[, , , 2*i, 2*j-1],
+                                          obs, nv, nu, out_merge$after_mix_lW, c(cir), c(cic), cir[, 2], cir[, 1], c(cic), c(cic), sqrt(1/nodes_dimension))
+        # update particles
+        xNew <- tempering_out_merge$x
+        # update history
+        historyIndexNew <- tempering_out_merge$history_index_updated
       }
     }
     historyIndex <- historyIndexNew

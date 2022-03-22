@@ -42,5 +42,5 @@ nl_merge <- function(lW, obs, x, history, historyIndex, node_row_left, node_row_
   indices <- out$resampled_indices
   merged_x <- array(rbind(x[cir_left, cic_left, indices[, 1], drop = FALSE], x[cir_right, cic_right, indices[, 2], drop = FALSE]),
                     dim = c(nv, nvNew, Nparticles))
-  return(list("x" = merged_x, "indices" = indices, "target_reached" = target_reached))
+  return(list("x" = merged_x, "indices" = indices, "target_reached" = target_reached, "after_mix_lW" = out$resampled_particles_lW))
 }

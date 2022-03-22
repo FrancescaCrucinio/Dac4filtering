@@ -1,5 +1,5 @@
 set.seed(1234)
-d <- 16
+d <- 4
 sigmaX <- 1
 nu <- 10
 delta <- 1
@@ -20,13 +20,13 @@ M <- 100
 history <- sqrt(sigmaX)*array(rnorm(Nparticles*d^2), dim = c(d, d, Nparticles))
 xOld <- sqrt(sigmaX)*array(rnorm(Nparticles*M*d^2), dim = c(d, d, Nparticles, M))
 xOld2 <- history
-tic()
-for (t in 1:Time.step){
-  print(paste(t))
-  res <- dac_nl_adaptive_lightweight(history, y[, , t], sigmaX, nu, covariance = FALSE)
-  history <- res
-}
-toc()
+# tic()
+# for (t in 1:Time.step){
+#   print(paste(t))
+#   res <- dac_nl_adaptive_lightweight(history, y[, , t], sigmaX, nu, covariance = FALSE)
+#   history <- res
+# }
+# toc()
 tic()
 for (t in 1:Time.step){
   print(paste(t))

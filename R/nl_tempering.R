@@ -1,5 +1,5 @@
-nl_tempering <- function(ess_target, ess_decay_threshold, x, history, historyIndex_left, historyIndex_right, obs, nv, nu, after_mix_lW, cir, cic, cic_right, cir_right, mcmc_sd){
-
+nl_tempering <- function(ess_target, ess_decay_threshold, x, history, historyIndex_left, historyIndex_right, obs, nv, nu,
+                         after_mix_lW, cir, cic, cir_left, cir_right, cic_left, cic_right, mcmc_sd){
   # tree topology
   nchild <- 2
   Nparticles <- length(after_mix_lW)
@@ -17,8 +17,8 @@ nl_tempering <- function(ess_target, ess_decay_threshold, x, history, historyInd
     if(ess < Nparticles / 2){
       resampled_indices <- stratified_resample(omega/sum(omega), Nparticles)
       newlOmega <- rep(0, times = Nparticles)
-      x[, ci[1]:ci[2]] <- x[resampled_indices, ci[1]:ci[2]]
-      historyIndex[, , i] <- historyIndex[resampled_indices, , i]
+      x[cir, cic, ] <- x[cir, cic, resampled_indices]
+      historyIndex[, , i] <- historyIndex[resampled_indices, , i] ##### fix this
       historyIndexNew[, , i] <- historyIndexNew[resampled_indices, , i]
       after_mix_lW <- rep(0, times = Nparticles)
       for (n in 1:Nparticles){
@@ -42,7 +42,7 @@ nl_tempering <- function(ess_target, ess_decay_threshold, x, history, historyInd
       }
     }
     updated_particles <- nl_mcmc_move(x, history, historyIndex_left, historyIndex_right, obs,
-                                      nv, nu, after_mix_lW, cir, cic, cic_right, cir_right, mcmc_sd)
+                                      nv, nu, after_mix_lW, cir, cic, cir_left, cir_right, cic_left, cic_right, mcmc_sd, new_alpha)
     x <- updated_particles$x
     current_alpha <- new_alpha
     lOmega <- newlOmega
@@ -55,7 +55,7 @@ nl_tempering <- function(ess_target, ess_decay_threshold, x, history, historyInd
   if(ess < Nparticles / 2){
     resampled_indices <- stratified_resample(omega/sum(omega), Nparticles)
     newlOmega <- rep(0, times = Nparticles)
-    x[, ci[1]:ci[2]] <- x[resampled_indices, ci[1]:ci[2]]
+    x[cir, cic, ] <- x[cir, cic, resampled_indices]
     historyIndex[, , i] <- historyIndex[resampled_indices, , i]
     historyIndexNew[, , i] <- historyIndexNew[resampled_indices, , i]
     after_mix_lW <- rep(0, times = Nparticles)
@@ -80,12 +80,13 @@ nl_tempering <- function(ess_target, ess_decay_threshold, x, history, historyInd
     }
   }
   updated_particles <- nl_mcmc_move(x, history, historyIndex_left, historyIndex_right, obs,
-                                    nv, nu, after_mix_lW, cir, cic, cic_right, cir_right, mcmc_sd)
+                                    nv, nu, after_mix_lW, cir, cic, cir_left, cir_right, cic_left, cic_right, mcmc_sd, new_alpha)
   x <- updated_particles$x
   return(list("x" = x, "history_index_updated" = historyIndexNew, "lWmix" = after_mix_lW))
 }
 
-nl_mcmc_move <- function(x, history, historyIndex_left, historyIndex_right, obs, nv, nu, after_mix_lW, cir, cic, cic_right, cir_right, mcmc_sd){
+nl_mcmc_move <- function(x, history, historyIndex_left, historyIndex_right, obs, nv, nu,
+                         after_mix_lW, cir, cic, cir_left, cir_right, cic_left, cic_right, mcmc_sd, new_alpha){
   Nparticles <- dim(x)[3]
   d <- dim(x)[1]
   propose_x <- x
@@ -129,7 +130,7 @@ nl_mcmc_move <- function(x, history, historyIndex_left, historyIndex_right, obs,
     for (col in cic) {
       for (row in cir) {
         # observation ratio
-        robs[n] <- robs[n] - 0.5*(nu+1)*log(1+(propose_x[row, col, n] - obs[row, col])^2/nu) + 0.5*(nu+1)*log(1+(x[row, col, n] - obs[row, col])^2/nu)
+        r_obs[n] <- r_obs[n] - 0.5*(nu+1)*log(1+(propose_x[row, col, n] - obs[row, col])^2/nu) + 0.5*(nu+1)*log(1+(x[row, col, n] - obs[row, col])^2/nu)
         # ft ratio
         out_neighbours <- get_neighbours_weights(row, col, d)
         r1[n] <- r1[n] + log(sum(out_neighbours$mixture_weights * dnorm(propose_x[row, col, n], mean = right_ancestor[row, col], sd = sqrt(sigmaX)))) +
@@ -141,6 +142,8 @@ nl_mcmc_move <- function(x, history, historyIndex_left, historyIndex_right, obs,
   }
   mh_ratio <- r1 + r_obs + new_alpha*r2
   accepted <- runif(Nparticles) <= exp(mh_ratio)
+  dim(propose_x)
+  length(accepted)
   # print(paste(sum(accepted)/Nparticles))
   x[cir, cic, accepted] <- propose_x[cir, cic, accepted]
   after_mix_lW[accepted] <- after_mix_lW_new[accepted]
