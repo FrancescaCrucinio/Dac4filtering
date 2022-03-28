@@ -1,5 +1,5 @@
 nl_merge <- function(lW, obs, x, history, historyIndex, node_row_left, node_row_right,
-                                node_col_left, node_col_right, cir_left, cic_left, cir_right, cic_right, nv, nvNew, u_info, M, covariance = FALSE){
+                    node_col_left, node_col_right, cir_left, cic_left, cir_right, cic_right, nv, nvNew, u_info, M, covariance = FALSE){
   Nparticles <- dim(history)[3]
   d <- dim(history)[2]
   nchild <- 2
@@ -35,7 +35,7 @@ nl_merge <- function(lW, obs, x, history, historyIndex, node_row_left, node_row_
       }
       target_reached <- TRUE
       out <- nl_light(u, x, history, historyIndex_left, historyIndex_right, cir_right, cic_right,
-                      lW_left, lW_right, sigmaX, M, d)
+                      lW_left, lW_right, sigmaX, M)
     }
   }
 

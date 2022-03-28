@@ -1,5 +1,6 @@
 nl_light <- function(u, x, history, historyIndex_left, historyIndex_right, cir_right, cic_right,
-                     lW_left, lW_right, sigmaX, m, d){
+                     lW_left, lW_right, sigmaX, m){
+  d <- dim(history)[1]
   Nparticles <- dim(history)[3]
   # binary tree
   nchild <- 2

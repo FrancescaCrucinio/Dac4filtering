@@ -20,18 +20,18 @@ M <- 100
 history <- sqrt(sigmaX)*array(rnorm(Nparticles*d^2), dim = c(d, d, Nparticles))
 xOld <- sqrt(sigmaX)*array(rnorm(Nparticles*M*d^2), dim = c(d, d, Nparticles, M))
 xOld2 <- history
-# tic()
-# for (t in 1:Time.step){
-#   print(paste(t))
-#   res <- dac_nl_adaptive_lightweight(history, y[, , t], sigmaX, nu, covariance = FALSE)
-#   history <- res
-# }
-# toc()
 tic()
 for (t in 1:Time.step){
   print(paste(t))
-  res_t <- dac_nl_lightweight(history, y[, , t], sigmaX, nu, covariance = FALSE)
-  history <- res_t
+  res_dac <- dac_nl_lightweight(history, y[, , t], sigmaX, nu, covariance = FALSE, tempering = FALSE)
+  history <- res_dac
+}
+toc()
+tic()
+for (t in 1:Time.step){
+  print(paste(t))
+  res_dac_tempering <- dac_nl_lightweight(history, y[, , t], sigmaX, nu, covariance = FALSE, tempering = TRUE)
+  history <- res_dac_tempering
 }
 toc()
 tic()
@@ -49,7 +49,7 @@ for (t in 1:Time.step){
 }
 toc()
 
-mean((apply(res, c(1,2), mean) - nl_data$x[, , Time.step+1])^2)
-mean((apply(res_t, c(1,2), mean) - nl_data$x[, , Time.step+1])^2)
+mean((apply(res_dac, c(1,2), mean) - nl_data$x[, , Time.step+1])^2)
+mean((apply(res_dac_tempering, c(1,2), mean) - nl_data$x[, , Time.step+1])^2)
 mean((apply(res_nsmc, c(1,2), mean) - nl_data$x[, , Time.step+1])^2)
 mean((apply(res_stpf, c(1, 2), mean) - nl_data$x[, , Time.step+1])^2)

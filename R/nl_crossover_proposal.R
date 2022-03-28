@@ -1,5 +1,7 @@
 nl_crossover_proposal <- function(x, history, historyIndex_left, historyIndex_right, nodes_row_left, nodes_row_right,
                                   nodes_col_left, nodes_col_right, cir, cic, sigmaX){
+  d <- dim(history)[1]
+  Nparticles <- dim(history[3])
   # binary tree
   nchild <- 2
 
@@ -18,8 +20,10 @@ nl_crossover_proposal <- function(x, history, historyIndex_left, historyIndex_ri
     for (col in cic) {
       for (row in cir) {
         out_neighbours <- get_neighbours_weights(row, col, d)
-        ft_ratio <- ft_ratio + log(sum(out_neighbours$mixture_weights * dnorm(x[row, col, n], mean = crossedover_ancestor[row, col], sd = sqrt(sigmaX)))) -
-                log(sum(out_neighbours$mixture_weights * dnorm(x[row, col, n], mean = left_ancestor[row, col], sd = sqrt(sigmaX))))
+        valid_weights <- out_neighbours$mixture_weights[out_neighbours$mixture_weights>0]
+        valid_current_neighbours <- out_neighbours$current_x_neighbours[out_neighbours$mixture_weights>0, ]
+        ft_ratio <- ft_ratio + log(sum(valid_weights * dnorm(x[row, col, n], mean = crossedover_ancestor[valid_current_neighbours], sd = sqrt(sigmaX)))) -
+                log(sum(valid_weights * dnorm(x[row, col, n], mean = left_ancestor[valid_current_neighbours], sd = sqrt(sigmaX))))
       }
     }
     # accept/reject
