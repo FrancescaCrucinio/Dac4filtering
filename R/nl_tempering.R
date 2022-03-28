@@ -1,5 +1,7 @@
 nl_tempering <- function(ess_target, ess_decay_threshold, x, history, historyIndex_left, historyIndex_right, obs, u, nu,
-                         after_mix_lW, cir, cic, cir_left, cir_right, cic_left, cic_right, mcmc_sd){
+                         after_mix_lW, lW_left, lW_right, cir, cic, cir_left, cir_right, cic_left, cic_right, mcmc_sd){
+  Nparticles <- dim(history)[3]
+  d <- dim(history)[1]
   # tree topology
   nchild <- 2
   Nparticles <- length(after_mix_lW)
@@ -42,7 +44,7 @@ nl_tempering <- function(ess_target, ess_decay_threshold, x, history, historyInd
       }
     }
     updated_particles <- nl_mcmc_move(x, history, historyIndex_left, historyIndex_right, obs,
-                                      u, nu, after_mix_lW, cir, cic, cir_left, cir_right, cic_left, cic_right, mcmc_sd, new_alpha)
+                                      u, nu, after_mix_lW, lW_left, lW_right, cir, cic, cir_left, cir_right, cic_left, cic_right, mcmc_sd, new_alpha)
     x <- updated_particles$x
     current_alpha <- new_alpha
     lOmega <- newlOmega
@@ -80,13 +82,13 @@ nl_tempering <- function(ess_target, ess_decay_threshold, x, history, historyInd
     }
   }
   updated_particles <- nl_mcmc_move(x, history, historyIndex_left, historyIndex_right, obs,
-                                    u, nu, after_mix_lW, cir, cic, cir_left, cir_right, cic_left, cic_right, mcmc_sd, new_alpha)
+                                    u, nu, after_mix_lW, lW_left, lW_right, cir, cic, cir_left, cir_right, cic_left, cic_right, mcmc_sd, new_alpha)
   x <- updated_particles$x
   return(list("x" = x, "history_index_updated" = historyIndex_left, "lWmix" = after_mix_lW))
 }
 
 nl_mcmc_move <- function(x, history, historyIndex_left, historyIndex_right, obs, u, nu,
-                         after_mix_lW, cir, cic, cir_left, cir_right, cic_left, cic_right, mcmc_sd, new_alpha){
+                         after_mix_lW, lW_left, lW_right, cir, cic, cir_left, cir_right, cic_left, cic_right, mcmc_sd, new_alpha){
   Nparticles <- dim(x)[3]
   d <- dim(x)[1]
   propose_x <- x
