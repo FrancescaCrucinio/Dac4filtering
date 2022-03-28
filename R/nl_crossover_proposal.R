@@ -1,7 +1,7 @@
 nl_crossover_proposal <- function(x, history, historyIndex_left, historyIndex_right, nodes_row_left, nodes_row_right,
                                   nodes_col_left, nodes_col_right, cir, cic, sigmaX){
   d <- dim(history)[1]
-  Nparticles <- dim(history[3])
+  Nparticles <- dim(history)[3]
   # binary tree
   nchild <- 2
 
