@@ -96,6 +96,8 @@ nl_mcmc_move <- function(x, history, historyIndex_left, historyIndex_right, obs,
           mcmc_sd*array(rnorm(Nparticles*length(cir)*length(cic)), dim = c(length(cir), length(cic), Nparticles))
   # mixture weight for proposed particle
   after_mix_lW_new <- rep(0, times = Nparticles)
+  r_obs <- rep(0, times = Nparticles)
+  r1 <- rep(0, times = Nparticles)
   for (n in 1:Nparticles){
     left_ancestor_coordinates <- cbind(1:d, rep(1:d, each = d), c(historyIndex_left[n, , ]))
     right_ancestor_coordinates <- cbind(1:d, rep(1:d, each = d), c(historyIndex_right[n, , ]))
@@ -111,25 +113,6 @@ nl_mcmc_move <- function(x, history, historyIndex_left, historyIndex_right, obs,
           log(sum(valid_weights * dnorm(propose_x[row, col, n], mean = right_ancestor[valid_current_neighbours], sd = sqrt(sigmaX))))
       }
     }
-  }
-  # mixture weights ratio
-  r2 <- after_mix_lW_new - after_mix_lW
-  if(u == 1){# children are leaves
-    child_weights_proposal <- -0.5*(nu+1)*log(1+(propose_x[cir_left, cic_left, ] - obs[cir_left, cic_left])^2/nu) -
-      0.5*(nu+1)*log(1+(propose_x[cir_right, cic_right, ] - obs[cir_right, cic_right])^2/nu)
-    child_weights_current <- -0.5*(nu+1)*log(1+(x[cir_left, cic_left, ] - obs[cir_left, cic_left])^2/nu) -
-      0.5*(nu+1)*log(1+(x[cir_right, cic_right, ] - obs[cir_right, cic_right])^2/nu)
-    r2 <- r2 + child_weights_proposal - child_weights_current
-  }
-
-  r_obs <- rep(0, times = Nparticles)
-  r1 <- rep(0, times = Nparticles)
-  for (n in 1:Nparticles){
-    left_ancestor_coordinates <- cbind(1:d, rep(1:d, each = d), c(historyIndex_left[n, , ]))
-    right_ancestor_coordinates <- cbind(1:d, rep(1:d, each = d), c(historyIndex_right[n, , ]))
-    left_ancestor <- matrix(history[left_ancestor_coordinates], nrow = d)
-    right_ancestor <- matrix(history[right_ancestor_coordinates], nrow = d)
-    ft_ratio <- 0
     for (col in cic) {
       for (row in cir) {
         # observation ratio
@@ -143,9 +126,19 @@ nl_mcmc_move <- function(x, history, historyIndex_left, historyIndex_right, obs,
       }
     }
   }
+  # mixture weights ratio
+  r2 <- after_mix_lW_new - after_mix_lW
+  if(u == 1){# children are leaves
+    child_weights_proposal <- -0.5*(nu+1)*log(1+(propose_x[cir_left, cic_left, ] - obs[cir_left, cic_left])^2/nu) -
+      0.5*(nu+1)*log(1+(propose_x[cir_right, cic_right, ] - obs[cir_right, cic_right])^2/nu)
+    child_weights_current <- -0.5*(nu+1)*log(1+(x[cir_left, cic_left, ] - obs[cir_left, cic_left])^2/nu) -
+      0.5*(nu+1)*log(1+(x[cir_right, cic_right, ] - obs[cir_right, cic_right])^2/nu)
+    r2 <- r2 + child_weights_proposal - child_weights_current
+  }
+
   mh_ratio <- r1 + r_obs + new_alpha*r2
   accepted <- runif(Nparticles) <= exp(mh_ratio)
-  # print(paste(sum(accepted)/Nparticles))
+  print(paste(sum(accepted)/Nparticles))
   x[cir, cic, accepted] <- propose_x[cir, cic, accepted]
   after_mix_lW[accepted] <- after_mix_lW_new[accepted]
   return(list("x" = x, "after_mix_lW" = after_mix_lW))

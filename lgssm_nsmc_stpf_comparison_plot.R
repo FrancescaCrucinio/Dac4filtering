@@ -1,6 +1,6 @@
 library(ggpubr)
 # read data
-d <- 32
+d <- 2048
 df <- read.csv(paste0("data/lgssm_tempering/lgssm_d", d, "N100ID1"))
 df$N <- "10^2"
 df$run <- 1
@@ -53,13 +53,15 @@ ggplot(data = distances, aes(x = runtime_mean, y = w1, group = interaction(algo,
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
   ) +
+  scale_fill_manual(values=c("#F8766D", "#00BA38", "#619CFF")) +
+  scale_color_manual(values=c("#F8766D", "#00BA38", "#619CFF")) +
   theme(axis.title.x=element_blank(),  axis.text = element_text(size=20),
         axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=20),
         text = element_text(size=15), legend.position="none")
 # my_legend <- get_legend(w1_plot)
 # as_ggplot(my_legend)
-# ggsave("lgssm32_w1.pdf", width = 10, height = 8, dpi = 300)
+# ggsave("lgssm2048_w1.pdf", width = 10, height = 8, dpi = 300)
 # ggsave("lgssm32_legend.pdf", width = 6, height = 1, dpi = 300)
 # Kolmogorov-Smirnov
 ggplot(data = distances, aes(x = runtime_mean, y = ks, group = interaction(algo, N), fill = algo, colour = algo)) +
@@ -73,11 +75,13 @@ ggplot(data = distances, aes(x = runtime_mean, y = ks, group = interaction(algo,
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
   ) +
+  scale_fill_manual(values=c("#F8766D", "#00BA38", "#619CFF")) +
+  scale_color_manual(values=c("#F8766D", "#00BA38", "#619CFF")) +
   theme(axis.title.x=element_blank(), axis.text = element_text(size=20),
         axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=25),
         text = element_text(size=20), legend.position="none")
-# ggsave("lgssm32_ks.pdf", width = 10, height = 8, dpi = 300)
+# ggsave("lgssm2048_ks.pdf", width = 10, height = 8, dpi = 300)
 # RMSE
 tmp <- aggregate(. ~ algo + N, data = df, FUN = "mean")
 rmse_data <- data.frame(rep(1:Time.step, times = 9), rep(tmp$algo, each = 100), rep(tmp$N, each = 100))
@@ -89,8 +93,9 @@ ggplot(data = rmse_data, aes(x = Time.step, y = rmse, group = algo, colour = alg
   geom_line(size = 2) +
   scale_y_continuous(trans='log10') +
   facet_wrap(~N, ncol = 2, nrow = 2) +
+  scale_color_manual(values=c("#F8766D", "#00BA38", "#619CFF")) +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         axis.text = element_text(size=20),
         legend.title = element_blank(), legend.text=element_text(size=20),
         text = element_text(size=15))
-# ggsave("lgssm32_rmse.pdf", width = 12, height = 8, dpi = 300)
+# ggsave("lgssm2048_rmse.pdf", width = 12, height = 8, dpi = 300)

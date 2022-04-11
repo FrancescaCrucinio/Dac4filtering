@@ -14,7 +14,7 @@ y.error.prec[upper.tri(y.error.prec)] = t(y.error.prec)[upper.tri(y.error.prec)]
 nl_data <- nl_obs(d, sigmaX, nu, delta, y.error.prec, Time.step)
 y <- nl_data$yiid
 
-Nparticles <- 100
+Nparticles <- 1000
 M <- 100
 # initial state
 history <- sqrt(sigmaX)*array(rnorm(Nparticles*d^2), dim = c(d, d, Nparticles))
@@ -30,7 +30,8 @@ toc()
 tic()
 for (t in 1:Time.step){
   print(paste(t))
-  res_dac_tempering <- dac_nl_lightweight(history, y[, , t], sigmaX, nu, covariance = FALSE, tempering = TRUE)
+  res_dac_tempering <- dac_nl_lightweight(history, y[, , t], sigmaX, nu, M = NULL, covariance = TRUE,
+                                          obs_old = matrix(0, nrow = d, ncol = d))
   history <- res_dac_tempering
 }
 toc()

@@ -1,5 +1,5 @@
 library(ggpubr)
-d <- 128
+d <- 1024
 # read data
 df <- rbind(read.csv(paste0("data/resampling_tempering/nocrossover_resampling_comparison_d", d, "N100ID1")),
             read.csv(paste0("data/resampling_tempering/crossover_resampling_comparison_d", d, "N100ID1")))
@@ -17,8 +17,8 @@ for (id in 1:50){
   df <- rbind(df, dfnew)
 }
 for (id in 1:50){
-  dfnew <- rbind(read.csv(paste0("data/resampling_tempering/nocrossover_resampling_comparison_d", d, "N10000ID", id, sep = "")),
-                 read.csv(paste0("data/resampling_tempering/crossover_resampling_comparison_d", d, "N10000ID", id, sep = "")))
+  dfnew <- rbind(read.csv(paste0("data/resampling_tempering/nocrossover_resampling_comparison_d", d, "N10000ID", id, sep = "")))
+                 #read.csv(paste0("data/resampling_tempering/crossover_resampling_comparison_d", d, "N10000ID", id, sep = "")))
   dfnew$N <- "10^4"
   df <- rbind(df, dfnew)
 }
@@ -48,4 +48,4 @@ p <- ggplot(data = df, aes(x = runtime, y = d_means, group = interaction(algo, m
 # my_legend <- get_legend(p)
 # as_ggplot(my_legend)
 # ggsave("resampling_legend.pdf", width = 6, height = 1, dpi = 300)
-# ggsave("res_time_medium.pdf", width = 10, height = 3, dpi = 300)
+# ggsave("res_time_high.pdf", width = 10, height = 3, dpi = 300)

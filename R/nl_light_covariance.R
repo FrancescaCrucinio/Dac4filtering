@@ -1,7 +1,9 @@
 nl_light_covariance <- function(u, obs, x, history, historyIndex_left, historyIndex_right, cir_left, cir_right, cic_left, cic_right,
-                     lW_left, lW_right, sigmaX, Nparticles, m, d, nodes_dimension){
+                     lW_left, lW_right, sigmaX, Nparticles, m, d){
   # binary tree
   nchild <- 2
+  nodes_dimension <- nchild^u
+  nodes_dimension_child <- nchild^(u-1)
   # resample on each children
   lW_left <- c(lW_left)
   max.lW_left <- max(lW_left)
@@ -73,7 +75,8 @@ nl_light_covariance <- function(u, obs, x, history, historyIndex_left, historyIn
         }
       }
     }
-    lWmix[n] <- lWmix[n] + 0.5*(nu+nodes_dimension)*(-log(1+obs_weight_merged/nu) + log(1+obs_weight_left/nu) + log(1+obs_weight_right/nu))
+    lWmix[n] <- lWmix[n] - 0.5*(nu+nodes_dimension)*log(1+obs_weight_merged/nu)
+          + 0.5*(nu+nodes_dimension_child)*(log(1+obs_weight_left/nu) + log(1+obs_weight_right/nu))
   }
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
