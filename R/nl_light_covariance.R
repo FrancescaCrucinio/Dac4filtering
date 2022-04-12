@@ -33,33 +33,33 @@ nl_light_covariance <- function(u, obs, x, history, historyIndex_left, historyIn
 
     # latent state contribution + right child observation contribution
     obs_weight_right <- 0
-    for (col in cic_right) {
-      current_node_fit <- obs[col, col] - x[col, col, indices2[n]]
-      for (row in cir_right) {
-        out_neighbours <- get_neighbours_weights(row, col, d)
-        valid_weights <- out_neighbours$mixture_weights[out_neighbours$mixture_weights>0]
-        valid_current_neighbours <- out_neighbours$current_x_neighbours[out_neighbours$mixture_weights>0, ]
-        lWmix[n] <- lWmix[n] + log(sum(valid_weights * dnorm(x[row, col, indices2[n]], mean = left_ancestor[valid_current_neighbours], sd = sqrt(sigmaX)))) -
-          log(sum(valid_weights * dnorm(x[row, col, indices2[n]], mean = right_ancestor[valid_current_neighbours], sd = sqrt(sigmaX))))
-        node_distance <- abs(row - col)
-        if(node_distance <= 1 & col %in% cir_right){
-          obs_fit <- obs[row, col] - x[row, col, indices2[n]]
-          obs_weight_right <- obs_weight_right + current_node_fit*obs_fit*tau^(node_distance)
-        }
-      }
-    }
+    # for (col in cic_right) {
+    #   current_node_fit <- obs[col, col] - x[col, col, indices2[n]]
+    #   for (row in cir_right) {
+    #     out_neighbours <- get_neighbours_weights(row, col, d)
+    #     valid_weights <- out_neighbours$mixture_weights[out_neighbours$mixture_weights>0]
+    #     valid_current_neighbours <- out_neighbours$current_x_neighbours[out_neighbours$mixture_weights>0, ]
+    #     lWmix[n] <- lWmix[n] + log(sum(valid_weights * dnorm(x[row, col, indices2[n]], mean = left_ancestor[valid_current_neighbours], sd = sqrt(sigmaX)))) -
+    #       log(sum(valid_weights * dnorm(x[row, col, indices2[n]], mean = right_ancestor[valid_current_neighbours], sd = sqrt(sigmaX))))
+    #     node_distance <- abs(row - col)
+    #     if(node_distance <= 1 & col %in% cir_right){
+    #       obs_fit <- obs[row, col] - x[row, col, indices2[n]]
+    #       obs_weight_right <- obs_weight_right + current_node_fit*obs_fit*tau^(node_distance)
+    #     }
+    #   }
+    # }
     # left child observation contribution
     obs_weight_left <- 0
-    for (col in cic_left) {
-      current_node_fit <- obs[col, col] - x[col, col, indices1[n]]
-      for (row in cir_left) {
-        node_distance <- abs(row - col)
-        if(node_distance <= 1 & col %in% cir_left){
-          obs_fit <- obs[row, col] - x[row, col, indices1[n]]
-          obs_weight_left <- obs_weight_left + current_node_fit*obs_fit*tau^(node_distance)
-        }
-      }
-    }
+    # for (col in cic_left) {
+    #   current_node_fit <- obs[col, col] - x[col, col, indices1[n]]
+    #   for (row in cir_left) {
+    #     node_distance <- abs(row - col)
+    #     if(node_distance <= 1 & col %in% cir_left){
+    #       obs_fit <- obs[row, col] - x[row, col, indices1[n]]
+    #       obs_weight_left <- obs_weight_left + current_node_fit*obs_fit*tau^(node_distance)
+    #     }
+    #   }
+    # }
     # merged node observation contribution
     obs_weight_merged <- 0
     # merged x
@@ -72,6 +72,27 @@ nl_light_covariance <- function(u, obs, x, history, historyIndex_left, historyIn
         if(node_distance <= 1 & col %in% c(cir_left, cir_right)){
           obs_fit <- obs[row, col] - mx[row, col]
           obs_weight_merged <- obs_weight_merged + current_node_fit*obs_fit*tau^(node_distance)
+        }
+        if((col %in% cic_left) & (row %in% cir_left)){ # left child
+          current_node_fit <- obs[col, col] - x[col, col, indices1[n]]
+          node_distance <- abs(row - col)
+          if(node_distance <= 1 & col %in% cir_left){
+            obs_fit <- obs[row, col] - x[row, col, indices1[n]]
+            obs_weight_left <- obs_weight_left + current_node_fit*obs_fit*tau^(node_distance)
+          }
+        }
+        if((col %in% cic_right) & (row %in% cir_right)){ # right child
+          current_node_fit <- obs[col, col] - x[col, col, indices2[n]]
+          out_neighbours <- get_neighbours_weights(row, col, d)
+          valid_weights <- out_neighbours$mixture_weights[out_neighbours$mixture_weights>0]
+          valid_current_neighbours <- out_neighbours$current_x_neighbours[out_neighbours$mixture_weights>0, ]
+          lWmix[n] <- lWmix[n] + log(sum(valid_weights * dnorm(x[row, col, indices2[n]], mean = left_ancestor[valid_current_neighbours], sd = sqrt(sigmaX)))) -
+            log(sum(valid_weights * dnorm(x[row, col, indices2[n]], mean = right_ancestor[valid_current_neighbours], sd = sqrt(sigmaX))))
+          node_distance <- abs(row - col)
+          if(node_distance <= 1 & col %in% cir_right){
+            obs_fit <- obs[row, col] - x[row, col, indices2[n]]
+            obs_weight_right <- obs_weight_right + current_node_fit*obs_fit*tau^(node_distance)
+          }
         }
       }
     }

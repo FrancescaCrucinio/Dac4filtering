@@ -2,7 +2,7 @@ set.seed(1234)
 d <- 4
 sigmaX <- 1
 nu <- 10
-tau <- 1/6
+tau <- 1/4
 delta <- 1
 Time.step <- 1
 y.error.prec <- matrix(0, nrow = d^2, ncol = d^2)
@@ -10,9 +10,11 @@ diag(y.error.prec) <- 1
 diag(y.error.prec[-1, ]) <- tau
 vertical_neighbours <- ((0:d^2) * (d^2 + 1) + d+1)
 y.error.prec[vertical_neighbours[(vertical_neighbours <= d^4)]] <- tau
-y.error.prec[upper.tri(y.error.prec)] = t(y.error.prec)[upper.tri(y.error.prec)]
+y.error.prec[upper.tri(y.error.prec)] <- t(y.error.prec)[upper.tri(y.error.prec)]
+y.error.var <- inv(y.error.prec)
+y.error.var[upper.tri(y.error.var)] <- t(y.error.var)[upper.tri(y.error.var)]
 
-nl_data <- nl_obs(d, sigmaX, nu, delta, y.error.prec, Time.step)
+nl_data <- nl_obs(d, sigmaX, nu, delta, y.error.var, Time.step)
 y <- nl_data$yiid
 y_cov <- nl_data$y
 Nparticles <- 1000
@@ -24,7 +26,7 @@ xOld2 <- history
 tic()
 for (t in 1:Time.step){
   print(paste(t))
-  res_dac <- dac_nl_lightweight(history, y[, , t], sigmaX, nu, covariance = FALSE, tempering = FALSE)
+  res_dac <- dac_nl_lightweight(history, y_cov[, , t], sigmaX, nu, covariance = FALSE, tempering = FALSE)
   # history <- res_dac
 }
 toc()
@@ -39,14 +41,14 @@ toc()
 tic()
 for (t in 1:Time.step){
   print(paste(t))
-  res_stpf <- stpf_nl(xOld, y[, , t], nu, sigmaX)
+  res_stpf <- stpf_nl(xOld, y_cov[, , t], nu, sigmaX)
   xOld <- res_stpf
 }
 toc()
 tic()
 for (t in 1:Time.step){
   print(paste(t))
-  res_nsmc <- nsmc_nl(xOld2, y[, , t], nu, sigmaX, M)
+  res_nsmc <- nsmc_nl(xOld2, y_cov[, , t], nu, sigmaX, M)
   xOld2 <- res_nsmc
 }
 toc()

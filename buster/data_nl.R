@@ -16,13 +16,15 @@ diag(y.error.prec) <- 1
 diag(y.error.prec[-1, ]) <- tau
 vertical_neighbours <- ((0:d^2) * (d^2 + 1) + d+1)
 y.error.prec[vertical_neighbours[(vertical_neighbours <= d^4)]] <- tau
-y.error.prec[upper.tri(y.error.prec)] = t(y.error.prec)[upper.tri(y.error.prec)]
+y.error.prec[upper.tri(y.error.prec)] <- t(y.error.prec)[upper.tri(y.error.prec)]
+y.error.var <- inv(y.error.prec)
+y.error.var[upper.tri(y.error.var)] <- t(y.error.var)[upper.tri(y.error.var)]
 
 # number of time steps
 Time.step <- 100
 
 # get observations
-nl_data <- nl_obs(d, sigmaX, nu, delta, y.error.prec, Time.step)
+nl_data <- nl_obs(d, sigmaX, nu, delta, y.error.var, Time.step)
 
 df_obs_iid <- data.frame(apply(nl_data$yiid,2,"c"))
 df_obs_cov <- data.frame(apply(nl_data$y,2,"c"))

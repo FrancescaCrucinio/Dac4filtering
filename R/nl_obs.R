@@ -1,4 +1,4 @@
-nl_obs <- function(d, sigmaX, nu, delta, y.error.prec, Time.step){
+nl_obs <- function(d, sigmaX, nu, delta, y.error.var, Time.step){
   x <- array(0, dim = c(d, d, Time.step+1))
   y <- array(0, dim = c(d, d, Time.step))
   y_iid <- array(0, dim = c(d, d, Time.step))
@@ -15,7 +15,7 @@ nl_obs <- function(d, sigmaX, nu, delta, y.error.prec, Time.step){
         y_iid[row, col, t-1] <- x[row, col, t] + rt(1, df = nu)
       }
     }
-    y[, , t-1] <- matrix(rmvt(1, mu = c(x[, , t]), df = nu, S = inv(y.error.prec)), ncol = d)
+    y[, , t-1] <- matrix(rmvt(1, mu = c(x[, , t]), S = y.error.var, df = 5), ncol = d)
 
   }
   return(list("x" = x, "y" = y, "yiid" = y_iid))
