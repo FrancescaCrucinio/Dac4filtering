@@ -2,18 +2,19 @@ set.seed(1234)
 d <- 4
 sigmaX <- 1
 nu <- 10
+tau <- 1/6
 delta <- 1
 Time.step <- 1
 y.error.prec <- matrix(0, nrow = d^2, ncol = d^2)
 diag(y.error.prec) <- 1
-diag(y.error.prec[-1, ]) <- 1/4
+diag(y.error.prec[-1, ]) <- tau
 vertical_neighbours <- ((0:d^2) * (d^2 + 1) + d+1)
-y.error.prec[vertical_neighbours[(vertical_neighbours <= d^4)]] <- 1/4
+y.error.prec[vertical_neighbours[(vertical_neighbours <= d^4)]] <- tau
 y.error.prec[upper.tri(y.error.prec)] = t(y.error.prec)[upper.tri(y.error.prec)]
 
 nl_data <- nl_obs(d, sigmaX, nu, delta, y.error.prec, Time.step)
 y <- nl_data$yiid
-
+y_cov <- nl_data$y
 Nparticles <- 1000
 M <- 100
 # initial state
@@ -24,15 +25,15 @@ tic()
 for (t in 1:Time.step){
   print(paste(t))
   res_dac <- dac_nl_lightweight(history, y[, , t], sigmaX, nu, covariance = FALSE, tempering = FALSE)
-  history <- res_dac
+  # history <- res_dac
 }
 toc()
 tic()
 for (t in 1:Time.step){
   print(paste(t))
-  res_dac_tempering <- dac_nl_lightweight(history, y[, , t], sigmaX, nu, M = NULL, covariance = TRUE,
-                                          obs_old = matrix(0, nrow = d, ncol = d))
-  history <- res_dac_tempering
+  res_dac_tempering <- dac_nl_lightweight(history, y_cov[, , t], sigmaX, nu, M = NULL, covariance = TRUE,
+                                          obs_old = matrix(0, nrow = d, ncol = d), tau = tau)
+  # history <- res_dac_tempering
 }
 toc()
 tic()

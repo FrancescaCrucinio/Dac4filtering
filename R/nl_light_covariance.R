@@ -1,5 +1,5 @@
 nl_light_covariance <- function(u, obs, x, history, historyIndex_left, historyIndex_right, cir_left, cir_right, cic_left, cic_right,
-                     lW_left, lW_right, sigmaX, Nparticles, m, d){
+                     lW_left, lW_right, sigmaX, Nparticles, m, d, tau){
   # binary tree
   nchild <- 2
   nodes_dimension <- nchild^u
@@ -25,7 +25,7 @@ nl_light_covariance <- function(u, obs, x, history, historyIndex_left, historyIn
   }
   # mixture weights
   lWmix <- rep(0, times = m*Nparticles)
-  for (n in 1:m*Nparticles){
+  for (n in 1:(m*Nparticles)){
     left_ancestor_coordinates <- cbind(1:d, rep(1:d, each = d), c(historyIndex_left[indices1[n], , ]))
     right_ancestor_coordinates <- cbind(1:d, rep(1:d, each = d), c(historyIndex_right[indices2[n], , ]))
     left_ancestor <- matrix(history[left_ancestor_coordinates], nrow = d)
@@ -44,7 +44,7 @@ nl_light_covariance <- function(u, obs, x, history, historyIndex_left, historyIn
         node_distance <- abs(row - col)
         if(node_distance <= 1 & col %in% cir_right){
           obs_fit <- obs[row, col] - x[row, col, indices2[n]]
-          obs_weight_right <- obs_weight_right + current_node_fit*obs_fit/4^(node_distance)
+          obs_weight_right <- obs_weight_right + current_node_fit*obs_fit*tau^(node_distance)
         }
       }
     }
@@ -56,7 +56,7 @@ nl_light_covariance <- function(u, obs, x, history, historyIndex_left, historyIn
         node_distance <- abs(row - col)
         if(node_distance <= 1 & col %in% cir_left){
           obs_fit <- obs[row, col] - x[row, col, indices1[n]]
-          obs_weight_left <- obs_weight_left + current_node_fit*obs_fit/4^(node_distance)
+          obs_weight_left <- obs_weight_left + current_node_fit*obs_fit*tau^(node_distance)
         }
       }
     }
@@ -71,7 +71,7 @@ nl_light_covariance <- function(u, obs, x, history, historyIndex_left, historyIn
         node_distance <- abs(row - col)
         if(node_distance <= 1 & col %in% c(cir_left, cir_right)){
           obs_fit <- obs[row, col] - mx[row, col]
-          obs_weight_merged <- obs_weight_merged + current_node_fit*obs_fit/4^(node_distance)
+          obs_weight_merged <- obs_weight_merged + current_node_fit*obs_fit*tau^(node_distance)
         }
       }
     }
@@ -87,7 +87,7 @@ nl_light_covariance <- function(u, obs, x, history, historyIndex_left, historyIn
 
 
 nl_adaptive_light_covariance <- function(ess_target, u, obs, x, history, historyIndex_left, historyIndex_right, cir_left, cir_right, cic_left, cic_right,
-                                         lW_left, lW_right, sigmaX, Nparticles, m, d, nodes_dimension){
+                                         lW_left, lW_right, sigmaX, Nparticles, m, d, nodes_dimension, tau){
   # binary tree
   nchild <- 2
   # mixture weights
@@ -111,7 +111,7 @@ nl_adaptive_light_covariance <- function(ess_target, u, obs, x, history, history
         node_distance <- abs(row - col)
         if(node_distance <= 1 & col %in% cir_right){
           obs_fit <- obs[row, col] - x[row, col, n]
-          obs_weight_right <- obs_weight_right + current_node_fit*obs_fit/4^(node_distance)
+          obs_weight_right <- obs_weight_right + current_node_fit*obs_fit*tau^(node_distance)
         }
       }
     }
@@ -123,7 +123,7 @@ nl_adaptive_light_covariance <- function(ess_target, u, obs, x, history, history
         node_distance <- abs(row - col)
         if(node_distance <= 1 & col %in% cir_left){
           obs_fit <- obs[row, col] - x[row, col, n]
-          obs_weight_left <- obs_weight_left + current_node_fit*obs_fit/4^(node_distance)
+          obs_weight_left <- obs_weight_left + current_node_fit*obs_fit*tau^(node_distance)
         }
       }
     }
@@ -138,7 +138,7 @@ nl_adaptive_light_covariance <- function(ess_target, u, obs, x, history, history
         node_distance <- abs(row - col)
         if(node_distance <= 1 & col %in% c(cir_left, cir_right)){
           obs_fit <- obs[row, col] - mx[row, col]
-          obs_weight_merged <- obs_weight_merged + current_node_fit*obs_fit/4^(node_distance)
+          obs_weight_merged <- obs_weight_merged + current_node_fit*obs_fit*tau^(node_distance)
         }
       }
     }
@@ -180,7 +180,7 @@ nl_adaptive_light_covariance <- function(ess_target, u, obs, x, history, history
           node_distance <- abs(row - col)
           if(node_distance <= 1 & col %in% cir_right){
             obs_fit <- obs[row, col] - x[row, col, new_perm[n]]
-            obs_weight_right <- obs_weight_right + current_node_fit*obs_fit/4^(node_distance)
+            obs_weight_right <- obs_weight_right + current_node_fit*obs_fit*tau^(node_distance)
           }
         }
       }
@@ -192,7 +192,7 @@ nl_adaptive_light_covariance <- function(ess_target, u, obs, x, history, history
           node_distance <- abs(row - col)
           if(node_distance <= 1 & col %in% cir_left){
             obs_fit <- obs[row, col] - x[row, col, n]
-            obs_weight_left <- obs_weight_left + current_node_fit*obs_fit/4^(node_distance)
+            obs_weight_left <- obs_weight_left + current_node_fit*obs_fit*tau^(node_distance)
           }
         }
       }
@@ -208,7 +208,7 @@ nl_adaptive_light_covariance <- function(ess_target, u, obs, x, history, history
           print(paste(row, col))
           if(node_distance <= 1 & col %in% c(cir_left, cir_right)){
             obs_fit <- obs[row, col] - mx[row, col]
-            obs_weight_merged <- obs_weight_merged + current_node_fit*obs_fit/4^(node_distance)
+            obs_weight_merged <- obs_weight_merged + current_node_fit*obs_fit*tau^(node_distance)
             print(paste(obs_weight_merged))
           }
         }

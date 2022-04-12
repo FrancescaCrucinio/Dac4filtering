@@ -1,4 +1,4 @@
-devtools::load_all("/storage/u1693998/Dac4filtering")
+# devtools::load_all("/storage/u1693998/Dac4filtering")
 ### Linear Gaussian SSM -- comparison of dac, stpf, nsmc
 ID <- as.numeric(Sys.getenv("SGE_TASK_ID"))
 set.seed(1234*ID)
@@ -11,6 +11,7 @@ Sigma0 <- diag(x = 1, d, d)
 tau <- 1
 lambda <- 1
 sigmaY <- 0.5^2
+timeinterval <- 1
 Time.step <- 100
 
 filename <- paste0("/storage/u1693998/data/data_lgssm_d", d, "ID", ID)
@@ -19,31 +20,29 @@ data <- read.csv(filename, row.names = 1)
 y <- unname(data.matrix(data[1:Time.step, 1:d], rownames.force = NA))
 true_means <- unname(data.matrix(data[data$type == "mean", 1:d]))
 true_variances <- unname(data.matrix(data[data$type == "var", 1:d]))
-rm(data)
 # samples from marginals at last time step
 marginals <- matrix(0, nrow = 10^5, ncol = d)
 for(i in 1:d){
- marginals[, i] <- rnorm(10^5, mean = true_means[Time.step, i], sd = sqrt(true_variances[Time.step, i]))
+  marginals[, i] <- rnorm(10^5, mean = true_means[Time.step, i], sd = sqrt(true_variances[Time.step, i]))
 }
-rm(true_means)
-rm(true_variances)
-gc()
 
 Nparticles <- 1000
 M <- 100
-df <- data.frame()
 
-x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
-# dac (lightweight adaptive)
-# tic()
-# res_dac <- dac_time_lgssm_crossover(tau, lambda, sigmaY, Nparticles, x0, y, method = "adaptive", marginals = marginals)
-# runtime <- toc()
-# rse_dac <- (res_dac$m - true_means)^2/true_variances
-# df <- data.frame(rbind(df, cbind(t(rse_dac), res_dac$w1, res_dac$ks, rep(runtime, times = d))))
+if(timeinterval == 1){
+  x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
+}
 # dac (lightweight)
+if(timeinterval > 1){
+  filename <- paste0("/storage/u1693998/results/dac_light_lgssm_d", d, "N", Nparticles, "ID", ID, "step", timeinterval-1)
+  x0 <- unname(data.matrix(read.table(filename, row.names = 1)))
+}
 tic()
 res_dac_light <- dac_time_lgssm_crossover(tau, lambda, sigmaY, Nparticles, x0, y, method = "light", marginals = marginals)
 runtime <- toc()
+filename <- paste0("/storage/u1693998/results/dac_light_lgssm_d", d, "N", Nparticles, "ID", ID, "step", timeinterval)
+write.table(res_dac_light, file = filename, append = FALSE, sep = " ", dec = ".",
+            row.names = TRUE, col.names = TRUE)
 # rse_dac_light <- (res_dac_light$m - true_means)^2/true_variances
 df <- data.frame(rbind(df, cbind(t(res_dac_light$m), res_dac_light$w1, res_dac_light$ks, rep(runtime, times = d))))
 # nsmc

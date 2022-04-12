@@ -38,7 +38,7 @@ nl_crossover_proposal <- function(x, history, historyIndex_left, historyIndex_ri
 }
 
 
-nl_crossover_proposal_covariance <- function(x, obs_old, history, historyIndex_left, historyIndex_right, cir, cic, sigmaX, nu){
+nl_crossover_proposal_covariance <- function(x, obs_old, history, historyIndex_left, historyIndex_right, cir, cic, sigmaX, nu, tau){
   d <- dim(history)[1]
   Nparticles <- dim(history)[3]
   # binary tree
@@ -57,15 +57,15 @@ nl_crossover_proposal_covariance <- function(x, obs_old, history, historyIndex_l
     crossedover_ancestor1 <- matrix(c(left_ancestor[1:crossover_point], right_ancestor[(crossover_point+1):d^2]), nrow = d)
     crossedover_ancestor2 <- matrix(c(right_ancestor[1:crossover_point], left_ancestor[(crossover_point+1):d^2]), nrow = d)
     ft_ratio <- 0
-    for (col in cic) {
-      for (row in cir) {
-        out_neighbours <- get_neighbours_weights(row, col, d)
-        valid_weights <- out_neighbours$mixture_weights[out_neighbours$mixture_weights>0]
-        valid_current_neighbours <- out_neighbours$current_x_neighbours[out_neighbours$mixture_weights>0, ]
-        ft_ratio <- ft_ratio + log(sum(valid_weights * dnorm(x[row, col, n], mean = crossedover_ancestor1[valid_current_neighbours], sd = sqrt(sigmaX)))) -
-          log(sum(valid_weights * dnorm(x[row, col, n], mean = left_ancestor[valid_current_neighbours], sd = sqrt(sigmaX))))
-      }
-    }
+    # for (col in cic) {
+    #   for (row in cir) {
+    #     out_neighbours <- get_neighbours_weights(row, col, d)
+    #     valid_weights <- out_neighbours$mixture_weights[out_neighbours$mixture_weights>0]
+    #     valid_current_neighbours <- out_neighbours$current_x_neighbours[out_neighbours$mixture_weights>0, ]
+    #     ft_ratio <- ft_ratio + log(sum(valid_weights * dnorm(x[row, col, n], mean = crossedover_ancestor1[valid_current_neighbours], sd = sqrt(sigmaX)))) -
+    #       log(sum(valid_weights * dnorm(x[row, col, n], mean = left_ancestor[valid_current_neighbours], sd = sqrt(sigmaX))))
+    #   }
+    # }
     obs_crossedover1 <- 0
     obs_crossedover2 <- 0
     obs_left <- 0
@@ -78,10 +78,17 @@ nl_crossover_proposal_covariance <- function(x, obs_old, history, historyIndex_l
       for (row in 1:d) {
         node_distance <- abs(row - col)
         if(node_distance <= 1){
-          obs_crossedover1 <- obs_crossedover1 + current_node_fit1*(obs_old[row, col] - crossedover_ancestor1[row, col])/4^(node_distance)
-          obs_crossedover2 <- obs_crossedover2 + current_node_fit2*(obs_old[row, col] - crossedover_ancestor2[row, col])/4^(node_distance)
-          obs_left <- obs_left + current_node_fit_left*(obs_old[row, col] - left_ancestor[row, col])/4^(node_distance)
-          obs_right <- obs_right + current_node_fit_right*(obs_old[row, col] - right_ancestor[row, col])/4^(node_distance)
+          obs_crossedover1 <- obs_crossedover1 + current_node_fit1*(obs_old[row, col] - crossedover_ancestor1[row, col])*tau^(node_distance)
+          obs_crossedover2 <- obs_crossedover2 + current_node_fit2*(obs_old[row, col] - crossedover_ancestor2[row, col])*tau^(node_distance)
+          obs_left <- obs_left + current_node_fit_left*(obs_old[row, col] - left_ancestor[row, col])*tau^(node_distance)
+          obs_right <- obs_right + current_node_fit_right*(obs_old[row, col] - right_ancestor[row, col])*tau^(node_distance)
+        }
+        if((col %in% cic) & (row %in% cir)){
+          out_neighbours <- get_neighbours_weights(row, col, d)
+          valid_weights <- out_neighbours$mixture_weights[out_neighbours$mixture_weights>0]
+          valid_current_neighbours <- out_neighbours$current_x_neighbours[out_neighbours$mixture_weights>0, ]
+          ft_ratio <- ft_ratio + log(sum(valid_weights * dnorm(x[row, col, n], mean = crossedover_ancestor1[valid_current_neighbours], sd = sqrt(sigmaX)))) -
+                log(sum(valid_weights * dnorm(x[row, col, n], mean = left_ancestor[valid_current_neighbours], sd = sqrt(sigmaX))))
         }
       }
     }
