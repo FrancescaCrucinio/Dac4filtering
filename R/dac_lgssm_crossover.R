@@ -72,8 +72,8 @@ dac_lgssm_lightweight_crossover <- function(history, obs, tau, lambda, sigmaY, M
     M <- ceiling(sqrt(Nparticles))
   }
   # dimension and number of particles
-  d <- ncol(history[, , 1])
-  Nparticles <- nrow(history[, , 1])
+  d <- ncol(history)
+  Nparticles <- nrow(history)
   # tree topology
   nchild <- 2
   nlevels <- log2(d)
@@ -87,9 +87,9 @@ dac_lgssm_lightweight_crossover <- function(history, obs, tau, lambda, sigmaY, M
   historyIndex <- array(1:Nparticles, dim = c(Nparticles, d, d))
   for (i in 1:nchild^nlevels){
     if (i == 1) {
-      x[, i] <- 0.5*history[, i, 1] + rnorm(Nparticles)/sqrt(tau)
+      x[, i] <- 0.5*history[, i] + rnorm(Nparticles)/sqrt(tau)
     } else {
-      x[, i] <- 0.5*tau*history[, i, 1]/(tau+lambda) + rnorm(Nparticles)/sqrt(tau+lambda)
+      x[, i] <- 0.5*tau*history[, i]/(tau+lambda) + rnorm(Nparticles)/sqrt(tau+lambda)
     }
     lW[, i] <- -0.5*(obs[i] - x[, i])^2/sigmaY
     max.lW <- max(lW[, i])
@@ -123,30 +123,30 @@ dac_lgssm_lightweight_crossover <- function(history, obs, tau, lambda, sigmaY, M
       # lightweight mixture resampling
       if(M == "adaptive") {
         out <- lgssm_adaptive_light(Nparticles, i, u, nv, ci, lW, Nparticles, lambda, tau, x,
-                                    history[historyIndex[, ci[1]+nv, nchild*i], ci[1]+nv, 1])
+                                    history[historyIndex[, ci[1]+nv, nchild*i], ci[1]+nv])
         # update after mixture resampling
         indices <- out$resampled_indices
         xNew[, ci[1]:ci[2]] <- cbind(x[indices[, 1], ci[1]:(ci[1]+nv-1)], x[indices[, 2], (ci[1]+nv):ci[2]])
         historyIndexNew[, , i] <- historyIndexNew[indices[, 1], , i]
-        out$target_reached <- FALSE
-        if(!out$target_reached){
+        # out$target_reached <- FALSE
+        # if(!out$target_reached){
           # tempering
-          tempering_out <- lgssm_tempering_crossover(ci, i, nv, lambda, tau, sigmaY, obs, xNew, history[, , 1], historyIndex,
+          tempering_out <- lgssm_tempering_crossover(ci, i, nv, lambda, tau, sigmaY, obs, xNew, history, historyIndex,
                                            historyIndexNew, out$resampled_particles_lW, Nparticles, 1 - 1e-05, 1/sqrt(nodes_dimension))
           # update particles
           xNew <- tempering_out$x
           # update history
           historyIndexNew <- tempering_out$history_index_updated
-        } else {
-          # mcmc move
-          updated_particles <- lgssm_mcmc_move(x, ci, i, nv, sigmaY, tau, lambda,
-                          history[historyIndex[, ci[1]+nv, nchild*i], ci[1]+nv, 1], history[, , 1],
-                          historyIndex, obs, out$resampled_particles_lW, 1/nodes_dimension, 1)
-          x <- updated_particles$x
-        }
+        # } else {
+        #   # mcmc move
+        #   updated_particles <- lgssm_mcmc_move(x, ci, i, nv, sigmaY, tau, lambda,
+        #                   history[historyIndex[, ci[1]+nv, nchild*i], ci[1]+nv], history,
+        #                   historyIndex, obs, out$resampled_particles_lW, 1/nodes_dimension, 1)
+        #   x <- updated_particles$x
+        # }
       }
       else{
-        out <- lgssm_light(i, u, nv, ci, W, Nparticles, M, lambda, tau, x, history[historyIndex[, ci[1]+nv, nchild*i], ci[1]+nv, 1])
+        out <- lgssm_light(i, u, nv, ci, W, Nparticles, M, lambda, tau, x, history[historyIndex[, ci[1]+nv, nchild*i], ci[1]+nv])
         indices <- out$resampled_indices
         xNew[, ci[1]:ci[2]] <- cbind(x[indices[, 1], ci[1]:(ci[1]+nv-1)], x[indices[, 2], (ci[1]+nv):ci[2]])
         historyIndexNew[, , i] <- historyIndexNew[indices[, 1], , i]

@@ -6,12 +6,12 @@ crossover <- function(i, nodes, x, history, historyIndex, tau, lambda){
   historyIndexNew <- historyIndex[, , nchild*(i-1)+1]
   for (n in 1:Nparticles){
     crossover_point <- sample.int(d-1, 1)
-    right_ancestor_coordinates <- cbind(historyIndex[n, (crossover_point+1):d, nchild*i], (crossover_point+1):d, rep(1, times = length((crossover_point+1):d)))
-    left_ancestor_coordinates <- cbind(historyIndex[n, (crossover_point+1):d, nchild*(i-1)+1], (crossover_point+1):d, rep(1, times = length((crossover_point+1):d)))
+    right_ancestor_coordinates <- cbind(historyIndex[n, (crossover_point+1):d, nchild*i], (crossover_point+1):d)
+    left_ancestor_coordinates <- cbind(historyIndex[n, (crossover_point+1):d, nchild*(i-1)+1], (crossover_point+1):d)
     ft_ratio <- -0.5*(tau+lambda) * sum((x[n, (crossover_point+1):d] - (0.5*tau*history[right_ancestor_coordinates] + lambda*x[n, crossover_point:(d-1)])/(tau+lambda))^2 -
                   (x[n, (crossover_point+1):d] - (0.5*tau*history[left_ancestor_coordinates] + lambda*x[n, crossover_point:(d-1)])/(tau+lambda))^2)
-    right_ancestor_coordinates <- cbind(historyIndex[n, crossover_point:(crossover_point+1), nchild*i], crossover_point:(crossover_point+1), rep(1, times = 2))
-    left_ancestor_coordinates <- cbind(historyIndex[n, crossover_point:(crossover_point+1), nchild*(i-1)+1], crossover_point:(crossover_point+1), rep(1, times = 2))
+    right_ancestor_coordinates <- cbind(historyIndex[n, crossover_point:(crossover_point+1), nchild*i], crossover_point:(crossover_point+1))
+    left_ancestor_coordinates <- cbind(historyIndex[n, crossover_point:(crossover_point+1), nchild*(i-1)+1], crossover_point:(crossover_point+1))
     # turn into matrix to use as indices for history
     older_right_ancestor_coordinates <- matrix(c(historyIndex[n, crossover_point+1, nchild*i], crossover_point+1, 2), ncol = 3)
     older_left_ancestor_coordinates <- matrix(c(historyIndex[n, crossover_point+1, nchild*(i-1)+1], crossover_point+1, 2), ncol = 3)
