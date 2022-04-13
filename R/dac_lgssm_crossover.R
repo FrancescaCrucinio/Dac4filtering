@@ -146,8 +146,7 @@ dac_lgssm_lightweight_crossover <- function(history, obs, tau, lambda, sigmaY, M
         }
       }
       else{
-        xOld <- history[historyIndex[, ci[1]+nv, nchild*i], ci[1]+nv, 1]
-        out <- lgssm_light(i, u, nv, ci, W, Nparticles, M, lambda, tau, x, xOld)
+        out <- lgssm_light(i, u, nv, ci, W, Nparticles, M, lambda, tau, x, history[historyIndex[, ci[1]+nv, nchild*i], ci[1]+nv, 1])
         indices <- out$resampled_indices
         xNew[, ci[1]:ci[2]] <- cbind(x[indices[, 1], ci[1]:(ci[1]+nv-1)], x[indices[, 2], (ci[1]+nv):ci[2]])
         historyIndexNew[, , i] <- historyIndexNew[indices[, 1], , i]

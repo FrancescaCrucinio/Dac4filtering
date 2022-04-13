@@ -61,7 +61,7 @@ runtime <- toc()
 cov_res_dac <- cov(res_dac)
 heatmap(cov_res_dac, Colv = NA, Rowv = NA, scale="column")
 (colMeans(res_dac) - true_means)^2
-max((colMeans(res_dac) - true_means)^2)
+mean((colMeans(res_dac) - true_means)^2)
 # dac (lightweight)
 tic()
 res_dac_light <- dac_lgssm_lightweight_crossover(history, y[t, ], tau, lambda, sigmaY)
@@ -69,7 +69,7 @@ runtime <- toc()
 cov_res_dac_light <- cov(res_dac_light)
 heatmap(cov_res_dac_light, Colv = NA, Rowv = NA, scale="column")
 (colMeans(res_dac_light) - true_means)^2
-max((colMeans(res_dac_light) - true_means)^2)
+mean((colMeans(res_dac_light) - true_means)^2)
 # nsmc
 tic()
 res_nsmc <- nsmc_lgssm(x0, y[t, ], tau, lambda, sigmaY, M)
