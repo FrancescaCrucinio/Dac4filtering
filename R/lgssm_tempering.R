@@ -20,7 +20,7 @@ lgssm_tempering_crossover <- function(ci, i, nv, lambda, tau, sigmaY, obs, x, xO
       newlOmega <- rep(0, times = Nparticles)
       x[, ci[1]:ci[2]] <- x[resampled_indices, ci[1]:ci[2]]
       historyIndex[, , i] <- historyIndex[resampled_indices, , i]
-      historyIndexNew[, , i] <- historyIndexNew[resampled_indices, , i]
+      historyIndexNew <- historyIndexNew[resampled_indices, ]
       after_mix_lW <- -0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2 - 2*x[, (ci[1]+nv-1)] * (x[, (ci[1]+nv)] - 0.5*tau*xOldv))
       if(nv == 1){ # children are leaves
         after_mix_lW <- after_mix_lW - 0.5*(obs[ci[1]] - x[, ci[1]])^2/sigmaY - 0.5*(obs[ci[2]] - x[, ci[2]])^2/sigmaY
@@ -41,7 +41,7 @@ lgssm_tempering_crossover <- function(ci, i, nv, lambda, tau, sigmaY, obs, x, xO
     newlOmega <- rep(0, times = Nparticles)
     x[, ci[1]:ci[2]] <- x[resampled_indices, ci[1]:ci[2]]
     historyIndex[, , i] <- historyIndex[resampled_indices, , i]
-    historyIndexNew[, , i] <- historyIndexNew[resampled_indices, , i]
+    historyIndexNew <- historyIndexNew[resampled_indices, ]
     after_mix_lW <- -0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2 - 2*x[, (ci[1]+nv-1)] * (x[, (ci[1]+nv)] - 0.5*tau*xOldv))
     if(nv == 1){ # children are leaves
       after_mix_lW <- after_mix_lW - 0.5*(obs[ci[1]] - x[, ci[1]])^2/sigmaY - 0.5*(obs[ci[2]] - x[, ci[2]])^2/sigmaY
@@ -49,7 +49,8 @@ lgssm_tempering_crossover <- function(ci, i, nv, lambda, tau, sigmaY, obs, x, xO
   }
   updated_particles <- lgssm_mcmc_move(x, ci, i, nv, sigmaY, tau, lambda, xOldv, xOld, historyIndex, obs, after_mix_lW, mcmc_sd, new_alpha)
   x <- updated_particles$x
-  return(list("x" = x, "history_index_updated" = historyIndexNew, "lWmix" = after_mix_lW))
+  historyIndex[, , i] <- historyIndexNew
+  return(list("x" = x, "history_index_updated" = historyIndex, "lWmix" = after_mix_lW))
 }
 
 

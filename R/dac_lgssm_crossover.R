@@ -109,16 +109,16 @@ dac_lgssm_lightweight_crossover <- function(history, obs, tau, lambda, sigmaY, M
     # updated particles
     xNew <- matrix(0, nrow = Nparticles, ncol = d)
     # updated history
-    historyIndexNew <- array(0, dim = c(Nparticles, d, nodes))
+    # historyIndexNew <- array(0, dim = c(Nparticles, d, nodes))
     for (i in 1:nodes){
       # get children indices
       ci <- child_indices(i, nvNew)
       if(u > 1){
         # mutation
-        historyIndexNew[, , i] <- crossover(i, nodes, x, history, historyIndex, tau, lambda)
+        historyIndexNew <- crossover(i, nodes, x, history, historyIndex, tau, lambda)
       }
       else{ # at the leaf level all histories are the same
-        historyIndexNew[, , i] <- historyIndex[, , i]
+        historyIndexNew <- historyIndex[, , i]
       }
       # lightweight mixture resampling
       if(M == "adaptive") {
@@ -127,7 +127,7 @@ dac_lgssm_lightweight_crossover <- function(history, obs, tau, lambda, sigmaY, M
         # update after mixture resampling
         indices <- out$resampled_indices
         xNew[, ci[1]:ci[2]] <- cbind(x[indices[, 1], ci[1]:(ci[1]+nv-1)], x[indices[, 2], (ci[1]+nv):ci[2]])
-        historyIndexNew[, , i] <- historyIndexNew[indices[, 1], , i]
+        historyIndexNew <- historyIndexNew[indices[, 1], ]
         # out$target_reached <- FALSE
         # if(!out$target_reached){
           # tempering
@@ -136,7 +136,7 @@ dac_lgssm_lightweight_crossover <- function(history, obs, tau, lambda, sigmaY, M
           # update particles
           xNew <- tempering_out$x
           # update history
-          historyIndexNew <- tempering_out$history_index_updated
+          historyIndex <- tempering_out$history_index_updated
         # } else {
         #   # mcmc move
         #   updated_particles <- lgssm_mcmc_move(x, ci, i, nv, sigmaY, tau, lambda,
@@ -149,13 +149,13 @@ dac_lgssm_lightweight_crossover <- function(history, obs, tau, lambda, sigmaY, M
         out <- lgssm_light(i, u, nv, ci, W, Nparticles, M, lambda, tau, x, history[historyIndex[, ci[1]+nv, nchild*i], ci[1]+nv])
         indices <- out$resampled_indices
         xNew[, ci[1]:ci[2]] <- cbind(x[indices[, 1], ci[1]:(ci[1]+nv-1)], x[indices[, 2], (ci[1]+nv):ci[2]])
-        historyIndexNew[, , i] <- historyIndexNew[indices[, 1], , i]
+        historyIndex[, , i] <- historyIndexNew[indices[, 1], ]
       }
     }
     # saveRDS(x, file = paste0("/Users/francescacrucinio/Documents/Dac4filtering/test/node", u, ".rds"))
     x <- xNew
     nv <- nvNew
-    historyIndex <- historyIndexNew
+    # historyIndex <- historyIndexNew
   }
   return(x)
 }
