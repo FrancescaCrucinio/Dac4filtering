@@ -122,9 +122,8 @@ dac_lgssm_lightweight_crossover <- function(history, obs, tau, lambda, sigmaY, M
       }
       # lightweight mixture resampling
       if(M == "adaptive") {
-        # extract history for mixture weights
-        xOld <- history[historyIndex[, ci[1]+nv, nchild*i], ci[1]+nv, 1]
-        out <- lgssm_adaptive_light(Nparticles, i, u, nv, ci, lW, Nparticles, lambda, tau, x, xOld)
+        out <- lgssm_adaptive_light(Nparticles, i, u, nv, ci, lW, Nparticles, lambda, tau, x,
+                                    history[historyIndex[, ci[1]+nv, nchild*i], ci[1]+nv, 1])
         # update after mixture resampling
         indices <- out$resampled_indices
         xNew[, ci[1]:ci[2]] <- cbind(x[indices[, 1], ci[1]:(ci[1]+nv-1)], x[indices[, 2], (ci[1]+nv):ci[2]])

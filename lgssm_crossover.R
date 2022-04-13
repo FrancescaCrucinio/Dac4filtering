@@ -3,7 +3,7 @@
 ID <- 1
 set.seed(1234*ID)
 # dimension
-d <- 32
+d <- 8
 # initial state
 mu0 <- rep(0, times = d)
 Sigma0 <- diag(x = 1, d, d)
@@ -52,19 +52,24 @@ Nparticles <- 100
 M <- 100
 
 x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
+history <- array(0, dim = c(Nparticles, d, 2))
+history[, , 1] <- x0
 # dac (lightweight adaptive)
 tic()
-res_dac <- dac_lgssm_lightweight(x0, y[t, ], tau, lambda, sigmaY, "adaptive")
+res_dac <- dac_lgssm_lightweight_crossover(history, y[t, ], tau, lambda, sigmaY, "adaptive")
 runtime <- toc()
 cov_res_dac <- cov(res_dac)
 heatmap(cov_res_dac, Colv = NA, Rowv = NA, scale="column")
-
+(colMeans(res_dac) - true_means)^2
+max((colMeans(res_dac) - true_means)^2)
 # dac (lightweight)
 tic()
-res_dac_light <- dac_lgssm_lightweight(x0, y[t, ], tau, lambda, sigmaY)
+res_dac_light <- dac_lgssm_lightweight_crossover(history, y[t, ], tau, lambda, sigmaY)
 runtime <- toc()
 cov_res_dac_light <- cov(res_dac_light)
 heatmap(cov_res_dac_light, Colv = NA, Rowv = NA, scale="column")
+(colMeans(res_dac_light) - true_means)^2
+max((colMeans(res_dac_light) - true_means)^2)
 # nsmc
 tic()
 res_nsmc <- nsmc_lgssm(x0, y[t, ], tau, lambda, sigmaY, M)
