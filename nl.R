@@ -17,7 +17,7 @@ y.error.var[upper.tri(y.error.var)] <- t(y.error.var)[upper.tri(y.error.var)]
 nl_data <- nl_obs(d, sigmaX, nu, delta, y.error.var, Time.step)
 y <- nl_data$yiid
 y_cov <- nl_data$y
-Nparticles <- 1000
+Nparticles <- 100
 M <- 100
 # initial state
 history <- sqrt(sigmaX)*array(rnorm(Nparticles*d^2), dim = c(d, d, Nparticles))

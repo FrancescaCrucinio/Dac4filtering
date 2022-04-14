@@ -61,7 +61,7 @@ ggplot(data = distances, aes(x = runtime_mean, y = w1, group = interaction(algo,
         text = element_text(size=15), legend.position="none")
 # my_legend <- get_legend(w1_plot)
 # as_ggplot(my_legend)
-# ggsave("lgssm2048_w1.pdf", width = 10, height = 8, dpi = 300)
+# ggsave("lgssm2048_w1.pdf", width = 10, height = 5, dpi = 300)
 # ggsave("lgssm32_legend.pdf", width = 6, height = 1, dpi = 300)
 # Kolmogorov-Smirnov
 ggplot(data = distances, aes(x = runtime_mean, y = ks, group = interaction(algo, N), fill = algo, colour = algo)) +
@@ -81,7 +81,7 @@ ggplot(data = distances, aes(x = runtime_mean, y = ks, group = interaction(algo,
         axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=25),
         text = element_text(size=20), legend.position="none")
-# ggsave("lgssm2048_ks.pdf", width = 10, height = 8, dpi = 300)
+# ggsave("lgssm2048_ks.pdf", width = 10, height = 5, dpi = 300)
 # RMSE
 tmp <- aggregate(. ~ algo + N, data = df, FUN = "mean")
 rmse_data <- data.frame(rep(1:Time.step, times = 9), rep(tmp$algo, each = 100), rep(tmp$N, each = 100))
