@@ -1,7 +1,7 @@
 dac_lgssm_lc_crossover <- function(history, obs, tau, lambda, sigmaY){
   # dimension and number of particles
-  d <- ncol(history[, , 1])
-  Nparticles <- nrow(history[, , 1])
+  d <- ncol(history)
+  Nparticles <- nrow(history)
   # tree topology
   nchild <- 2
   nlevels <- log2(d)
@@ -14,9 +14,9 @@ dac_lgssm_lc_crossover <- function(history, obs, tau, lambda, sigmaY){
   historyIndex <- array(1:Nparticles, dim = c(Nparticles, d, d))
   for (i in 1:nchild^nlevels){
     if (i == 1) {
-      x[, i] <- 0.5*history[, i, 1] + rnorm(Nparticles)/sqrt(tau)
+      x[, i] <- 0.5*history[, i] + rnorm(Nparticles)/sqrt(tau)
     } else {
-      x[, i] <- 0.5*tau*history[, i, 1]/(tau+lambda) + rnorm(Nparticles)/sqrt(tau+lambda)
+      x[, i] <- 0.5*tau*history[, i]/(tau+lambda) + rnorm(Nparticles)/sqrt(tau+lambda)
     }
     lW <- -0.5*(obs[i] - x[, i])^2/sigmaY - 0.5*log(2*pi*sigmaY)
     max.lW <- max(lW)
@@ -31,7 +31,7 @@ dac_lgssm_lc_crossover <- function(history, obs, tau, lambda, sigmaY){
     # number of variables in each node
     nvNew <- nchild^u
     # updated history
-    historyIndexNew <- array(0, dim = c(Nparticles, d, nodes))
+    # historyIndexNew <- array(0, dim = c(Nparticles, d, nodes))
 
     for (i in 1:nodes){
       # get children indices
@@ -48,20 +48,20 @@ dac_lgssm_lc_crossover <- function(history, obs, tau, lambda, sigmaY){
       x[, ci[1]:ci[2]] <- cbind(x[indices1, ci[1]:(ci[1]+nv-1)], x[indices2, (ci[1]+nv):ci[2]])
       if(u > 1){
         # mutation
-        historyIndexNew[, , i] <- crossover(i, nodes, x, history, historyIndex, tau, lambda)
+        historyIndexNew <- crossover(i, nodes, x, history, historyIndex, tau, lambda)
       }
       else{ # at the leaf level all histories are the same
-        historyIndexNew[, , i] <- historyIndex[, , i]
+        historyIndexNew <- historyIndex[, , i]
       }
       # weights
       lW <- -0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2/(tau+lambda) -
-                             2*x[, (ci[1]+nv-1)] * (x[, (ci[1]+nv)] - 0.5*tau*history[historyIndex[, (ci[1]+nv), nchild*i], (ci[1]+nv), 1]/(tau+lambda))
+                             2*x[, (ci[1]+nv-1)] * (x[, (ci[1]+nv)] - 0.5*tau*history[historyIndex[, (ci[1]+nv), nchild*i], (ci[1]+nv)]/(tau+lambda))
       )
       max.lW <- max(lW)
       W[, i] <- exp(lW - max.lW)
+      historyIndex[, , i] <- historyIndexNew
     }
     nv <- nvNew
-    historyIndex <- historyIndexNew
   }
   return(x)
 }

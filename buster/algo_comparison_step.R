@@ -1,4 +1,4 @@
-# devtools::load_all("/storage/u1693998/Dac4filtering")
+devtools::load_all("/storage/u1693998/Dac4filtering")
 ### Linear Gaussian SSM -- comparison of dac, stpf, nsmc
 ID <- as.numeric(Sys.getenv("SGE_TASK_ID"))
 set.seed(1234*ID)
@@ -11,56 +11,40 @@ Sigma0 <- diag(x = 1, d, d)
 tau <- 1
 lambda <- 1
 sigmaY <- 0.5^2
-timeinterval <- 1
 Time.step <- 100
-
-filename <- paste0("/storage/u1693998/data/data_lgssm_d", d, "ID", ID)
-# filename <- paste0("data/data_lgssm_d", d, "ID", ID)
-data <- read.csv(filename, row.names = 1)
-y <- unname(data.matrix(data[1:Time.step, 1:d], rownames.force = NA))
-true_means <- unname(data.matrix(data[data$type == "mean", 1:d]))
-true_variances <- unname(data.matrix(data[data$type == "var", 1:d]))
-# samples from marginals at last time step
-marginals <- matrix(0, nrow = 10^5, ncol = d)
-for(i in 1:d){
-  marginals[, i] <- rnorm(10^5, mean = true_means[Time.step, i], sd = sqrt(true_variances[Time.step, i]))
-}
 
 Nparticles <- 1000
 M <- 100
+df_light <- data.frame()
+df_nsmc <- data.frame()
 
-if(timeinterval == 1){
-  x0 <- mvrnorm(n = Nparticles, mu0, Sigma0)
-}
-# dac (lightweight)
-if(timeinterval > 1){
-  filename <- paste0("/storage/u1693998/results/dac_light_lgssm_d", d, "N", Nparticles, "ID", ID, "step", timeinterval-1)
-  x0 <- unname(data.matrix(read.table(filename, row.names = 1)))
-}
+res_dac_light <- mvrnorm(n = Nparticles, mu0, Sigma0)
+res_nsmc <- res_dac_light
 tic()
-res_dac_light <- dac_time_lgssm_crossover(tau, lambda, sigmaY, Nparticles, x0, y, method = "light", marginals = marginals)
+for (t in 1:Time.step) {
+  y <- unname(data.matrix(read.csv(paste0("/storage/u1693998/data/data_lgssm_d", d, "ID", ID), row.names = 1, nrows=1, skip=t-1)))[1:d]
+  res_dac_light <- dac_lgssm_lightweight_crossover(res_dac_light, y, tau, lambda, sigmaY)
+
+  df_light <- data.frame(rbind(df_light, cbind(colMeans(res_dac_light), t)))
+}
 runtime <- toc()
-filename <- paste0("/storage/u1693998/results/dac_light_lgssm_d", d, "N", Nparticles, "ID", ID, "step", timeinterval)
-write.table(res_dac_light, file = filename, append = FALSE, sep = " ", dec = ".",
-            row.names = TRUE, col.names = TRUE)
-# rse_dac_light <- (res_dac_light$m - true_means)^2/true_variances
-df <- data.frame(rbind(df, cbind(t(res_dac_light$m), res_dac_light$w1, res_dac_light$ks, rep(runtime, times = d))))
+df_light$runtime <- runtime
 # nsmc
 tic()
-res_nsmc <- nsmc_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, M = M, marginals = marginals)
+for (t in 1:Time.step) {
+  y <- unname(data.matrix(read.csv(paste0("/storage/u1693998/data/data_lgssm_d", d, "ID", ID), row.names = 1, nrows=1, skip=t-1)))[1:d]
+  res_nsmc <- nsmc_lgssm(res_nsmc, y, tau, lambda, sigmaY, M)
+  df_nsmc <- data.frame(rbind(df_nsmc, cbind(colMeans(res_nsmc), t)))
+}
 runtime <- toc()
-# rse_nsmc <- (res_nsmc$m - true_means)^2/true_variances
-df <- data.frame(rbind(df, cbind(t(res_nsmc$m), res_nsmc$w1, res_nsmc$ks, rep(runtime, times = d))))
-# # stpf
-# x0 <- array(mvrnorm(n = Nparticles*M, mu0, Sigma0), dim = c(Nparticles, M, d))
-# tic()
-# res_stpf <- stpf_time_lgssm(tau, lambda, sigmaY, Nparticles, x0, y, M = M, marginals = marginals)
-# runtime <- toc()
-# rse_stpf <- (res_stpf$m - true_means)^2/true_variances
-# df <- data.frame(rbind(df, cbind(t(rse_stpf), res_stpf$w1, res_stpf$ks, rep(runtime, times = d))))
+df_nsmc$runtime <- runtime
 
-df$algo <- as.factor(rep(c("dac-light", "nsmc"), each = d))
+filename <- paste0("/storage/u1693998/results/t100_light_lgssm_d", d, "N", Nparticles, "ID", ID)
+write.table(res_dac_light, file = filename, append = FALSE, sep = " ", dec = ".",
+            row.names = TRUE, col.names = TRUE)
+filename <- paste0("/storage/u1693998/results/t100_nsmc_lgssm_d", d, "N", Nparticles, "ID", ID)
+write.table(res_nsmc, file = filename, append = FALSE, sep = " ", dec = ".",
+            row.names = TRUE, col.names = TRUE)
 
-
-filename <- paste0("run_dac/results/lgssm_d", d, "N", Nparticles, "ID", ID)
-write.csv(x=df, file=filename)
+write.csv(x=df_nsmc, file=paste0("run_dac/results/nsmc_lgssm_d", d, "N", Nparticles, "ID", ID))
+write.csv(x=df_light, file=paste0("run_dac/results/light_lgssm_d", d, "N", Nparticles, "ID", ID))
