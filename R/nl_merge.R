@@ -4,14 +4,16 @@ nl_merge <- function(lW, obs, x, history, historyIndex, node_row_left, node_row_
   Nparticles <- dim(history)[3]
   d <- dim(history)[2]
   nchild <- 2
-  lW_left <- lW[node_row_left, node_col_left, ]
-  lW_right <- lW[node_row_right, node_col_right, ]
   historyIndex_left <- historyIndex[, , , node_row_left, node_col_left]
   historyIndex_right <- historyIndex[, , , node_row_right, node_col_right]
   if(u_info$direction == "v"){
     u <- 2*u_info$u
   } else {
     u <- 2*u_info$u-1
+  }
+  if(u == 1){
+    lW_left <- lW[node_row_left, node_col_left, ]
+    lW_right <- lW[node_row_right, node_col_right, ]
   }
   if(covariance){
     if(is.null(M)){
