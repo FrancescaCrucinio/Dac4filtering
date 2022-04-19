@@ -18,7 +18,7 @@ dac_nl_lightweight_likelihood_tempering <- function(history, obs, sigmaX, nu, M 
   # history indices
   historyIndex <- array(1:Nparticles, dim = c(Nparticles, d, d, d, d))
   # leaves
-  beta <- (1.5-1)/(1.5-1.5^(-2*nlevels))
+  beta <- (2-1)/(2-2^(-2*nlevels))
   for (col in 1:d){
     for (row in 1:d){
       out_neighbours <- get_neighbours_weights(row, col, d)
@@ -74,7 +74,7 @@ dac_nl_lightweight_likelihood_tempering <- function(history, obs, sigmaX, nu, M 
                                                     c(cir), c(cic), sigmaX, u+1)
         # merge
         out_merge <- nl_merge_likelihood_tempering(lW, obs, xNew, history, historyIndex, 2*i-1, 2*i, 2*j-1, 2*j-1, cir[, 1], c(cic),
-                                                   cir[, 2], c(cic), nvNew, nvNew, list("u" = u, "direction" = "v"), M, covariance)
+                                                   cir[, 2], c(cic), nv, nvNew, list("u" = u, "direction" = "v"), M, covariance)
         xNew[c(cir), c(cic), ] <- out_merge$x
         historyIndexNew <- historyIndexNew[out_merge$indices[, 1], , ]
       }

@@ -31,7 +31,7 @@ nl_merge_likelihood_tempering <- function(lW, obs, x, history, historyIndex, nod
                                lW_left, lW_right, sigmaX, M, d)
       target_reached <- out$target_reached
     } else {
-      beta_diff <- (-1.5^(-u)+1.5^(-u+1))/(1.5-1.5^(-2*nlevels))
+      beta_diff <- (-2^(-u)+2^(-u+1))/(2-2^(-2*nlevels))
       target_reached <- TRUE
       out <- nl_light_likelihood_tempering(u, x, obs, history, historyIndex_left, historyIndex_right,
                                            cir_left, cir_right, cic_left, cic_right, lW_left, lW_right, sigmaX, nu, M, beta_diff)
@@ -39,7 +39,14 @@ nl_merge_likelihood_tempering <- function(lW, obs, x, history, historyIndex, nod
   }
 
   indices <- out$resampled_indices
-  merged_x <- array(rbind(x[cir_left, cic_left, indices[, 1], drop = FALSE], x[cir_right, cic_right, indices[, 2], drop = FALSE]),
-                    dim = c(nv, nvNew, Nparticles))
+  if(u_info$direction == "h"){ # merge horizontally
+    merged_x <- array(0, dim = c(nv, nvNew, Nparticles))
+    merged_x[1:nv, 1:nv, ] <- x[cir_left, cic_left, indices[, 1], drop = FALSE]
+    merged_x[1:nv, (nv+1):nvNew, ] <- x[cir_right, cic_right, indices[, 2], drop = FALSE]
+  } else { # merge vertically
+    merged_x <- array(0, dim = c(nvNew, nvNew, Nparticles))
+    merged_x[1:nv, 1:nvNew, ] <- x[cir_left, cic_left, indices[, 1], drop = FALSE]
+    merged_x[(nv+1):nvNew, 1:nvNew, ] <- x[cir_right, cic_right, indices[, 2], drop = FALSE]
+  }
   return(list("x" = merged_x, "indices" = indices, "target_reached" = target_reached, "after_mix_lW" = out$resampled_particles_lW))
 }

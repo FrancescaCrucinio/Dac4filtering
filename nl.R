@@ -4,7 +4,7 @@ sigmaX <- 1
 nu <- 10
 tau <- 1/4
 delta <- 1
-Time.step <- 2
+Time.step <- 10
 y.error.prec <- matrix(0, nrow = d^2, ncol = d^2)
 diag(y.error.prec) <- 1
 diag(y.error.prec[-1, ]) <- tau
@@ -30,14 +30,13 @@ for (t in 1:Time.step){
   history_dac <- res_dac
 }
 toc()
-# tic()
-# for (t in 1:Time.step){
-#   print(paste(t))
-#   res_dac_tempering <- dac_nl_lightweight(history, y_cov[, , t], sigmaX, nu, M = NULL, covariance = TRUE,
-#                                           obs_old = matrix(0, nrow = d, ncol = d), tau = tau)
-#   # history <- res_dac_tempering
-# }
-# toc()
+tic()
+for (t in 1:Time.step){
+  print(paste(t))
+  res_dac_tempering <- dac_nl_lightweight_likelihood_tempering(history_dac, y[, , t], sigmaX, nu, covariance = FALSE, tempering = FALSE)
+  history_dac <- res_dac_tempering
+}
+toc()
 tic()
 for (t in 1:Time.step){
   print(paste(t))
@@ -52,7 +51,8 @@ for (t in 1:Time.step){
   history_stpf <- res_stpf
 }
 toc()
-mean((apply(res_dac, c(1,2), mean) - nl_data$x[, , Time.step+1])^2)
-# mean((apply(res_dac_tempering, c(1,2), mean) - nl_data$x[, , Time.step+1])^2)
+max((apply(res_dac, c(1,2), mean) - nl_data$x[, , Time.step+1])^2)
+mean((apply(res_dac_tempering, c(1,2), mean) - nl_data$x[, , Time.step+1])^2)
 mean((apply(res_nsmc, c(1,2), mean) - nl_data$x[, , Time.step+1])^2)
 mean((apply(res_stpf, c(1, 2), mean) - nl_data$x[, , Time.step+1])^2)
+

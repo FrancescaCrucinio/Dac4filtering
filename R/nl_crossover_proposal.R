@@ -21,8 +21,8 @@ nl_crossover_proposal <- function(x, history, historyIndex_left, historyIndex_ri
         out_neighbours <- get_neighbours_weights(row, col, d)
         valid_weights <- out_neighbours$mixture_weights[out_neighbours$mixture_weights>0]
         valid_current_neighbours <- out_neighbours$current_x_neighbours[out_neighbours$mixture_weights>0, ]
-        ft_ratio <- ft_ratio + log(sum(valid_weights * dnorm(x[row, col, n], mean = crossedover_ancestor[valid_current_neighbours], sd = sqrt(sigmaX)))) -
-                log(sum(valid_weights * dnorm(x[row, col, n], mean = left_ancestor[valid_current_neighbours], sd = sqrt(sigmaX))))
+        ft_ratio <- ft_ratio + log(sum(valid_weights * exp(-(x[row, col, n] - crossedover_ancestor[valid_current_neighbours])^2/(2*sigmaX)))) -
+                log(sum(valid_weights * exp(-(x[row, col, n] - left_ancestor[valid_current_neighbours])^2/(2*sigmaX))))
       }
     }
     # accept/reject

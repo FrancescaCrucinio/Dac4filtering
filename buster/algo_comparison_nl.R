@@ -41,5 +41,5 @@ for (t in 1:Time.step){
 runtime <- toc()
 df_stpf$runtime <- runtime
 
-write.csv(x=df_nsmc, file=paste0("run_dac/results/nsmc_nl_iid_d", d, "N", Nparticles, "ID", ID))
-write.csv(x=df_stpf, file=paste0("run_dac/results/stpf_nl_iid_d", d, "N", Nparticles, "ID", ID))
+write.csv(x=df_nsmc, file=paste0("/storage/u1693998/results/results/nsmc_nl_iid_d", d, "N", Nparticles, "ID", ID))
+write.csv(x=df_stpf, file=paste0("/storage/u1693998/results/results/stpf_nl_iid_d", d, "N", Nparticles, "ID", ID))

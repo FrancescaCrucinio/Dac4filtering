@@ -38,7 +38,14 @@ nl_merge <- function(lW, obs, x, history, historyIndex, node_row_left, node_row_
   }
 
   indices <- out$resampled_indices
-  merged_x <- array(rbind(x[cir_left, cic_left, indices[, 1], drop = FALSE], x[cir_right, cic_right, indices[, 2], drop = FALSE]),
-                    dim = c(nv, nvNew, Nparticles))
+  if(u_info$direction == "h"){ # merge horizontally
+    merged_x <- array(0, dim = c(nv, nvNew, Nparticles))
+    merged_x[1:nv, 1:nv, ] <- x[cir_left, cic_left, indices[, 1], drop = FALSE]
+    merged_x[1:nv, (nv+1):nvNew, ] <- x[cir_right, cic_right, indices[, 2], drop = FALSE]
+  } else { # merge vertically
+    merged_x <- array(0, dim = c(nvNew, nvNew, Nparticles))
+    merged_x[1:nv, 1:nvNew, ] <- x[cir_left, cic_left, indices[, 1], drop = FALSE]
+    merged_x[(nv+1):nvNew, 1:nvNew, ] <- x[cir_right, cic_right, indices[, 2], drop = FALSE]
+  }
   return(list("x" = merged_x, "indices" = indices, "target_reached" = target_reached, "after_mix_lW" = out$resampled_particles_lW))
 }
