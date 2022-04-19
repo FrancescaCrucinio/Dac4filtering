@@ -60,7 +60,7 @@ dac_nl_lightweight <- function(history, obs, sigmaX, nu, M = NULL,
         out_top_merge <- nl_merge(lW, obs, x, history, historyIndex, 2*i-1, 2*i-1, 2*j-1, 2*j, cir[, 1], cic[, 1],
                                   cir[, 1], cic[, 2], nv, nvNew, list("u" = u, "direction" = "h"), M, covariance, tau)
         x[cir[, 1], c(cic), ] <- out_top_merge$x
-        historyIndex[, , , 2*i-1, 2*j-1] <- historyIndexNew[out_top_merge$indices[, 1], , , drop = FALSE]
+        historyIndex[, , , 2*i-1, 2*j-1] <- historyIndexNew[out_top_merge$indices[, 1], , ]
         # if(tempering){
         #   lW_left <- lW[2*i-1, 2*j-1, ]
         #   lW_right <- lW[2*i-1, 2*j, ]
@@ -81,7 +81,7 @@ dac_nl_lightweight <- function(history, obs, sigmaX, nu, M = NULL,
         out_bottom_merge <- nl_merge(lW, obs, x, history, historyIndex, 2*i, 2*i, 2*j-1, 2*j, cir[, 2], cic[, 1],
                                      cir[, 2], cic[, 2], nv, nvNew, list("u" = u, "direction" = "h"), M, covariance, tau)
         x[cir[, 2], c(cic), ] <- out_bottom_merge$x
-        historyIndex[, , , 2*i, 2*j-1] <- historyIndexNew[out_bottom_merge$indices[, 1], , , drop = FALSE]
+        historyIndex[, , , 2*i, 2*j-1] <- historyIndexNew[out_bottom_merge$indices[, 1], , ]
         # if(tempering){
         #   lW_left <- lW[2*i, 2*j-1, ]
         #   lW_right <- lW[2*i, 2*j, ]

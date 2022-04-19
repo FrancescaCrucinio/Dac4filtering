@@ -23,21 +23,21 @@ nl_light <- function(u, x, history, historyIndex_left, historyIndex_right, cir_r
   }
   # mixture weights
   lWmix <- rep(0, times = m*Nparticles)
-  # for (n in 1:(m*Nparticles)){
-  #   left_ancestor_coordinates <- cbind(1:d, rep(1:d, each = d), c(historyIndex_left[indices1[n], , ]))
-  #   right_ancestor_coordinates <- cbind(1:d, rep(1:d, each = d), c(historyIndex_right[indices2[n], , ]))
-  #   left_ancestor <- matrix(history[left_ancestor_coordinates], nrow = d)
-  #   right_ancestor <- matrix(history[right_ancestor_coordinates], nrow = d)
-  #   for (col in cic_right) {
-  #     for (row in cir_right) {
-  #       out_neighbours <- get_neighbours_weights(row, col, d)
-  #       valid_weights <- out_neighbours$mixture_weights[out_neighbours$mixture_weights>0]
-  #       valid_current_neighbours <- out_neighbours$current_x_neighbours[out_neighbours$mixture_weights>0, ]
-  #       lWmix[n] <- lWmix[n] + log(sum(valid_weights * exp(-(x[row, col, indices2[n]] - left_ancestor[valid_current_neighbours])^2/(2*sigmaX)))) -
-  #         log(sum(valid_weights * exp(-(x[row, col, indices2[n]] - right_ancestor[valid_current_neighbours])^2/(2*sigmaX))))
-  #     }
-  #   }
-  # }
+  for (n in 1:(m*Nparticles)){
+    left_ancestor_coordinates <- cbind(1:d, rep(1:d, each = d), c(historyIndex_left[indices1[n], , ]))
+    right_ancestor_coordinates <- cbind(1:d, rep(1:d, each = d), c(historyIndex_right[indices2[n], , ]))
+    left_ancestor <- matrix(history[left_ancestor_coordinates], nrow = d)
+    right_ancestor <- matrix(history[right_ancestor_coordinates], nrow = d)
+    for (col in cic_right) {
+      for (row in cir_right) {
+        out_neighbours <- get_neighbours_weights(row, col, d)
+        valid_weights <- out_neighbours$mixture_weights[out_neighbours$mixture_weights>0]
+        valid_current_neighbours <- out_neighbours$current_x_neighbours[out_neighbours$mixture_weights>0, ]
+        lWmix[n] <- lWmix[n] + log(sum(valid_weights * exp(-(x[row, col, indices2[n]] - left_ancestor[valid_current_neighbours])^2/(2*sigmaX)))) -
+          log(sum(valid_weights * exp(-(x[row, col, indices2[n]] - right_ancestor[valid_current_neighbours])^2/(2*sigmaX))))
+      }
+    }
+  }
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
   # resampling the new population

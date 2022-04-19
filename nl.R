@@ -1,5 +1,5 @@
 set.seed(1234)
-d <- 4
+d <- 8
 sigmaX <- 1
 nu <- 10
 tau <- 1/4
@@ -17,7 +17,7 @@ y.error.var[upper.tri(y.error.var)] <- t(y.error.var)[upper.tri(y.error.var)]
 nl_data <- nl_obs(d, sigmaX, nu, delta, y.error.var, Time.step)
 y <- nl_data$yiid
 y_cov <- nl_data$y
-Nparticles <- 1000
+Nparticles <- 100
 M <- 100
 # initial state
 history_dac <- sqrt(sigmaX)*array(rnorm(Nparticles*d^2), dim = c(d, d, Nparticles))
@@ -30,13 +30,13 @@ for (t in 1:Time.step){
   history_dac <- res_dac
 }
 toc()
-tic()
-for (t in 1:Time.step){
-  print(paste(t))
-  res_dac_tempering <- dac_nl_lightweight_likelihood_tempering(history_dac, y[, , t], sigmaX, nu, covariance = FALSE, tempering = FALSE)
-  history_dac <- res_dac_tempering
-}
-toc()
+# tic()
+# for (t in 1:Time.step){
+#   print(paste(t))
+#   res_dac_tempering <- dac_nl_lightweight_likelihood_tempering(history_dac, y[, , t], sigmaX, nu, covariance = FALSE, tempering = FALSE)
+#   history_dac <- res_dac_tempering
+# }
+# toc()
 tic()
 for (t in 1:Time.step){
   print(paste(t))
@@ -52,7 +52,7 @@ for (t in 1:Time.step){
 }
 toc()
 max((apply(res_dac, c(1,2), mean) - nl_data$x[, , Time.step+1])^2)
-mean((apply(res_dac_tempering, c(1,2), mean) - nl_data$x[, , Time.step+1])^2)
+# mean((apply(res_dac_tempering, c(1,2), mean) - nl_data$x[, , Time.step+1])^2)
 mean((apply(res_nsmc, c(1,2), mean) - nl_data$x[, , Time.step+1])^2)
 mean((apply(res_stpf, c(1, 2), mean) - nl_data$x[, , Time.step+1])^2)
 
