@@ -1,4 +1,5 @@
-nl_crossover <- function(x, history, historyIndex_left, historyIndex_right, cir, cic, sigmaX, u, covariance, obs_old, tau){
+nl_crossover <- function(x, history, historyIndex_left, historyIndex_right, cir, cic, sigmaX, u,
+                         covariance = FALSE, obs_old = NULL, tau = NULL){
   nu <- 10
   # crossover
   if(u > 1){

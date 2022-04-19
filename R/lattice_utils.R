@@ -20,3 +20,10 @@ sample_mixture <- function(n, mixture_weights, current_x_neighbours, xOld){
   xMean <- xOld[component_coordinates[1], component_coordinates[2], n]
   return(xMean)
 }
+sample_mixture2 <- function(mixture_weights, current_x_neighbours, xOld){
+  # sample component of mixture
+  mixture_component <- sample.int(5, size = 1, prob = mixture_weights)
+  component_coordinates <- current_x_neighbours[mixture_component, ]
+  xMean <- xOld[component_coordinates[1], component_coordinates[2]]
+  return(xMean)
+}

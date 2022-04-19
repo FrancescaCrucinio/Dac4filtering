@@ -15,17 +15,21 @@ dac_nl_lightweight <- function(history, obs, sigmaX, nu, M = NULL,
   nv <- 1
   x <- array(0, dim = c(d, d, Nparticles))
   lW <- array(0, dim = c(d, d, Nparticles))
+  W <- array(0, dim = c(d, d, Nparticles))
   # history indices
   historyIndex <- array(1:Nparticles, dim = c(Nparticles, d, d, d, d))
   # leaves
-  for (col in 1:d){
-    for (row in 1:d){
+  for (row in 1:d){
+    for (col in 1:d){
       out_neighbours <- get_neighbours_weights(row, col, d)
       xMean <- sapply(1:Nparticles, sample_mixture, out_neighbours$mixture_weights,
                       out_neighbours$current_x_neighbours, history, simplify = TRUE)
       # weights
       x[row, col, ] <- xMean + sqrt(sigmaX)*rnorm(Nparticles)
       lW[row, col, ] <- -0.5*(nu+1)*log(1+(x[row, col, ] - obs[row, col])^2/nu)
+      max.lW <- max(lW[row, col, ])
+      W[row, col, ] <- exp(lW[row, col, ] - max.lW)
+      W[row, col, ] <- W[row, col, ]/sum(W[row, col, ])
     }
   }
   # loop over tree levels excluding leaves

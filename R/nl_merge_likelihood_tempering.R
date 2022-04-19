@@ -31,9 +31,7 @@ nl_merge_likelihood_tempering <- function(lW, obs, x, history, historyIndex, nod
                                lW_left, lW_right, sigmaX, M, d)
       target_reached <- out$target_reached
     } else {
-      print(paste(u_info))
-      beta_diff <- (-2^(-u)+2^(-u+1))/(2-2^(-2*nlevels))
-      print(paste((2-2^(-u))/(2-2^(-2*nlevels))))
+      beta_diff <- (-1.5^(-u)+1.5^(-u+1))/(1.5-1.5^(-2*nlevels))
       target_reached <- TRUE
       out <- nl_light_likelihood_tempering(u, x, obs, history, historyIndex_left, historyIndex_right,
                                            cir_left, cir_right, cic_left, cic_right, lW_left, lW_right, sigmaX, nu, M, beta_diff)

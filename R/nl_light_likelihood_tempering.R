@@ -37,12 +37,12 @@ nl_light_likelihood_tempering <- function(u, x, obs, history, historyIndex_left,
         valid_current_neighbours <- out_neighbours$current_x_neighbours[out_neighbours$mixture_weights>0, ]
         lWmix[n] <- lWmix[n] + log(sum(valid_weights * dnorm(x[row, col, indices2[n]], mean = left_ancestor[valid_current_neighbours], sd = sqrt(sigmaX)))) -
           log(sum(valid_weights * dnorm(x[row, col, indices2[n]], mean = right_ancestor[valid_current_neighbours], sd = sqrt(sigmaX)))) +
-          beta_diff*0.5*(nu+1)*log(1+(x[row, col, ] - obs[row, col])^2/nu)
+          beta_diff*0.5*(nu+1)*log(1+(x[row, col, indices2[n]] - obs[row, col])^2/nu)
       }
     }
     for (col in cic_left) {
       for (row in cir_left) {
-        lWmix[n] <- lWmix[n] + beta_diff*0.5*(nu+1)*log(1+(x[row, col, ] - obs[row, col])^2/nu)
+        lWmix[n] <- lWmix[n] + beta_diff*0.5*(nu+1)*log(1+(x[row, col, indices1[n]] - obs[row, col])^2/nu)
       }
     }
   }
