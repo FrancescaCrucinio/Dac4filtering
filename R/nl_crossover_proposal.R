@@ -87,8 +87,8 @@ nl_crossover_proposal_covariance <- function(x, obs_old, history, historyIndex_l
           out_neighbours <- get_neighbours_weights(row, col, d)
           valid_weights <- out_neighbours$mixture_weights[out_neighbours$mixture_weights>0]
           valid_current_neighbours <- out_neighbours$current_x_neighbours[out_neighbours$mixture_weights>0, ]
-          ft_ratio <- ft_ratio + log(sum(valid_weights * dnorm(x[row, col, n], mean = crossedover_ancestor1[valid_current_neighbours], sd = sqrt(sigmaX)))) -
-                log(sum(valid_weights * dnorm(x[row, col, n], mean = left_ancestor[valid_current_neighbours], sd = sqrt(sigmaX))))
+          ft_ratio <- ft_ratio + log(sum(valid_weights * exp(-(x[row, col, n] - crossedover_ancestor1[valid_current_neighbours])^2/(2*sigmaX)))) -
+                log(sum(valid_weights * exp(-(x[row, col, n] - left_ancestor[valid_current_neighbours])^2/(2*sigmaX))))
         }
       }
     }

@@ -5,13 +5,13 @@ nl_light_likelihood_tempering <- function(u, x, obs, history, historyIndex_left,
   # binary tree
   nchild <- 2
   # resample on each children
-  lW_left <- c(lW_left)
-  max.lW_left <- max(lW_left)
-  W_left <- exp(lW_left - max.lW_left)
-  lW_right<- c(lW_right)
-  max.lW_right <- max(lW_right)
-  W_right <- exp(lW_right - max.lW_right)
   if(u == 1){
+    lW_left <- c(lW_left)
+    max.lW_left <- max(lW_left)
+    W_left <- exp(lW_left - max.lW_left)
+    lW_right<- c(lW_right)
+    max.lW_right <- max(lW_right)
+    W_right <- exp(lW_right - max.lW_right)
     # child 1
     indices1 <- stratified_resample(W_left/sum(W_left), m*Nparticles)
     # child 2 (with random permutation)
@@ -35,8 +35,8 @@ nl_light_likelihood_tempering <- function(u, x, obs, history, historyIndex_left,
         out_neighbours <- get_neighbours_weights(row, col, d)
         valid_weights <- out_neighbours$mixture_weights[out_neighbours$mixture_weights>0]
         valid_current_neighbours <- out_neighbours$current_x_neighbours[out_neighbours$mixture_weights>0, ]
-        lWmix[n] <- lWmix[n] + log(sum(valid_weights * dnorm(x[row, col, indices2[n]], mean = left_ancestor[valid_current_neighbours], sd = sqrt(sigmaX)))) -
-          log(sum(valid_weights * dnorm(x[row, col, indices2[n]], mean = right_ancestor[valid_current_neighbours], sd = sqrt(sigmaX)))) +
+        lWmix[n] <- lWmix[n] + log(sum(valid_weights * exp(-(x[row, col, indices2[n]] - left_ancestor[valid_current_neighbours])^2/(2*sigmaX)))) -
+          log(sum(valid_weights * exp(-(x[row, col, indices2[n]] - right_ancestor[valid_current_neighbours])^2/(2*sigmaX)))) +
           beta_diff*0.5*(nu+1)*log(1+(x[row, col, indices2[n]] - obs[row, col])^2/nu)
       }
     }

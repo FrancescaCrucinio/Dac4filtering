@@ -45,14 +45,10 @@ nl_light <- function(u, x, history, historyIndex_left, historyIndex_right, cir_r
   return(list("resampled_indices" = cbind(indices1[indices], indices2[indices]), "resampled_particles_lW" = lWmix[indices]))
 }
 
-nl_adaptive_light <- function(ess_target, u_info, x, history, historyIndex_left, historyIndex_right, cir_right, cic_right,
-                              lW_left, lW_right, sigmaX, m, d){
+nl_adaptive_light <- function(ess_target, u, x, history, historyIndex_left, historyIndex_right, cir_right, cic_right,
+                              lW_left, lW_right, sigmaX, u_info){
+  d <- dim(history)[1]
   Nparticles <- dim(history)[3]
-  if(u_info$direction == "v"){
-    u <- u_info$u+1
-  } else {
-    u <- u_info$u
-  }
   # binary tree
   nchild <- 2
   # mixture weights
@@ -67,8 +63,8 @@ nl_adaptive_light <- function(ess_target, u_info, x, history, historyIndex_left,
         out_neighbours <- get_neighbours_weights(row, col, d)
         valid_weights <- out_neighbours$mixture_weights[out_neighbours$mixture_weights>0]
         valid_current_neighbours <- out_neighbours$current_x_neighbours[out_neighbours$mixture_weights>0, ]
-        lWmix[n] <- lWmix[n] + log(sum(valid_weights * dnorm(x[row, col, n], mean = left_ancestor[valid_current_neighbours], sd = sqrt(sigmaX)))) -
-          log(sum(valid_weights * dnorm(x[row, col, n], mean = right_ancestor[valid_current_neighbours], sd = sqrt(sigmaX))))
+        lWmix[n] <- lWmix[n] + log(sum(valid_weights * exp(-(x[row, col, n] - left_ancestor[valid_current_neighbours])^2/(2*sigmaX)))) -
+          log(sum(valid_weights * exp(-(x[row, col, n] - right_ancestor[valid_current_neighbours])^2/(2*sigmaX))))
       }
     }
   }
@@ -100,8 +96,8 @@ nl_adaptive_light <- function(ess_target, u_info, x, history, historyIndex_left,
           out_neighbours <- get_neighbours_weights(row, col, d)
           valid_weights <- out_neighbours$mixture_weights[out_neighbours$mixture_weights>0]
           valid_current_neighbours <- out_neighbours$current_x_neighbours[out_neighbours$mixture_weights>0, ]
-          lWmix_perm[n] <- lWmix_perm[n] + log(sum(valid_weights * dnorm(x[row, col, n], mean = left_ancestor[valid_current_neighbours], sd = sqrt(sigmaX)))) -
-            log(sum(valid_weights * dnorm(x[row, col, new_perm[n]], mean = right_ancestor[valid_current_neighbours], sd = sqrt(sigmaX))))
+          lWmix_perm[n] <- lWmix_perm[n] + log(sum(valid_weights * exp(-(x[row, col, n] - left_ancestor[valid_current_neighbours])^2/(2*sigmaX)))) -
+            log(sum(valid_weights * exp(-(x[row, col, new_perm[n]] - right_ancestor[valid_current_neighbours])^2/(2*sigmaX))))
         }
       }
     }

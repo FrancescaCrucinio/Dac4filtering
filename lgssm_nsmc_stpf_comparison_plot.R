@@ -11,7 +11,7 @@ for (id in 2:50){
   dfnew$run <- id
   df <- rbind(df, dfnew)
 }
-for (id in 1:50){
+for (id in c(1:31, 36:50)){
   filename <- paste0("data/lgssm_tempering/lgssm_d", d, "N1000ID", id, sep = "")
   dfnew <- read.csv(filename)
   dfnew$N <- "10^3"
@@ -36,7 +36,8 @@ distances$ks <- aggregate(ks ~ algo + runtime + N + run, data = df, FUN = "mean"
 time_means <- aggregate(runtime ~ algo + N, data = df, FUN= "mean" )
 time_means <- time_means[order(time_means$algo, time_means$N), ]
 distances <- distances[order(distances$algo, distances$N), ]
-distances$runtime_mean <- rep(time_means$runtime, each = 50)
+distances$runtime_mean <- c(rep(time_means$runtime[1], times = 50), rep(time_means$runtime[2], times = 46),
+                            rep(time_means$runtime[3], times = 50), rep(time_means$runtime[4], times = 46))
 distances_mean <- data.frame(aggregate(w1 ~ algo + N, data = distances, FUN = "mean"))
 distances_mean$ks <- aggregate(ks ~ algo + N, data = distances, FUN = "mean")$ks
 distances_mean <- merge(distances_mean, time_means, by=c("algo", "N"))
@@ -84,7 +85,7 @@ ggplot(data = distances, aes(x = runtime_mean, y = ks, group = interaction(algo,
 # ggsave("lgssm2048_ks.pdf", width = 10, height = 5, dpi = 300)
 # RMSE
 tmp <- aggregate(. ~ algo + N, data = df, FUN = "mean")
-rmse_data <- data.frame(rep(1:Time.step, times = 9), rep(tmp$algo, each = 100), rep(tmp$N, each = 100))
+rmse_data <- data.frame(rep(1:Time.step, times = 4), rep(tmp$algo, each = 100), rep(tmp$N, each = 100))
 colnames(rmse_data) <- c("Time.step", "algo", "N")
 rmse_data <- rmse_data[order(rmse_data$algo, rmse_data$N), ]
 tmp <- tmp[order(tmp$algo, tmp$N), ]

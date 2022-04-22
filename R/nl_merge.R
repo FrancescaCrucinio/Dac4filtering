@@ -4,6 +4,8 @@ nl_merge <- function(lW, obs, x, history, historyIndex, node_row_left, node_row_
   Nparticles <- dim(history)[3]
   d <- dim(history)[2]
   nchild <- 2
+  sigmaX <- 1
+  nu <- 10
   historyIndex_left <- historyIndex[, , , node_row_left, node_col_left]
   historyIndex_right <- historyIndex[, , , node_row_right, node_col_right]
   if(u_info$direction == "v"){
@@ -17,18 +19,18 @@ nl_merge <- function(lW, obs, x, history, historyIndex, node_row_left, node_row_
   }
   if(covariance){
     if(is.null(M)){
-      out <- nl_adaptive_light_covariance(Nparticles, u_info, obs, x, history, historyIndex_left, historyIndex_right, cir_left, cir_right, cic_left, cic_right,
-                               lW_left, lW_right, sigmaX, Nparticles, M, d)
+      out <- nl_adaptive_light_covariance(Nparticles, u, obs, x, history, historyIndex_left, historyIndex_right, cir_left, cir_right, cic_left, cic_right,
+                                          lW_left, lW_right, sigmaX, tau, nu, u_info)
       target_reached <- out$target_reached
     } else {
       target_reached <- TRUE
       out <- nl_light_covariance(u, obs, x, history, historyIndex_left, historyIndex_right, cir_left, cir_right, cic_left, cic_right,
-                      lW_left, lW_right, sigmaX, Nparticles, M, d, tau)
+                                 lW_left, lW_right, sigmaX, M, tau, nu)
     }
   } else{
     if(is.null(M)){
-      out <- nl_adaptive_light(Nparticles, u_info, x, history, historyIndex_left, historyIndex_right, cir_right, cic_right,
-                               lW_left, lW_right, sigmaX, M, d)
+      out <- nl_adaptive_light(Nparticles, u, x, history, historyIndex_left, historyIndex_right, cir_right, cic_right,
+                               lW_left, lW_right, sigmaX, u_info)
       target_reached <- out$target_reached
     } else {
       target_reached <- TRUE
