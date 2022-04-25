@@ -1,5 +1,5 @@
 set.seed(1234)
-d <- 8
+d <- 4
 sigmaX <- 1
 nu <- 10
 tau <- -1/4
