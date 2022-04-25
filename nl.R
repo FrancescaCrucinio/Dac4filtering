@@ -41,22 +41,22 @@ for (t in 1:Time.step){
   obs_old <- y_cov[, , t]
 }
 toc()
-tic()
-for (t in 1:Time.step){
-  print(paste(t))
-  res_nsmc <- nsmc_nl(history_nsmc, y[, , t], nu, sigmaX, M)
-  history_nsmc <- res_nsmc
-}
-toc()
-tic()
-for (t in 1:Time.step){
-  print(paste(t))
-  res_stpf <- stpf_nl(history_stpf, y[, , t], nu, sigmaX)
-  history_stpf <- res_stpf
-}
-toc()
-mean((apply(res_dac, c(1,2), mean) - nl_data$x[, , Time.step+1])^2, col = grey(seq(0, 1, length = 256)))
-mean((apply(res_dac_tempering, c(1,2), mean) - nl_data$x[, , Time.step+1])^2, col = grey(seq(0, 1, length = 256)))
-mean((apply(res_nsmc, c(1,2), mean) - nl_data$x[, , Time.step+1])^2, col = grey(seq(0, 1, length = 256)))
-mean((apply(res_stpf, c(1, 2), mean) - nl_data$x[, , Time.step+1])^2, col = grey(seq(0, 1, length = 256)))
-
+# tic()
+# for (t in 1:Time.step){
+#   print(paste(t))
+#   res_nsmc <- nsmc_nl(history_nsmc, y[, , t], nu, sigmaX, M)
+#   history_nsmc <- res_nsmc
+# }
+# toc()
+# tic()
+# for (t in 1:Time.step){
+#   print(paste(t))
+#   res_stpf <- stpf_nl(history_stpf, y[, , t], nu, sigmaX)
+#   history_stpf <- res_stpf
+# }
+# toc()
+# mean((apply(res_dac, c(1,2), mean) - nl_data$x[, , Time.step+1])^2, col = grey(seq(0, 1, length = 256)))
+# mean((apply(res_dac_tempering, c(1,2), mean) - nl_data$x[, , Time.step+1])^2, col = grey(seq(0, 1, length = 256)))
+# mean((apply(res_nsmc, c(1,2), mean) - nl_data$x[, , Time.step+1])^2, col = grey(seq(0, 1, length = 256)))
+# mean((apply(res_stpf, c(1, 2), mean) - nl_data$x[, , Time.step+1])^2, col = grey(seq(0, 1, length = 256)))
+#
