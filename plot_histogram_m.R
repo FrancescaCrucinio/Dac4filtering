@@ -1,6 +1,7 @@
 library(plyr)
-df <- read.csv("data/adaptive_nl.csv", col.names = c("u", "direction", "m"))
-# df$u <- as.factor(mapvalues(df$u, from=c(1, 2, 3, 4, 5), to=c(5, 4, 3, 2, 1)))
+# df <- read.csv("data/adaptive_resampling/adaptive_nl_d64N1000T10.csv", col.names = c("u", "direction", "m"))
+df <- read.csv("data/adaptive_resampling/adaptive_lgssm_d32N1000T100.csv", col.names = c("u", "m"))
+df$u <- as.factor(mapvalues(df$u, from=c(1, 2, 3, 4, 5), to=c(5, 4, 3, 2, 1)))
 # histogram of m
 ggplot(data = df, aes(x = m)) +
   geom_histogram() +

@@ -27,7 +27,7 @@ history_stpf <- sqrt(sigmaX)*array(rnorm(Nparticles*M*d^2), dim = c(d, d, Nparti
 tic()
 for (t in 1:Time.step){
   print(paste(t))
-  res_dac <- dac_nl_adaptive_lightweight(history_dac, y[, , t], sigmaX, nu, covariance = FALSE, tempering = FALSE)
+  res_dac <- dac_nl_lightweight(history_dac, y[, , t], sigmaX, nu, covariance = FALSE, tempering = FALSE)
   history_dac <- res_dac
 }
 toc()
@@ -35,7 +35,7 @@ tic()
 obs_old <- matrix(0, ncol = d, nrow = d)
 for (t in 1:Time.step){
   print(paste(t))
-  res_dac_tempering <- dac_nl_adaptive_lightweight(history_dac_tempering, y_cov[, , t], sigmaX, nu, covariance = TRUE, tempering = FALSE,
+  res_dac_tempering <- dac_nl_lightweight(history_dac_tempering, y_cov[, , t], sigmaX, nu, covariance = TRUE, tempering = FALSE,
                                           obs_old = obs_old, tau = tau)
   history_dac_tempering <- res_dac_tempering
   obs_old <- y_cov[, , t]
