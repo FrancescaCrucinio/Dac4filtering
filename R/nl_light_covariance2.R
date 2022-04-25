@@ -65,13 +65,13 @@ nl_light_covariance2 <- function(u, obs, x, history, historyIndex_left, historyI
               current_node_fit <- obs[valid_current_neighbours[main_node, 1], valid_current_neighbours[main_node, 2]] -
                 x[valid_current_neighbours[main_node, 1], valid_current_neighbours[main_node, 2], indices1[n]]
               obs_fit <- obs[neighbour_row, neighbour_col] - x[neighbour_row, neighbour_col, indices1[n]]
-              obs_weight_merged <- obs_weight_merged + current_node_fit*obs_fit*obs_precision
+              obs_weight_left <- obs_weight_left + current_node_fit*obs_fit*obs_precision
             }
             if((neighbour_col %in% cic_right) & (neighbour_row %in% cir_right)){ # right node
               current_node_fit <- obs[valid_current_neighbours[main_node, 1], valid_current_neighbours[main_node, 2]] -
                 x[valid_current_neighbours[main_node, 1], valid_current_neighbours[main_node, 2], indices2[n]]
               obs_fit <- obs[neighbour_row, neighbour_col] - x[neighbour_row, neighbour_col, indices2[n]]
-              obs_weight_merged <- obs_weight_merged + current_node_fit*obs_fit*obs_precision
+              obs_weight_right <- obs_weight_right + current_node_fit*obs_fit*obs_precision
             }
           }
         }
@@ -90,3 +90,30 @@ nl_light_covariance2 <- function(u, obs, x, history, historyIndex_left, historyI
   indices <- stratified_resample(Wmix/sum(Wmix), Nparticles)
   return(list("resampled_indices" = cbind(indices1[indices], indices2[indices]), "resampled_particles_lW" = lWmix[indices]))
 }
+#
+# obs_precision <- rep(tau, length(valid_weights))
+# obs_precision[main_node] <- 1
+# vcn_node <- cbind(valid_current_neighbours[valid_current_neighbours[, 1] %in% cir, 1],
+#                   valid_current_neighbours[valid_current_neighbours[, 2] %in% cic, 2])
+# vcn_left <- cbind(valid_current_neighbours[valid_current_neighbours[, 1] %in% cir_left, 1],
+#                   valid_current_neighbours[valid_current_neighbours[, 2] %in% cic_left, 2])
+# vcn_left <- cbind(vcn_left, rep(indices1[n], nrow(vcn_left)))
+# vcn_right <- cbind(valid_current_neighbours[valid_current_neighbours[, 1] %in% cir_right, 1],
+#                   valid_current_neighbours[valid_current_neighbours[, 2] %in% cic_right, 2])
+# vcn_right <- cbind(vcn_right, rep(indices2[n], nrow(vcn_right)))
+#
+# # current node
+# current_node_fit <- obs[valid_current_neighbours[main_node, 1], valid_current_neighbours[main_node, 2]] -
+#   mx[valid_current_neighbours[main_node, 1], valid_current_neighbours[main_node, 2]]
+# obs_fit <- obs[vcn_node] - mx[vcn_node]
+# obs_weight_merged <- sum(current_node_fit*obs_fit*obs_precision)
+# # left node
+# current_node_fit <- obs[valid_current_neighbours[main_node, 1], valid_current_neighbours[main_node, 2]] -
+#   x[valid_current_neighbours[main_node, 1], valid_current_neighbours[main_node, 2], indices1[n]]
+# obs_fit <- obs[vcn_left] - x[cbind(vcn_left, rep(indices1[n], nrow(vcn_left)))]
+# obs_weight_left <- sum(current_node_fit*obs_fit*obs_precision)
+# # right node
+# current_node_fit <- obs[valid_current_neighbours[main_node, 1], valid_current_neighbours[main_node, 2]] -
+#   x[valid_current_neighbours[main_node, 1], valid_current_neighbours[main_node, 2], indices2[n]]
+# obs_fit <- obs[vcn_right] - x[cbind(vcn_right, rep(indices2[n], nrow(vcn_right)))]
+# obs_weight_right <- sum(current_node_fit*obs_fit*obs_precision)
