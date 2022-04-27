@@ -24,7 +24,7 @@ nl_merge <- function(lW, obs, x, history, historyIndex, node_row_left, node_row_
       target_reached <- out$target_reached
     } else {
       target_reached <- TRUE
-      out <- nl_light_covariance2(u, obs, x, history, historyIndex_left, historyIndex_right, cir_left, cir_right, cic_left, cic_right,
+      out <- nl_light_covariance(u, obs, x, history, historyIndex_left, historyIndex_right, cir_left, cir_right, cic_left, cic_right,
                                  lW_left, lW_right, sigmaX, M, tau, nu)
     }
   } else{

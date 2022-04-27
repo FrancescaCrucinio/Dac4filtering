@@ -1,5 +1,5 @@
 nl_light_covariance <- function(u, obs, x, history, historyIndex_left, historyIndex_right, cir_left, cir_right, cic_left, cic_right,
-                     lW_left, lW_right, sigmaX, m, tau, nu){
+                                lW_left, lW_right, sigmaX, m, tau, nu){
   d <- dim(history)[1]
   Nparticles <- dim(history)[3]
   # binary tree
@@ -45,38 +45,47 @@ nl_light_covariance <- function(u, obs, x, history, historyIndex_left, historyIn
     mx <- x[, , indices1[n]]
     mx[as.matrix(expand.grid(cir_right, cic_right))] <- x[as.matrix(expand.grid(cir_right, cic_right, indices2[n]))]
     for (col in cic) {
-      current_node_fit <- obs[col, col] - mx[col, col]
       for (row in cir) {
-        node_distance <- abs(row - col)
-        if(node_distance <= 1 & col %in% cir){
-          obs_fit <- obs[row, col] - mx[row, col]
-          obs_weight_merged <- obs_weight_merged + current_node_fit*obs_fit*tau^(node_distance)
+        out_neighbours <- get_neighbours_weights(row, col, d)
+        valid_weights <- out_neighbours$mixture_weights[out_neighbours$mixture_weights>0]
+        valid_current_neighbours <- out_neighbours$current_x_neighbours[out_neighbours$mixture_weights>0, ]
+        main_node <- which(valid_weights == max(valid_weights))
+        obs_precision <- rep(tau, length(valid_weights))
+        obs_precision[main_node] <- 1
+        vcn_node_coordinates <- (valid_current_neighbours[, 1] %in% cir) & (valid_current_neighbours[, 2] %in% cic)
+        vcn_left_coordinates <- (valid_current_neighbours[, 1] %in% cir_left) & (valid_current_neighbours[, 2] %in% cic_left)
+        vcn_right_coordinates <- (valid_current_neighbours[, 1] %in% cir_right) & (valid_current_neighbours[, 2] %in% cic_right)
+        vcn_node <- valid_current_neighbours[vcn_node_coordinates, , drop = FALSE]
+        vcn_left <- valid_current_neighbours[vcn_left_coordinates, , drop = FALSE]
+        vcn_right <- valid_current_neighbours[vcn_right_coordinates, , drop = FALSE]
+        # current node
+        current_node_fit <- obs[valid_current_neighbours[main_node, , drop = FALSE]] -
+          mx[valid_current_neighbours[main_node, , drop = FALSE]]
+        obs_fit <- obs[vcn_node] - mx[vcn_node]
+        obs_weight_merged <- obs_weight_merged + current_node_fit*sum(obs_fit*obs_precision[vcn_node_coordinates])
+        # left node
+        if((valid_current_neighbours[main_node, 2] %in% cic_left) & (valid_current_neighbours[main_node, 1] %in% cir_left)){
+          current_node_fit <- obs[valid_current_neighbours[main_node, , drop = FALSE]] -
+            x[valid_current_neighbours[main_node, 1], valid_current_neighbours[main_node, 2], indices1[n]]
+          obs_fit <- obs[vcn_left] - x[cbind(vcn_left, rep(indices1[n], nrow(vcn_left)))]
+          obs_weight_left <- obs_weight_left + current_node_fit*sum(obs_fit*obs_precision[vcn_left_coordinates])
         }
-        if((col %in% cic_left) & (row %in% cir_left)){ # left child
-          current_node_fit <- obs[col, col] - x[col, col, indices1[n]]
-          node_distance <- abs(row - col)
-          if(node_distance <= 1 & col %in% cir_left){
-            obs_fit <- obs[row, col] - x[row, col, indices1[n]]
-            obs_weight_left <- obs_weight_left + current_node_fit*obs_fit*tau^(node_distance)
-          }
+        # right node
+        if((valid_current_neighbours[main_node, 2] %in% cic_right) & (valid_current_neighbours[main_node, 1] %in% cir_right)){
+          current_node_fit <- obs[valid_current_neighbours[main_node, , drop = FALSE]] -
+            x[valid_current_neighbours[main_node, 1], valid_current_neighbours[main_node, 2], indices2[n]]
+          obs_fit <- obs[vcn_right] - x[cbind(vcn_right, rep(indices2[n], nrow(vcn_right)))]
+          obs_weight_right <- obs_weight_right + current_node_fit*sum(obs_fit*obs_precision[vcn_right_coordinates])
         }
+        # contribute of f
         if((col %in% cic_right) & (row %in% cir_right)){ # right child
-          current_node_fit <- obs[col, col] - x[col, col, indices2[n]]
-          out_neighbours <- get_neighbours_weights(row, col, d)
-          valid_weights <- out_neighbours$mixture_weights[out_neighbours$mixture_weights>0]
-          valid_current_neighbours <- out_neighbours$current_x_neighbours[out_neighbours$mixture_weights>0, ]
           lWmix[n] <- lWmix[n] + log(sum(valid_weights * exp(-(x[row, col, indices2[n]] - left_ancestor[valid_current_neighbours])^2/(2*sigmaX)))) -
             log(sum(valid_weights * exp(-(x[row, col, indices2[n]] - right_ancestor[valid_current_neighbours])^2/(2*sigmaX))))
-          node_distance <- abs(row - col)
-          if(node_distance <= 1 & col %in% cir_right){
-            obs_fit <- obs[row, col] - x[row, col, indices2[n]]
-            obs_weight_right <- obs_weight_right + current_node_fit*obs_fit*tau^(node_distance)
-          }
         }
       }
     }
-    lWmix[n] <- lWmix[n] - 0.5*(nu+nodes_dimension)*log(1+obs_weight_merged/nu)
-          + 0.5*(nu+nodes_dimension_child)*(log(1+obs_weight_left/nu) + log(1+obs_weight_right/nu))
+    lWmix[n] <- lWmix[n] - 0.5*(nu+nodes_dimension)*log(1+abs(obs_weight_merged)/nu)
+    + 0.5*(nu+nodes_dimension_child)*(log(1+abs(obs_weight_left)/nu) + log(1+abs(obs_weight_right)/nu))
   }
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
@@ -84,6 +93,8 @@ nl_light_covariance <- function(u, obs, x, history, historyIndex_left, historyIn
   indices <- stratified_resample(Wmix/sum(Wmix), Nparticles)
   return(list("resampled_indices" = cbind(indices1[indices], indices2[indices]), "resampled_particles_lW" = lWmix[indices]))
 }
+
+
 
 
 nl_adaptive_light_covariance <- function(ess_target, u, obs, x, history, historyIndex_left, historyIndex_right, cir_left, cir_right, cic_left, cic_right,
@@ -114,38 +125,47 @@ nl_adaptive_light_covariance <- function(ess_target, u, obs, x, history, history
     mx <- x[, , n]
     mx[as.matrix(expand.grid(cir_right, cic_right))] <- x[as.matrix(expand.grid(cir_right, cic_right, n))]
     for (col in cic) {
-      current_node_fit <- obs[col, col] - mx[col, col]
       for (row in cir) {
-        node_distance <- abs(row - col)
-        if(node_distance <= 1 & col %in% cir){
-          obs_fit <- obs[row, col] - mx[row, col]
-          obs_weight_merged <- obs_weight_merged + current_node_fit*obs_fit*tau^(node_distance)
+        out_neighbours <- get_neighbours_weights(row, col, d)
+        valid_weights <- out_neighbours$mixture_weights[out_neighbours$mixture_weights>0]
+        valid_current_neighbours <- out_neighbours$current_x_neighbours[out_neighbours$mixture_weights>0, ]
+        main_node <- which(valid_weights == max(valid_weights))
+        obs_precision <- rep(tau, length(valid_weights))
+        obs_precision[main_node] <- 1
+        vcn_node_coordinates <- (valid_current_neighbours[, 1] %in% cir) & (valid_current_neighbours[, 2] %in% cic)
+        vcn_left_coordinates <- (valid_current_neighbours[, 1] %in% cir_left) & (valid_current_neighbours[, 2] %in% cic_left)
+        vcn_right_coordinates <- (valid_current_neighbours[, 1] %in% cir_right) & (valid_current_neighbours[, 2] %in% cic_right)
+        vcn_node <- valid_current_neighbours[vcn_node_coordinates, , drop = FALSE]
+        vcn_left <- valid_current_neighbours[vcn_left_coordinates, , drop = FALSE]
+        vcn_right <- valid_current_neighbours[vcn_right_coordinates, , drop = FALSE]
+        # current node
+        current_node_fit <- obs[valid_current_neighbours[main_node, , drop = FALSE]] -
+          mx[valid_current_neighbours[main_node, , drop = FALSE]]
+        obs_fit <- obs[vcn_node] - mx[vcn_node]
+        obs_weight_merged <- obs_weight_merged + current_node_fit*sum(obs_fit*obs_precision[vcn_node_coordinates])
+        # left node
+        if((valid_current_neighbours[main_node, 2] %in% cic_left) & (valid_current_neighbours[main_node, 1] %in% cir_left)){
+          current_node_fit <- obs[valid_current_neighbours[main_node, , drop = FALSE]] -
+            x[valid_current_neighbours[main_node, 1], valid_current_neighbours[main_node, 2], n]
+          obs_fit <- obs[vcn_left] - x[cbind(vcn_left, rep(n, nrow(vcn_left)))]
+          obs_weight_left <- obs_weight_left + current_node_fit*sum(obs_fit*obs_precision[vcn_left_coordinates])
         }
-        if((col %in% cic_left) & (row %in% cir_left)){ # left child
-          current_node_fit <- obs[col, col] - x[col, col, n]
-          node_distance <- abs(row - col)
-          if(node_distance <= 1 & col %in% cir_left){
-            obs_fit <- obs[row, col] - x[row, col, n]
-            obs_weight_left <- obs_weight_left + current_node_fit*obs_fit*tau^(node_distance)
-          }
+        # right node
+        if((valid_current_neighbours[main_node, 2] %in% cic_right) & (valid_current_neighbours[main_node, 1] %in% cir_right)){
+          current_node_fit <- obs[valid_current_neighbours[main_node, , drop = FALSE]] -
+            x[valid_current_neighbours[main_node, 1], valid_current_neighbours[main_node, 2], n]
+          obs_fit <- obs[vcn_right] - x[cbind(vcn_right, rep(n, nrow(vcn_right)))]
+          obs_weight_right <- obs_weight_right + current_node_fit*sum(obs_fit*obs_precision[vcn_right_coordinates])
         }
+        # contribute of f
         if((col %in% cic_right) & (row %in% cir_right)){ # right child
-          current_node_fit <- obs[col, col] - x[col, col, n]
-          out_neighbours <- get_neighbours_weights(row, col, d)
-          valid_weights <- out_neighbours$mixture_weights[out_neighbours$mixture_weights>0]
-          valid_current_neighbours <- out_neighbours$current_x_neighbours[out_neighbours$mixture_weights>0, ]
           lWmix[n] <- lWmix[n] + log(sum(valid_weights * exp(-(x[row, col, n] - left_ancestor[valid_current_neighbours])^2/(2*sigmaX)))) -
             log(sum(valid_weights * exp(-(x[row, col, n] - right_ancestor[valid_current_neighbours])^2/(2*sigmaX))))
-          node_distance <- abs(row - col)
-          if(node_distance <= 1 & col %in% cir_right){
-            obs_fit <- obs[row, col] - x[row, col, n]
-            obs_weight_right <- obs_weight_right + current_node_fit*obs_fit*tau^(node_distance)
-          }
         }
       }
     }
-    lWmix[n] <- lWmix[n] - 0.5*(nu+nodes_dimension)*log(1+obs_weight_merged/nu)
-        + 0.5*(nu+nodes_dimension_child)*(log(1+obs_weight_left/nu) + log(1+obs_weight_right/nu))
+    lWmix[n] <- lWmix[n] - 0.5*(nu+nodes_dimension)*log(1+abs(obs_weight_merged)/nu)
+        + 0.5*(nu+nodes_dimension_child)*(log(1+abs(obs_weight_left)/nu) + log(1+abs(obs_weight_right)/nu))
   }
   if(u == 1){
     lWmix <- lWmix + c(lW_left) + c(lW_right)
@@ -179,49 +199,48 @@ nl_adaptive_light_covariance <- function(ess_target, u, obs, x, history, history
       # merged x
       mx <- x[, , n]
       mx[as.matrix(expand.grid(cir_right, cic_right))] <- x[as.matrix(expand.grid(cir_right, cic_right, new_perm[n]))]
-      print(paste(cic, cir))
       for (col in cic) {
-
-        current_node_fit <- obs[col, col] - mx[col, col]
         for (row in cir) {
-          print(paste(col, row))
-          node_distance <- abs(row - col)
-          if(node_distance <= 1 & col %in% cir){
-            print(paste("squared", current_node_fit))
-            obs_fit <- obs[row, col] - mx[row, col]
-            print(paste("product", obs_fit))
-            obs_weight_merged <- obs_weight_merged + current_node_fit*obs_fit*tau^(node_distance)
+          out_neighbours <- get_neighbours_weights(row, col, d)
+          valid_weights <- out_neighbours$mixture_weights[out_neighbours$mixture_weights>0]
+          valid_current_neighbours <- out_neighbours$current_x_neighbours[out_neighbours$mixture_weights>0, ]
+          main_node <- which(valid_weights == max(valid_weights))
+          obs_precision <- rep(tau, length(valid_weights))
+          obs_precision[main_node] <- 1
+          vcn_node_coordinates <- (valid_current_neighbours[, 1] %in% cir) & (valid_current_neighbours[, 2] %in% cic)
+          vcn_left_coordinates <- (valid_current_neighbours[, 1] %in% cir_left) & (valid_current_neighbours[, 2] %in% cic_left)
+          vcn_right_coordinates <- (valid_current_neighbours[, 1] %in% cir_right) & (valid_current_neighbours[, 2] %in% cic_right)
+          vcn_node <- valid_current_neighbours[vcn_node_coordinates, , drop = FALSE]
+          vcn_left <- valid_current_neighbours[vcn_left_coordinates, , drop = FALSE]
+          vcn_right <- valid_current_neighbours[vcn_right_coordinates, , drop = FALSE]
+          # current node
+          current_node_fit <- obs[valid_current_neighbours[main_node, , drop = FALSE]] -
+            mx[valid_current_neighbours[main_node, , drop = FALSE]]
+          obs_fit <- obs[vcn_node] - mx[vcn_node]
+          obs_weight_merged <- obs_weight_merged + current_node_fit*sum(obs_fit*obs_precision[vcn_node_coordinates])
+          # left node
+          if((valid_current_neighbours[main_node, 2] %in% cic_left) & (valid_current_neighbours[main_node, 1] %in% cir_left)){
+            current_node_fit <- obs[valid_current_neighbours[main_node, , drop = FALSE]] -
+              x[valid_current_neighbours[main_node, 1], valid_current_neighbours[main_node, 2], n]
+            obs_fit <- obs[vcn_left] - x[cbind(vcn_left, rep(n, nrow(vcn_left)))]
+            obs_weight_left <- obs_weight_left + current_node_fit*sum(obs_fit*obs_precision[vcn_left_coordinates])
           }
-          if((col %in% cic_left) & (row %in% cir_left)){ # left child
-            current_node_fit <- obs[col, col] - x[col, col, n]
-            node_distance <- abs(row - col)
-            if(node_distance <= 1 & col %in% cir_left){
-              obs_fit <- obs[row, col] - x[row, col, n]
-              obs_weight_left <- obs_weight_left + current_node_fit*obs_fit*tau^(node_distance)
-            }
+          # right node
+          if((valid_current_neighbours[main_node, 2] %in% cic_right) & (valid_current_neighbours[main_node, 1] %in% cir_right)){
+            current_node_fit <- obs[valid_current_neighbours[main_node, , drop = FALSE]] -
+              x[valid_current_neighbours[main_node, 1], valid_current_neighbours[main_node, 2], new_perm[n]]
+            obs_fit <- obs[vcn_right] - x[cbind(vcn_right, rep(new_perm[n], nrow(vcn_right)))]
+            obs_weight_right <- obs_weight_right + current_node_fit*sum(obs_fit*obs_precision[vcn_right_coordinates])
           }
+          # contribute of f
           if((col %in% cic_right) & (row %in% cir_right)){ # right child
-            current_node_fit <- obs[col, col] - x[col, col, new_perm[n]]
-            out_neighbours <- get_neighbours_weights(row, col, d)
-            valid_weights <- out_neighbours$mixture_weights[out_neighbours$mixture_weights>0]
-            valid_current_neighbours <- out_neighbours$current_x_neighbours[out_neighbours$mixture_weights>0, ]
-            print(paste(lWmix_perm[n]))
-            lWmix_perm[n] <- lWmix_perm[n] + log(sum(valid_weights * exp(-(x[row, col, new_perm[n]] - left_ancestor[valid_current_neighbours])^2/(2*sigmaX)))) -
+            lWmix[n] <- lWmix[n] + log(sum(valid_weights * exp(-(x[row, col, new_perm[n]] - left_ancestor[valid_current_neighbours])^2/(2*sigmaX)))) -
               log(sum(valid_weights * exp(-(x[row, col, new_perm[n]] - right_ancestor[valid_current_neighbours])^2/(2*sigmaX))))
-            node_distance <- abs(row - col)
-            if(node_distance <= 1 & col %in% cir_right){
-              obs_fit <- obs[row, col] - x[row, col, new_perm[n]]
-              obs_weight_right <- obs_weight_right + current_node_fit*obs_fit*tau^(node_distance)
-            }
           }
         }
       }
-      print(paste("weight", lWmix_perm[n]))
-      lWmix_perm[n] <- lWmix_perm[n] - 0.5*(nu+nodes_dimension)*log(1+obs_weight_merged/nu)
-          + 0.5*(nu+nodes_dimension_child)*(log(1+obs_weight_left/nu) + log(1+obs_weight_right/nu))
-      print(paste("weight", lWmix_perm[n]))
-      print(paste("merge", obs_weight_merged))
-      if(is.nan(lWmix_perm[n])){ break}
+      lWmix_perm[n] <- lWmix_perm[n] - 0.5*(nu+nodes_dimension)*log(1+abs(obs_weight_merged)/nu)
+          + 0.5*(nu+nodes_dimension_child)*(log(1+abs(obs_weight_left)/nu) + log(1+abs(obs_weight_right)/nu))
     }
 
     if(u == 1){
@@ -235,11 +254,9 @@ nl_adaptive_light_covariance <- function(ess_target, u, obs, x, history, history
     ess_ss <- ess_ss + sum(Wmix^2)
     ess <- ess_s^2/ess_ss
     lWmix <- c(lWmix, lWmix_perm)
-
-    print(paste(ess))
   }
-  write.table(data.frame("u" = u, "m" = m), file = "data/adaptive_nl_cov.csv", sep = ",", append = TRUE, quote = FALSE,
-              col.names = FALSE, row.names = FALSE)
+  # write.table(data.frame("u" = u_info$u, "direction" = u_info$direction, "m" = m), file = "data/adaptive_nl_cov.csv", sep = ",", append = TRUE, quote = FALSE,
+  #             col.names = FALSE, row.names = FALSE)
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
   # resampling the new population
