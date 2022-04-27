@@ -4,6 +4,16 @@ df <- read.csv(paste0("data/lgssm_tempering/lgssm_d32N100ID1"))
 df$N <- "10^2"
 df$d <- "32"
 df$run <- 1
+dfnew <- read.csv(paste0("data/lgssm_tempering/lgssm_d256N100ID1"))
+dfnew$N <- "10^2"
+dfnew$d <- "256"
+dfnew$run <- 1
+df <- rbind(df, dfnew)
+dfnew <- read.csv(paste0("data/lgssm_tempering/lgssm_d2048N100ID1"))
+dfnew$N <- "10^2"
+dfnew$d <- "2048"
+dfnew$run <- 1
+df <- rbind(df, dfnew)
 for (id in 2:50){
   filename <- paste0("data/lgssm_tempering/lgssm_d32N100ID", id, sep = "")
   dfnew <- read.csv(filename)
