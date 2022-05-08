@@ -1,7 +1,7 @@
 library(tidyverse)
 
 # dimension
-d <- 32
+d <- 8
 # parameters
 sigmaX <- 1
 nu <- 10
@@ -9,7 +9,7 @@ tau <- 1/4
 delta <- 1
 Time.step <- 100
 
-Nparticles <- 100
+Nparticles <- 1000
 M <- 100
 
 # nsmc
@@ -89,7 +89,7 @@ theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         axis.text = element_blank(), axis.ticks = element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=20),
         text = element_text(size=15), strip.text.x = element_text(size = 20))
-ggsave("nl_d32N100_mse.pdf", width = 12, height = 12, dpi = 300)
+# ggsave("nl_d32N100_mse.pdf", width = 12, height = 12, dpi = 300)
 
 # variance
 df_var <- rbind(df1var, df2var, df3var)
@@ -101,4 +101,4 @@ ggplot(data = df_var, aes(x = col , y = factor(r_id, level = paste0("r", d:1)), 
         axis.text = element_blank(), axis.ticks = element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=20),
         text = element_text(size=15), strip.text.x = element_text(size = 20))
-ggsave("nl_d32N100_var.pdf", width = 12, height = 12, dpi = 300)
+# ggsave("nl_d32N100_var.pdf", width = 12, height = 12, dpi = 300)
