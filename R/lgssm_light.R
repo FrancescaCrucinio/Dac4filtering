@@ -1,3 +1,4 @@
+# Lightweight resampling for linear Gaussian SSM
 lgssm_light <- function(i, u, nv, ci, W, Nparticles, m, lambda, tau, x, xOld){
   # binary tree
   nchild <- 2
@@ -27,7 +28,7 @@ lgssm_light <- function(i, u, nv, ci, W, Nparticles, m, lambda, tau, x, xOld){
   return(list("resampled_indices" = cbind(indices1[indices], indices2[indices]), "resampled_particles_lW" = lWmix[indices]))
 }
 
-# xOldv is the ci[1]+nv component of xOld (main code)
+# Lightweight adaptive resampling for linear Gaussian SSM
 lgssm_adaptive_light <- function(ess_target, i, u, nv, ci, lW, Nparticles, lambda, tau, x, xOldv){
   # binary tree
   nchild <- 2

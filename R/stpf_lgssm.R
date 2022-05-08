@@ -1,3 +1,4 @@
+# Space-time particle filter for linear Gaussian SSM
 stpf_lgssm <- function(xOld, obs, tau, lambda, sigmaY){
   # dimension, number islands and number of particles
   d <- dim(xOld)[3]

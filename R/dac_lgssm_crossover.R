@@ -1,3 +1,4 @@
+# Linear cost DaC with crossover operators for linear Gaussian SSM
 dac_lgssm_lc_crossover <- function(history, obs, tau, lambda, sigmaY){
   # dimension and number of particles
   d <- ncol(history)
@@ -31,7 +32,6 @@ dac_lgssm_lc_crossover <- function(history, obs, tau, lambda, sigmaY){
     # number of variables in each node
     nvNew <- nchild^u
     # updated history
-    # historyIndexNew <- array(0, dim = c(Nparticles, d, nodes))
 
     for (i in 1:nodes){
       # get children indices
@@ -66,6 +66,7 @@ dac_lgssm_lc_crossover <- function(history, obs, tau, lambda, sigmaY){
   return(x)
 }
 
+# Lightweight resampling DaC with crossover operators for linear Gaussian SSM
 dac_lgssm_lightweight_crossover <- function(history, obs, tau, lambda, sigmaY, M = NULL){
   if(is.null(M)) {
     # number of samples for lightweight mixture (no adaptation)
@@ -96,7 +97,6 @@ dac_lgssm_lightweight_crossover <- function(history, obs, tau, lambda, sigmaY, M
     W[, i] <- exp(lW[, i] - max.lW)
     W[, i] <- W[, i]/sum(W[, i])
   }
-  # saveRDS(list("x"= x, "W"=W), file = "/Users/francescacrucinio/Documents/Dac4filtering/test/node0.rds")
   # loop over tree levels excluding leaves
   for (u in 1:nlevels){
     # number of nodes at this level
@@ -109,7 +109,6 @@ dac_lgssm_lightweight_crossover <- function(history, obs, tau, lambda, sigmaY, M
     # updated particles
     xNew <- matrix(0, nrow = Nparticles, ncol = d)
     # updated history
-    # historyIndexNew <- array(0, dim = c(Nparticles, d, nodes))
     for (i in 1:nodes){
       # get children indices
       ci <- child_indices(i, nvNew)
@@ -128,22 +127,12 @@ dac_lgssm_lightweight_crossover <- function(history, obs, tau, lambda, sigmaY, M
         indices <- out$resampled_indices
         xNew[, ci[1]:ci[2]] <- cbind(x[indices[, 1], ci[1]:(ci[1]+nv-1)], x[indices[, 2], (ci[1]+nv):ci[2]])
         historyIndexNew <- historyIndexNew[indices[, 1], ]
-        # out$target_reached <- FALSE
-        # if(!out$target_reached){
-          # tempering
-          tempering_out <- lgssm_tempering_crossover(ci, i, nv, lambda, tau, sigmaY, obs, xNew, history, historyIndex,
-                                           historyIndexNew, out$resampled_particles_lW, Nparticles, 1 - 1e-05, 1/sqrt(nodes_dimension))
-          # update particles
-          xNew <- tempering_out$x
-          # update history
-          historyIndex <- tempering_out$history_index_updated
-        # } else {
-        #   # mcmc move
-        #   updated_particles <- lgssm_mcmc_move(x, ci, i, nv, sigmaY, tau, lambda,
-        #                   history[historyIndex[, ci[1]+nv, nchild*i], ci[1]+nv], history,
-        #                   historyIndex, obs, out$resampled_particles_lW, 1/nodes_dimension, 1)
-        #   x <- updated_particles$x
-        # }
+        tempering_out <- lgssm_tempering_crossover(ci, i, nv, lambda, tau, sigmaY, obs, xNew, history, historyIndex,
+                                         historyIndexNew, out$resampled_particles_lW, Nparticles, 1 - 1e-05, 1/sqrt(nodes_dimension))
+        # update particles
+        xNew <- tempering_out$x
+        # update history
+        historyIndex <- tempering_out$history_index_updated
       }
       else{
         out <- lgssm_light(i, u, nv, ci, W, Nparticles, M, lambda, tau, x, history[historyIndex[, ci[1]+nv, nchild*i], ci[1]+nv])
@@ -152,14 +141,13 @@ dac_lgssm_lightweight_crossover <- function(history, obs, tau, lambda, sigmaY, M
         historyIndex[, , i] <- historyIndexNew[indices[, 1], ]
       }
     }
-    # saveRDS(x, file = paste0("/Users/francescacrucinio/Documents/Dac4filtering/test/node", u, ".rds"))
     x <- xNew
     nv <- nvNew
-    # historyIndex <- historyIndexNew
   }
   return(x)
 }
 
+# Mixture resampling DaC with crossover operators for linear Gaussian SSM
 dac_lgssm_crossover <- function(history, obs, tau, lambda, sigmaY){
   # dimension and number of particles
   d <- ncol(history[, , 1])

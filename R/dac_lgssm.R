@@ -1,3 +1,4 @@
+# Mixture resampling DaC for linear Gaussian SSM
 dac_lgssm <- function(xOld, obs, tau, lambda, sigmaY){
   # dimension and number of particles
   d <- ncol(xOld)
@@ -77,6 +78,7 @@ dac_lgssm <- function(xOld, obs, tau, lambda, sigmaY){
   return(x)
 }
 
+# Lightweight resampling DaC for linear Gaussian SSM
 dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, M = NULL){
   if(is.null(M)) {
     # number of samples for lightweight mixture (no adaptation)
@@ -162,6 +164,7 @@ dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, M = NULL){
   return(x)
 }
 
+# Linear cost DaC for linear Gaussian SSM
 dac_lgssm_lc <- function(xOld, obs, tau, lambda, sigmaY){
   # dimension and number of particles
   d <- ncol(xOld)

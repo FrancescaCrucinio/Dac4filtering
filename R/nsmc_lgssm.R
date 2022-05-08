@@ -1,3 +1,4 @@
+# Nested SMC for linear Gaussian SSM
 nsmc_lgssm <- function(xOld, obs, tau, lambda, sigmaY, M){
   # dimension, number islands and number of particles
   d <- ncol(xOld)
@@ -31,7 +32,7 @@ nsmc_lgssm <- function(xOld, obs, tau, lambda, sigmaY, M){
   return(x)
 }
 
-
+# Inner SMC for linear Gaussian SSM
 nsmc_inner_lgssm <- function(xinnerOld, obs, tau, lambda, sigmaY, M){
   xinner <- matrix(0, nrow = M, ncol = d)
   # loop over dimension
