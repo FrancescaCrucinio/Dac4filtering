@@ -255,8 +255,6 @@ nl_adaptive_light_covariance <- function(ess_target, u, obs, x, history, history
     ess <- ess_s^2/ess_ss
     lWmix <- c(lWmix, lWmix_perm)
   }
-  # write.table(data.frame("u" = u_info$u, "direction" = u_info$direction, "m" = m), file = "data/adaptive_nl_cov.csv", sep = ",", append = TRUE, quote = FALSE,
-  #             col.names = FALSE, row.names = FALSE)
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
   # resampling the new population

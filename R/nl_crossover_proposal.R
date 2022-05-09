@@ -57,10 +57,6 @@ nl_crossover_proposal_covariance <- function(x, obs_old, history, historyIndex_l
     obs_left <- 0
     obs_right <- 0
     for (col in 1:d) {
-      # current_node_fit1 <- obs_old[col, col] - crossedover_ancestor1[col, col]
-      # current_node_fit2 <- obs_old[col, col] - crossedover_ancestor2[col, col]
-      # current_node_fit_left <- obs_old[col, col] - left_ancestor[col, col]
-      # current_node_fit_right <- obs_old[col, col] - right_ancestor[col, col]
       for (row in 1:d) {
         out_neighbours <- get_neighbours_weights(row, col, d)
         valid_weights <- out_neighbours$mixture_weights[out_neighbours$mixture_weights>0]
@@ -76,21 +72,14 @@ nl_crossover_proposal_covariance <- function(x, obs_old, history, historyIndex_l
           left_ancestor[valid_current_neighbours[main_node, , drop = FALSE]]
         current_node_fit_right <- obs_old[valid_current_neighbours[main_node, , drop = FALSE]] -
           right_ancestor[valid_current_neighbours[main_node, , drop = FALSE]]
-        # node_distance <- abs(row - col)
-        # if(node_distance <= 1){
-        #   obs_crossedover1 <- obs_crossedover1 + current_node_fit1*(obs_old[row, col] - crossedover_ancestor1[row, col])*tau^(node_distance)
-        #   obs_crossedover2 <- obs_crossedover2 + current_node_fit2*(obs_old[row, col] - crossedover_ancestor2[row, col])*tau^(node_distance)
-        #   obs_left <- obs_left + current_node_fit_left*(obs_old[row, col] - left_ancestor[row, col])*tau^(node_distance)
-        #   obs_right <- obs_right + current_node_fit_right*(obs_old[row, col] - right_ancestor[row, col])*tau^(node_distance)
-        # }
-          obs_crossedover1 <- obs_crossedover1 +
-            current_node_fit1*sum((obs_old[valid_current_neighbours] - crossedover_ancestor1[valid_current_neighbours])*obs_precision)
-          obs_crossedover2 <- obs_crossedover2 +
-            current_node_fit2*sum((obs_old[valid_current_neighbours] - crossedover_ancestor2[valid_current_neighbours])*obs_precision)
-          obs_left <- obs_left +
-            current_node_fit_left*sum((obs_old[valid_current_neighbours] - left_ancestor[valid_current_neighbours])*obs_precision)
-          obs_right <- obs_right +
-            current_node_fit_right*sum((obs_old[valid_current_neighbours] - right_ancestor[valid_current_neighbours])*obs_precision)
+        obs_crossedover1 <- obs_crossedover1 +
+          current_node_fit1*sum((obs_old[valid_current_neighbours] - crossedover_ancestor1[valid_current_neighbours])*obs_precision)
+        obs_crossedover2 <- obs_crossedover2 +
+          current_node_fit2*sum((obs_old[valid_current_neighbours] - crossedover_ancestor2[valid_current_neighbours])*obs_precision)
+        obs_left <- obs_left +
+          current_node_fit_left*sum((obs_old[valid_current_neighbours] - left_ancestor[valid_current_neighbours])*obs_precision)
+        obs_right <- obs_right +
+          current_node_fit_right*sum((obs_old[valid_current_neighbours] - right_ancestor[valid_current_neighbours])*obs_precision)
         if((col %in% cic) & (row %in% cir)){
           out_neighbours <- get_neighbours_weights(row, col, d)
           valid_weights <- out_neighbours$mixture_weights[out_neighbours$mixture_weights>0]
