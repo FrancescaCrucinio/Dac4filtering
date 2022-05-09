@@ -1,7 +1,7 @@
 library(tidyverse)
 
 # dimension
-d <- 8
+d <- 32
 # parameters
 sigmaX <- 1
 nu <- 10
