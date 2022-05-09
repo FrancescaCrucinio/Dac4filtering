@@ -1,3 +1,4 @@
+# RMSE for linear Gaussian SSM
 library(ggpubr)
 # read data
 df <- read.csv(paste0("data/lgssm_tempering/lgssm_d32N100ID1"))
