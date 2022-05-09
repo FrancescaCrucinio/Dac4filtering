@@ -131,24 +131,16 @@ dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, M = NULL){
         xNew[, ci[1]:ci[2]] <- cbind(x[indices[, 1], ci[1]:(ci[1]+nv-1)], x[indices[, 2], (ci[1]+nv):ci[2]])
         xOld[, ci[1]:ci[2]] <- xOld[indices[, 1], ci[1]:ci[2]]
         historyIndex <- array(1:Nparticles, dim = c(Nparticles, d, d))
-        if(!out$target_reached){
-          # tempering
-          historyIndexNew <- array(1:Nparticles, dim = c(Nparticles, d, d))
-          tempering_out <- lgssm_tempering_crossover(ci, i, nv, lambda, tau, sigmaY, obs, xNew, xOld, historyIndex,
-                                                     historyIndexNew, out$resampled_particles_lW, Nparticles, 1 - 1e-05, 1/nodes_dimension)
-          # update particles
-          xNew <- tempering_out$x
-          # update history
-          historyIndexNew <- tempering_out$history_index_updated
-          left_ancestor_coordinates <- cbind(c(historyIndexNew[, , nchild*(i-1)+1]), rep(1:d, each = Nparticles))
-          xOld <- matrix(xOld[left_ancestor_coordinates], nrow = Nparticles)
-        } else {
-          # mcmc move
-          updated_particles <- lgssm_mcmc_move(x, ci, i, nv, sigmaY, tau, lambda,
-                                               xOld[, ci[1]+nv], xOld,
-                                               historyIndex, obs, out$resampled_particles_lW, 1/nodes_dimension, 1)
-          x <- updated_particles$x
-        }
+        # tempering
+        historyIndexNew <- array(1:Nparticles, dim = c(Nparticles, d, d))
+        tempering_out <- lgssm_tempering_crossover(ci, i, nv, lambda, tau, sigmaY, obs, xNew, xOld, historyIndex,
+                                                   historyIndexNew, out$resampled_particles_lW, Nparticles, 1 - 1e-05, 1/nodes_dimension)
+        # update particles
+        xNew <- tempering_out$x
+        # update history
+        historyIndexNew <- tempering_out$history_index_updated
+        left_ancestor_coordinates <- cbind(c(historyIndexNew[, , nchild*(i-1)+1]), rep(1:d, each = Nparticles))
+        xOld <- matrix(xOld[left_ancestor_coordinates], nrow = Nparticles)
       }
       else{
         out <- lgssm_light(i, u, nv, ci, W, Nparticles, M, lambda, tau, x, xOld[, ci[1]+nv])

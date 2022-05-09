@@ -27,7 +27,7 @@ y.error.var <- diag(x = sigmaY, d, d)
 y.coeff <- diag(x = 1, d, d)
 
 # number of time steps
-Time.step <- 1
+Time.step <- 10
 
 # get observations
 y <- ssm_obs(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step)

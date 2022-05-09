@@ -1,3 +1,4 @@
+# Crossover operator for linear Gaussian SSM
 crossover <- function(i, nodes, x, history, historyIndex, tau, lambda){
   # binary tree
   nchild <- 2
@@ -17,7 +18,6 @@ crossover <- function(i, nodes, x, history, historyIndex, tau, lambda){
     older_left_ancestor_coordinates <- matrix(c(historyIndex[n, crossover_point+1, nchild*(i-1)+1], crossover_point+1, 2), ncol = 3)
     gamma_ratio <- -lambda * (history[right_ancestor_coordinates[1, , drop = FALSE]] - history[left_ancestor_coordinates[1, , drop = FALSE]]) *
                     (history[right_ancestor_coordinates[2, , drop = FALSE]] - history[left_ancestor_coordinates[2, , drop = FALSE]])
-    # - 0.5*tau*history[older_right_ancestor_coordinates]/(tau+lambda) + 0.5*tau*history[older_left_ancestor_coordinates]/(tau+lambda))
     mh_ratio <- gamma_ratio + ft_ratio
     # accept/reject
     if(runif(1) <= exp(mh_ratio)){

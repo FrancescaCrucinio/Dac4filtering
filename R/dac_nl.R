@@ -36,15 +36,9 @@ dac_nl_lightweight <- function(history, obs, sigmaX, nu, M = NULL,
   for (u in 1:nlevels){
     # number of nodes at this level
     nodes <- nchild^(nlevels-u)
-    # nodes_dimension_h <- nchild^(u-1)
-    # nodes_dimension_v <- nchild^(u)
     # number of variables in each node
     nvNew <- nchild^u
 
-    # updated particles
-    # xNew <- array(0, dim = c(d, d, Nparticles))
-    # updated history
-    # historyIndexNew <- array(0, dim = c(Nparticles, d, d, nodes, nodes))
     for (i in 1:nodes) {
       # row indices of children (column 1 = left child, column 2 = right child)
       cir <- matrix(c(((i-1)*nvNew+1):((2*i-1)*nv), ((2*i-1)*nv+1):(i*nvNew)), ncol = 2)

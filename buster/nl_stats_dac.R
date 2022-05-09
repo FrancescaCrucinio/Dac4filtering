@@ -15,7 +15,7 @@ M <- 100
 data_dac <- array(0, dim = c(d, d, 50))
 mse_dac <- array(0, dim = c(d, d, 50))
 dac_time <- rep(0, times = 50)
-for (i in 1:35){
+for (i in 1:50){
   ground_truth <- unname(data.matrix(read.csv(paste0("/storage/u1693998/data/data_truth_nl_tau_", tau, "d", d, "ID", i),
                                               row.names = 1, nrows=d, skip=(Time.step)*d)))
   d1 <- read.csv(paste0("/storage/u1693998/results/results/dac_nl_iid_d", d, "N", Nparticles, "ID", i), row.names = 1,
