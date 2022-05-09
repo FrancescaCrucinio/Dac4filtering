@@ -1,3 +1,4 @@
+# Get stats to compare resampling schemes for linear Gaussian SSM
 library(ggpubr)
 d <- 1024
 # read data

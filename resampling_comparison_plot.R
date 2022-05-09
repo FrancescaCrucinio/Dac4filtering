@@ -1,3 +1,4 @@
+# Plot of MSE for different resampling schemes for linear Gaussian SSM
 library(ggpubr)
 # read data
 df <- rbind(read.csv(paste0("data/resampling_tempering/resampling_comparison_d8")),

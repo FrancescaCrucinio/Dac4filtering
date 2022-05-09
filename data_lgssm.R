@@ -1,7 +1,5 @@
-# devtools::load_all("/storage/u1693998/Dac4filtering")
-
-# ID <- as.numeric(Sys.getenv("SGE_TASK_ID"))
-set.seed(1234*ID)
+# Get data for linear Gaussian SSM
+set.seed(1234)
 
 # dimension
 d <- 32
