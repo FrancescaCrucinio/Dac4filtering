@@ -1,15 +1,15 @@
 devtools::load_all("/storage/u1693998/Dac4filtering")
 ### Linear Gaussian SSM -- comparison of dac, stpf, nsmc
 # dimension
-d <- 8
+d <- 32
 # parameters
 sigmaX <- 1
 nu <- 10
 tau <- 1/4
 delta <- 1
-Time.step <- 100
+Time.step <- 10
 
-Nparticles <- 1000
+Nparticles <- 100
 M <- 100
 
 data_dac <- array(0, dim = c(d, d, 50))

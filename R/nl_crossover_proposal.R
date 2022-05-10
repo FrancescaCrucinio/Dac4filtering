@@ -13,6 +13,17 @@ nl_crossover_proposal <- function(x, history, historyIndex_left, historyIndex_ri
     right_ancestor <- matrix(history[right_ancestor_coordinates], nrow = d)
     crossedover_ancestor <- matrix(c(left_ancestor[1:crossover_point], right_ancestor[(crossover_point+1):d^2]), nrow = d)
     ft_ratio <- 0
+    # tmp <- as.matrix(expand.grid(cir, cic))
+    # neighbours_out <- sapply(1:nrow(tmp), wrap_get_neighbours_weights, tmp, d, simplify = FALSE)
+    # how_many_neighbours <- sapply(neighbours_out, `[[`, 2)
+    # res_tmp <- do.call(rbind, sapply(neighbours_out, `[[`, 1, simplify = FALSE))
+    # tmp <- tmp[rep(seq_len(nrow(tmp)), times = how_many_neighbours), ]
+    # ft_ratio_pre_log_crossedover <- split(res_tmp[, 3] * exp(-(x[cbind(tmp, n)] - crossedover_ancestor[res_tmp[, 1:2]])^2/(2*sigmaX)),
+    #                           rep(1:length(how_many_neighbours), how_many_neighbours))
+    # ft_ratio_pre_log_left <- split(res_tmp[, 3] * exp(-(x[cbind(tmp, n)] - left_ancestor[res_tmp[, 1:2]])^2/(2*sigmaX)),
+    #                                       rep(1:length(how_many_neighbours), how_many_neighbours))
+    # ft_ratio <- sum(unlist(lapply(ft_ratio_pre_log_crossedover, FUN = function(x) log(sum(x)))) -
+    #   unlist(lapply(ft_ratio_pre_log_left, FUN = function(x) log(sum(x)))))
     for (col in cic) {
       for (row in cir) {
         out_neighbours <- get_neighbours_weights(row, col, d)
@@ -101,4 +112,12 @@ nl_crossover_proposal_covariance <- function(x, obs_old, history, historyIndex_l
     }
   }
   return(merged_history)
+}
+
+wrap_get_neighbours_weights <- function(n, mat, d){
+  out_neighbours <- get_neighbours_weights(mat[n, 1], mat[n, 2], d)
+  valid_weights <- out_neighbours$mixture_weights[out_neighbours$mixture_weights>0]
+  valid_current_neighbours <- out_neighbours$current_x_neighbours[out_neighbours$mixture_weights>0, ]
+  return(list("neighbours" = matrix(c(valid_current_neighbours, valid_weights), ncol = 3),
+              "how_many_neighbours" = nrow(valid_current_neighbours)))
 }

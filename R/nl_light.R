@@ -28,6 +28,17 @@ nl_light <- function(u, x, history, historyIndex_left, historyIndex_right, cir_r
     right_ancestor_coordinates <- cbind(1:d, rep(1:d, each = d), c(historyIndex_right[indices2[n], , ]))
     left_ancestor <- matrix(history[left_ancestor_coordinates], nrow = d)
     right_ancestor <- matrix(history[right_ancestor_coordinates], nrow = d)
+    # tmp <- as.matrix(expand.grid(cir_right, cic_right))
+    # neighbours_out <- sapply(1:nrow(tmp), wrap_get_neighbours_weights, tmp, d, simplify = FALSE)
+    # how_many_neighbours <- sapply(neighbours_out, `[[`, 2)
+    # res_tmp <- do.call(rbind, sapply(neighbours_out, `[[`, 1, simplify = FALSE))
+    # tmp <- tmp[rep(seq_len(nrow(tmp)), times = how_many_neighbours), ]
+    # ft_ratio_pre_log_right <- split(res_tmp[, 3] * exp(-(x[cbind(tmp, indices2[n])] - right_ancestor[res_tmp[, 1:2]])^2/(2*sigmaX)),
+    #                                       rep(1:length(how_many_neighbours), how_many_neighbours))
+    # ft_ratio_pre_log_left <- split(res_tmp[, 3] * exp(-(x[cbind(tmp, indices2[n])] - left_ancestor[res_tmp[, 1:2]])^2/(2*sigmaX)),
+    #                                rep(1:length(how_many_neighbours), how_many_neighbours))
+    # lWmix[n] <- sum(unlist(lapply(ft_ratio_pre_log_left, FUN = function(x) log(sum(x)))) -
+    #                   unlist(lapply(ft_ratio_pre_log_right, FUN = function(x) log(sum(x)))))
     for (col in cic_right) {
       for (row in cir_right) {
         out_neighbours <- get_neighbours_weights(row, col, d)

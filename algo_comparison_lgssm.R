@@ -1,7 +1,7 @@
 ### Linear Gaussian SSM -- comparison of dac, stpf, nsmc
 set.seed(1234)
 # dimension
-d <- 2048
+d <- 4
 # initial state
 mu0 <- rep(0, times = d)
 Sigma0 <- diag(x = 1, d, d)
@@ -9,10 +9,13 @@ Sigma0 <- diag(x = 1, d, d)
 tau <- 1
 lambda <- 1
 sigmaY <- 0.5^2
-Time.step <- 100
+Time.step <- 2
 
-Nparticles <- 1000
+Nparticles <- 100
 M <- 100
+
+# observations
+filename <- paste0("data/data_lgssm_d", d, "ID", ID)
 
 df_nsmc <- data.frame()
 df_stpf <- data.frame()
