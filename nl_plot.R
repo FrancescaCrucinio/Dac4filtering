@@ -101,7 +101,7 @@ df4var <- var_dac_cov %>%
 df4var$algo <- "dac-cov"
 
 # MSE
-df <- rbind(df1, df2, df3, df4)
+df <- rbind(df1, df2)
 
 ggplot(data = df, aes(x = col , y = factor(r_id, level = paste0("r", d:1)), fill = mse)) +
 geom_raster() +

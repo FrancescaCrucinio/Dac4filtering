@@ -1,7 +1,8 @@
 ### Linear Gaussian SSM -- comparison of dac, stpf, nsmc
-set.seed(1234)
+ID <- 1
+set.seed(1234*ID)
 # dimension
-d <- 4
+d <- 32
 # initial state
 mu0 <- rep(0, times = d)
 Sigma0 <- diag(x = 1, d, d)
@@ -9,9 +10,9 @@ Sigma0 <- diag(x = 1, d, d)
 tau <- 1
 lambda <- 1
 sigmaY <- 0.5^2
-Time.step <- 2
+Time.step <- 100
 
-Nparticles <- 100
+Nparticles <- 1000
 M <- 100
 
 # observations
@@ -20,16 +21,6 @@ filename <- paste0("data/data_lgssm_d", d, "ID", ID)
 df_nsmc <- data.frame()
 df_stpf <- data.frame()
 df_dac <- data.frame()
-
-m_dac <- matrix(0, nrow = Time.step, ncol = d)
-v_dac <- matrix(0, nrow = Time.step, ncol = d)
-runtime_dac <- rep(0, times = Time.step)
-m_nsmc <- matrix(0, nrow = Time.step, ncol = d)
-v_nsmc <- matrix(0, nrow = Time.step, ncol = d)
-runtime_nsmc <- rep(0, times = Time.step)
-m_stpf <- matrix(0, nrow = Time.step, ncol = d)
-v_stpf <- matrix(0, nrow = Time.step, ncol = d)
-runtime_stpf <- rep(0, times = Time.step)
 
 # initial distribution
 res_nsmc <- mvrnorm(n = Nparticles, mu0, Sigma0)
@@ -42,45 +33,34 @@ for (t in 1:Time.step){
   tic()
   res_dac <- dac_lgssm_lightweight_crossover(res_dac, y, tau, lambda, sigmaY)
   rt <- toc()
-  # save means and variances
-  m_dac[t, ] <- colMeans(res_dac)
-  v_dac[t, ] <- colVars(res_dac)
-  runtime_dac[t] <- rt
+  df_dac <- data.frame(rbind(df_dac, cbind(colMeans(res_dac), t, rt)))
 
   # nsmc
   tic()
   res_nsmc <- nsmc_lgssm(res_nsmc, y, tau, lambda, sigmaY, M)
   rt <- toc()
-  m_nsmc[t, ] <- colMeans(res_nsmc)
-  v_nsmc[t, ] <- colVars(res_nsmc)
-  runtime_nsmc[t] <- rt
+  df_nsmc <- data.frame(rbind(df_nsmc, cbind(colMeans(res_nsmc), t, rt)))
 
   # stpf
   tic()
   res_stpf <- stpf_lgssm(res_stpf, y, tau, lambda, sigmaY)
   rt <- toc()
-  m_stpf[t, ] <- colMeans(res_stpf, dims = 2)
-  v_stpf[t, ] <- colMeans(res_stpf^2, dims = 2) - m_stpf[t - (timeinterval-1)*10, ]^2
-  runtime_stpf[t] <- rt
+  df_stpf <- data.frame(rbind(df_stpf, cbind(colMeans(res_stpf, dims = 2), t, rt)))
 }
 
+# save particles at last time step for W1 and KS
+filename <- paste0("/data/results/t100_dac_lgssm_d", d, "N", Nparticles, "ID", ID)
+write.table(res_dac, file = filename, append = FALSE, sep = " ", dec = ".",
+            row.names = TRUE, col.names = TRUE)
+filename <- paste0("/data/results/t100_nsmc_lgssm_d", d, "N", Nparticles, "ID", ID)
+write.table(res_nsmc, file = filename, append = FALSE, sep = " ", dec = ".",
+            row.names = TRUE, col.names = TRUE)
+filename <- paste0("/data/results/t100_stpf_lgssm_d", d, "N", Nparticles, "ID", ID)
+write.table(matrix(res_stpf, ncol = d, nrow = Nparticles*M), file = filename, append = FALSE, sep = " ", dec = ".",
+            row.names = TRUE, col.names = TRUE)
 
-filename <- paste0("data/lgssm_tempering/dac_lgssm_d", d, "N", Nparticles, "ID", ID)
-df_dac <- data.frame(rbind(m_dac, v_dac))
-df_dac$type <- as.factor(rep(c("mean", "var"), each = Time.step))
-df_dac$runtime <- rep(runtime_dac, times = 2)
-write.table(x=df_dac, file=filename, append = TRUE, sep = " ", dec = ".",
-            row.names = FALSE, col.names = FALSE)
-filename <- paste0("data/lgssm_tempering/nsmc_lgssm_d", d, "N", Nparticles, "ID", ID)
-df_nsmc <- data.frame(rbind(m_nsmc, v_nsmc))
-df_nsmc$type <- as.factor(rep(c("mean", "var"), each = Time.step))
-df_nsmc$runtime <- rep(runtime_nsmc, each = 2)
-write.table(x=df_nsmc, file=filename, append = TRUE, sep = " ", dec = ".",
-            row.names = FALSE, col.names = FALSE)
-filename <- paste0("data/lgssm_tempering/stpf_lgssm_d", d, "N", Nparticles, "ID", ID)
-df_stpf <- data.frame(rbind(m_stpf, v_stpf))
-df_stpf$type <- as.factor(rep(c("mean", "var"), each = Time.step))
-df_stpf$runtime <- rep(runtime_stpf, each = 2)
-write.table(x=df_stpf, file=filename, append = TRUE, sep = " ", dec = ".",
-            row.names = FALSE, col.names = FALSE)
+# save means
+write.csv(x=df_dac, file=paste0("/data/results/dac_lgssm_d", d, "N", Nparticles, "ID", ID))
+write.csv(x=df_nsmc, file=paste0("/data/results/nsmc_lgssm_d", d, "N", Nparticles, "ID", ID))
+write.csv(x=df_stpf, file=paste0("/data/results/stpf_lgssm_d", d, "N", Nparticles, "ID", ID))
 
