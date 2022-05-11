@@ -1,3 +1,4 @@
+# Space-time particle filter for nonlinear model
 stpf_nl <- function(xOld, obs, nu, sigmaX){
   # dimension, number islands and number of particles
   d <- dim(xOld)[2]

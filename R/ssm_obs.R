@@ -1,4 +1,4 @@
-# Generate observations from a linear gaussian SSM
+# Generate observations from a linear Gaussian SSM
 ssm_obs <- function(mu0, Sigma0, y.coeff, x.coeff, x.error.prec, y.error.var, Time.step){
   p <- nrow(y.error.var)
   y <- matrix(0, nrow = Time.step, ncol = p)

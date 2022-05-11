@@ -1,3 +1,4 @@
+# Generate observations from a nonlinear model
 nl_obs <- function(d, sigmaX, nu, delta, y.error.var, Time.step){
   x <- array(0, dim = c(d, d, Time.step+1))
   y <- array(0, dim = c(d, d, Time.step))

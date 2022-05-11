@@ -127,15 +127,17 @@ ggplot(data = df_var, aes(x = col , y = factor(r_id, level = paste0("r", d:1)), 
 
 df_nsmc2 <- read.csv(paste0("data/nl/stats_nsmc_nl_iid_d", d, "N", 1000),
                     row.names = 1)
+df_stpf2 <- read.csv(paste0("data/nl/stats_stpf_nl_iid_d", d, "N", 1000),
+                     row.names = 1)
 
 df_collective <- data.frame(c(c(df_stpf$runtime[1], df_dac$runtime[1], df_nsmc$runtime[1])/10, df_dac_cov$runtime[1]),
                             c(mean(as.matrix(mse_stpf)), mean(as.matrix(mse_dac)), mean(as.matrix(mse_nsmc)), mean(as.matrix(mse_dac_cov))),
                             c("stpf", "dac", "nsmc", "dac-cov"))
 colnames(df_collective) <- c("runtime", "mse", "algo")
 df_collective$N <- "10^2"
-df_collective2 <- data.frame(c(df_nsmc2$runtime[1]),
-                            c(mean(as.matrix(df_nsmc2[1:d, 1:d]))),
-                            c("nsmc"))
+df_collective2 <- data.frame(c(df_nsmc2$runtime[1], df_stpf2$runtime[1]),
+                            c(mean(as.matrix(df_nsmc2[1:d, 1:d])), mean(as.matrix(df_stpf2[1:d, 1:d]))),
+                            c("nsmc", "stpf"))
 colnames(df_collective2) <- c("runtime", "mse", "algo")
 df_collective2$N <- "10^3"
 df_collective <- rbind(df_collective, df_collective2)

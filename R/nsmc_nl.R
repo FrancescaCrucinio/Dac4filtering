@@ -1,6 +1,5 @@
+# Nested SMC for nonlinear model
 nsmc_nl <- function(xOld, obs, nu, sigmaX, M){
-  # dimension, number islands and number of particles
-  # dimension and number of particles
   d <- nrow(xOld)
   Nparticles <- dim(xOld)[3]
 
@@ -30,9 +29,7 @@ nsmc_nl <- function(xOld, obs, nu, sigmaX, M){
   return(x)
 }
 
-
-
-
+# Inner SMC for nonlinear model
 nsmc_inner_nl <- function(xinnerOld, obs, nu, sigmaX, M){
   xinner <- array(0, dim = c(d, d, M))
   lZ <- 0

@@ -7,9 +7,9 @@ sigmaX <- 1
 nu <- 10
 tau <- 1/4
 delta <- 1
-Time.step <- 100
+Time.step <- 10
 
-Nparticles <- 100
+Nparticles <- 1000
 M <- 100
 
 data_nsmc <- array(0, dim = c(d, d, 50))

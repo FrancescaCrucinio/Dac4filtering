@@ -1,6 +1,5 @@
 # Nested SMC for linear Gaussian SSM
 nsmc_lgssm <- function(xOld, obs, tau, lambda, sigmaY, M){
-  # dimension, number islands and number of particles
   d <- ncol(xOld)
   Nparticles <- nrow(xOld)
 
