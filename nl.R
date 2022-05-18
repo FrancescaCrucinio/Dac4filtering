@@ -4,7 +4,7 @@ sigmaX <- 1
 nu <- 10
 tau <- -1/4
 delta <- 1
-Time.step <- 1
+Time.step <- 10
 y.error.prec <- matrix(0, nrow = d^2, ncol = d^2)
 diag(y.error.prec) <- 1
 diag(y.error.prec[-1, ]) <- tau
@@ -26,9 +26,9 @@ history_nsmc <- sqrt(sigmaX)*array(rnorm(Nparticles*d^2), dim = c(d, d, Nparticl
 history_stpf <- sqrt(sigmaX)*array(rnorm(Nparticles*M*d^2), dim = c(d, d, Nparticles, M))
 tic()
 for (t in 1:Time.step){
-  print(paste(t))
   res_dac <- dac_nl_lightweight(history_dac, y[, , t], sigmaX, nu, covariance = FALSE, tempering = FALSE)
   history_dac <- res_dac
+  print(paste(t))
 }
 toc()
 tic()
