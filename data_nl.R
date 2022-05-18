@@ -1,6 +1,5 @@
-# devtools::load_all("/storage/u1693998/Dac4filtering")
-
-# ID <- as.numeric(Sys.getenv("SGE_TASK_ID"))
+# Get data for nonlinear spatial SSM
+ID <- 1
 set.seed(1234*ID)
 
 # dimension
@@ -28,6 +27,6 @@ nl_data <- nl_obs(d, sigmaX, nu, delta, y.error.var, Time.step)
 
 df_obs_iid <- data.frame(apply(nl_data$yiid,2,"c"))
 df_obs_cov <- data.frame(apply(nl_data$y,2,"c"))
-write.csv(x=df_obs_iid, file=paste0("/storage/u1693998/data/data_iid_nl_tau_", tau, "d", d, "ID", ID))
-write.csv(x=df_obs_cov, file=paste0("/storage/u1693998/data/data_cov_nl_tau_", tau, "d", d, "ID", ID))
-write.csv(x=data.frame(apply(nl_data$x,2,"c")), file=paste0("/storage/u1693998/data/data_truth_nl_tau_", tau, "d", d, "ID", ID))
+write.csv(x=df_obs_iid, file=paste0("/data/data_iid_nl_tau_", tau, "d", d, "ID", ID))
+write.csv(x=df_obs_cov, file=paste0("/data/data_cov_nl_tau_", tau, "d", d, "ID", ID))
+write.csv(x=data.frame(apply(nl_data$x,2,"c")), file=paste0("/data/data_truth_nl_tau_", tau, "d", d, "ID", ID))

@@ -1,5 +1,6 @@
 # Get data for linear Gaussian SSM
-set.seed(1234)
+ID <- 1
+set.seed(1234*ID)
 
 # dimension
 d <- 32
