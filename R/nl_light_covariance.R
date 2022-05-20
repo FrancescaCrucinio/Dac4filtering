@@ -78,10 +78,10 @@ nl_light_covariance <- function(u, obs, x, history, historyIndex_left, historyIn
           obs_weight_right <- obs_weight_right + current_node_fit*sum(obs_fit*obs_precision[vcn_right_coordinates])
         }
         # contribute of f
-        if((col %in% cic_right) & (row %in% cir_right)){ # right child
-          lWmix[n] <- lWmix[n] + log(sum(valid_weights * exp(-(x[row, col, indices2[n]] - left_ancestor[valid_current_neighbours])^2/(2*sigmaX)))) -
-            log(sum(valid_weights * exp(-(x[row, col, indices2[n]] - right_ancestor[valid_current_neighbours])^2/(2*sigmaX))))
-        }
+        # if((col %in% cic_right) & (row %in% cir_right)){ # right child
+        #   lWmix[n] <- lWmix[n] + log(sum(valid_weights * exp(-(x[row, col, indices2[n]] - left_ancestor[valid_current_neighbours])^2/(2*sigmaX)))) -
+        #     log(sum(valid_weights * exp(-(x[row, col, indices2[n]] - right_ancestor[valid_current_neighbours])^2/(2*sigmaX))))
+        # }
       }
     }
     lWmix[n] <- lWmix[n] - 0.5*(nu+nodes_dimension)*log(1+abs(obs_weight_merged)/nu)
@@ -158,10 +158,10 @@ nl_adaptive_light_covariance <- function(ess_target, u, obs, x, history, history
           obs_weight_right <- obs_weight_right + current_node_fit*sum(obs_fit*obs_precision[vcn_right_coordinates])
         }
         # contribute of f
-        if((col %in% cic_right) & (row %in% cir_right)){ # right child
-          lWmix[n] <- lWmix[n] + log(sum(valid_weights * exp(-(x[row, col, n] - left_ancestor[valid_current_neighbours])^2/(2*sigmaX)))) -
-            log(sum(valid_weights * exp(-(x[row, col, n] - right_ancestor[valid_current_neighbours])^2/(2*sigmaX))))
-        }
+        # if((col %in% cic_right) & (row %in% cir_right)){ # right child
+        #   lWmix[n] <- lWmix[n] + log(sum(valid_weights * exp(-(x[row, col, n] - left_ancestor[valid_current_neighbours])^2/(2*sigmaX)))) -
+        #     log(sum(valid_weights * exp(-(x[row, col, n] - right_ancestor[valid_current_neighbours])^2/(2*sigmaX))))
+        # }
       }
     }
     lWmix[n] <- lWmix[n] - 0.5*(nu+nodes_dimension)*log(1+abs(obs_weight_merged)/nu)
@@ -233,10 +233,10 @@ nl_adaptive_light_covariance <- function(ess_target, u, obs, x, history, history
             obs_weight_right <- obs_weight_right + current_node_fit*sum(obs_fit*obs_precision[vcn_right_coordinates])
           }
           # contribute of f
-          if((col %in% cic_right) & (row %in% cir_right)){ # right child
-            lWmix[n] <- lWmix[n] + log(sum(valid_weights * exp(-(x[row, col, new_perm[n]] - left_ancestor[valid_current_neighbours])^2/(2*sigmaX)))) -
-              log(sum(valid_weights * exp(-(x[row, col, new_perm[n]] - right_ancestor[valid_current_neighbours])^2/(2*sigmaX))))
-          }
+          # if((col %in% cic_right) & (row %in% cir_right)){ # right child
+          #   lWmix[n] <- lWmix[n] + log(sum(valid_weights * exp(-(x[row, col, new_perm[n]] - left_ancestor[valid_current_neighbours])^2/(2*sigmaX)))) -
+          #     log(sum(valid_weights * exp(-(x[row, col, new_perm[n]] - right_ancestor[valid_current_neighbours])^2/(2*sigmaX))))
+          # }
         }
       }
       lWmix_perm[n] <- lWmix_perm[n] - 0.5*(nu+nodes_dimension)*log(1+abs(obs_weight_merged)/nu)
@@ -255,6 +255,8 @@ nl_adaptive_light_covariance <- function(ess_target, u, obs, x, history, history
     ess <- ess_s^2/ess_ss
     lWmix <- c(lWmix, lWmix_perm)
   }
+  # write.table(data.frame("u" = u_info$u, "direction" = u_info$direction, "m" = m), file = "data/adaptive_nl_cov.csv", sep = ",", append = TRUE, quote = FALSE,
+  #             col.names = FALSE, row.names = FALSE)
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
   # resampling the new population

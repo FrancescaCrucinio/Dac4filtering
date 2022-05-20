@@ -18,7 +18,7 @@ dac_time <- rep(0, times = 50)
 for (i in 1:50){
   ground_truth <- unname(data.matrix(read.csv(paste0("/storage/u1693998/data/data_truth_nl_tau_", tau, "d", d, "ID", i),
                                               row.names = 1, nrows=d, skip=(Time.step)*d)))
-  d1 <- read.csv(paste0("/storage/u1693998/results/results/dac_nl_iid_d", d, "N", Nparticles, "ID", i), row.names = 1,
+  d1 <- read.csv(paste0("/storage/u1693998/results/results/dac_nl_cov_d", d, "N", Nparticles, "ID", i), row.names = 1,
                  nrows=d, skip=(Time.step-1)*d)
   data_dac[, , i] <- unname(data.matrix(d1[, 1:d]))
 
@@ -35,4 +35,4 @@ mse_dac <- apply(mse_dac, c(1,2), mean)
 df_dac <- data.frame(rbind(mse_dac, var_dac))
 df_dac$type <- rep(c("mse", "var"), each = d)
 df_dac$runtime <- mean(dac_time)
-write.csv(x=df_dac, file=paste0("run_dac/results/stats_dac_nl_iid_d", d, "N", Nparticles))
+write.csv(x=df_dac, file=paste0("run_dac/results/nc_stats_dac_nl_cov_d", d, "N", Nparticles))

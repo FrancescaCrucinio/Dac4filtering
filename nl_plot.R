@@ -46,7 +46,7 @@ for (Nparticles in c(100, 1000)) {
   print(paste(tmp$runtime[1]))
   df2 <- rbind(df2, tmp)
   # dac
-  df_dac <- read.csv(paste0("data/nl/stats_dac_nl_iid_d", d, "N", Nparticles),
+  df_dac <- read.csv(paste0("data/nl/nc_stats_dac_nl_iid_d", d, "N", Nparticles),
                      row.names = 1)
   mse_dac <- df_dac[1:d, 1:d]
   colnames(mse_dac) <- paste0("c",seq(1,d))
@@ -155,4 +155,9 @@ ggplot(data = df_collective, aes(x=runtime, y=mse, group = interaction(algo, typ
   scale_y_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
-  )
+  ) +
+  theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
+        axis.text = element_blank(), axis.ticks = element_blank(),
+        legend.title = element_blank(), legend.text=element_text(size=25),
+        text = element_text(size=20))
+# ggsave("nl_mse_runtime.pdf", width = 20, height = 15, dpi = 300)
