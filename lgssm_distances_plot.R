@@ -5,6 +5,11 @@ df <- read.csv(paste0("data/lgssm_tempering/lgssm_d32N100ID1"))
 df$N <- "10^2"
 df$d <- "32"
 df$run <- 1
+dfnew <- read.csv(paste0("data/lgssm_tempering/marginal_lgssm_d32N100ID1"))
+dfnew$N <- "10^2"
+dfnew$d <- "32"
+dfnew$run <- 1
+df <- rbind(df, dfnew)
 dfnew <- read.csv(paste0("data/lgssm_tempering/lgssm_d256N100ID1"))
 dfnew$N <- "10^2"
 dfnew$d <- "256"
@@ -18,6 +23,11 @@ df <- rbind(df, dfnew)
 for (id in 2:50){
   filename <- paste0("data/lgssm_tempering/lgssm_d32N100ID", id, sep = "")
   dfnew <- read.csv(filename)
+  dfnew$N <- "10^2"
+  dfnew$d <- "32"
+  dfnew$run <- id
+  df <- rbind(df, dfnew)
+  dfnew <- read.csv(paste0("data/lgssm_tempering/marginal_lgssm_d32N100ID", id, sep = ""))
   dfnew$N <- "10^2"
   dfnew$d <- "32"
   dfnew$run <- id
@@ -42,6 +52,12 @@ for (id in 1:50){
   dfnew$d <- "32"
   dfnew$run <- id
   df <- rbind(df, dfnew)
+  filename <- paste0("data/lgssm_tempering/marginal_lgssm_d32N1000ID", id, sep = "")
+  dfnew <- read.csv(filename)
+  dfnew$N <- "10^3"
+  dfnew$d <- "32"
+  dfnew$run <- id
+  df <- rbind(df, dfnew)
   filename <- paste0("data/lgssm_tempering/lgssm_d256N1000ID", id, sep = "")
   dfnew <- read.csv(filename)
   dfnew$N <- "10^3"
@@ -58,6 +74,11 @@ for (id in 1:50){
 for (id in 1:50){
   filename <- paste0("data/lgssm_tempering/lgssm_d32N10000ID", id, sep = "")
   dfnew <- read.csv(filename)
+  dfnew$N <- "10^4"
+  dfnew$d <- "32"
+  dfnew$run <- id
+  df <- rbind(df, dfnew)
+  dfnew <- read.csv(paste0("data/lgssm_tempering/marginal_lgssm_d32N10000ID", id, sep = ""))
   dfnew$N <- "10^4"
   dfnew$d <- "32"
   dfnew$run <- id
@@ -98,8 +119,8 @@ ggplot(data = distances, aes(x = runtime_mean, y = w1, group = interaction(algo,
     labels = scales::trans_format("log10", scales::math_format(10^.x))
   ) +
   facet_wrap(~factor(d, levels = c("32", "256", "2048")), ncol = 1, nrow = 3) +
-  scale_fill_manual(values=c("#F8766D", "#00BA38", "#619CFF")) +
-  scale_color_manual(values=c("#F8766D", "#00BA38", "#619CFF")) +
+  scale_fill_manual(values=c("#F8766D", "#999999", "#00BA38", "#619CFF")) +
+  scale_color_manual(values=c("#F8766D", "#999999", "#00BA38", "#619CFF")) +
   theme(axis.title.x=element_blank(),  axis.text = element_text(size=30),
         axis.title.y=element_blank(), strip.text.x = element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=30),
@@ -118,8 +139,8 @@ ggplot(data = distances, aes(x = runtime_mean, y = ks, group = interaction(algo,
     labels = scales::trans_format("log10", scales::math_format(10^.x))
   ) +
   facet_wrap(~factor(d, levels = c("32", "256", "2048")), ncol = 1, nrow = 3) +
-  scale_fill_manual(values=c("#F8766D", "#00BA38", "#619CFF")) +
-  scale_color_manual(values=c("#F8766D", "#00BA38", "#619CFF")) +
+  scale_fill_manual(values=c("#F8766D", "#999999", "#00BA38", "#619CFF")) +
+  scale_color_manual(values=c("#F8766D", "#999999", "#00BA38", "#619CFF")) +
   theme(axis.title.x=element_blank(), axis.text = element_text(size=30),
         axis.title.y=element_blank(), strip.text.x = element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=30),

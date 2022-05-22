@@ -16,11 +16,22 @@ neighbours_lattice <- function(row, col, d){
   return(list("current_x_neighbours" = current_x_neighbours, "current_valid" = current_valid))
 }
 
-# Sample frm mixture for nonlinear model
+# Sample from mixture for nonlinear model
 sample_mixture <- function(n, mixture_weights, current_x_neighbours, xOld){
   # sample component of mixture
   mixture_component <- sample.int(5, size = 1, prob = mixture_weights)
   component_coordinates <- current_x_neighbours[mixture_component, ]
   xMean <- xOld[component_coordinates[1], component_coordinates[2], n]
+  return(xMean)
+}
+
+# Sample from mixture for nonlinear model
+marginal_sample_mixture <- function(n, mixture_weights, current_x_neighbours, xOld, sigmaX){
+  Nparticles <- dim(xOld)[3]
+  # sample component of mixture
+  mixture_component <- sample.int(5, size = 1, prob = mixture_weights)
+  component_coordinates <- current_x_neighbours[mixture_component, ]
+  # sample history component
+  xMean <- xOld[component_coordinates[1], component_coordinates[2], sample.int(Nparticles, 1)]
   return(xMean)
 }
