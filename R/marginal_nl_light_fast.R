@@ -42,39 +42,151 @@ marginal_nl_light_fast <- function(u_info, x, history, cir_left, cir_right, cic_
   all_nodes_neighbours_valid[all_nodes_neighbours_valid == 0] <- 1
   all_nodes_valid[all_nodes_valid == 0] <- 1
   for (n in 1:(theta*Nparticles)){
+    sum_merged <- 0
+    sum_left <- 0
+    sum_right <- 0
     # merged x
     mx <- x[, , indices1[n]]
     mx[as.matrix(expand.grid(cir_right, cic_right))] <- x[as.matrix(expand.grid(cir_right, cic_right, indices2[n]))]
-    ancestors_indices <- matrix(all_nodes_neighbours_valid, nrow = Nparticles, ncol = length(all_nodes_neighbours_valid), byrow = TRUE) + d^2*(0:(Nparticles-1))
-    history_all_particles <- matrix(history[ancestors_indices], ncol = length(all_nodes_neighbours_valid))
-    tmp <-  sweep(exp(-(sweep(history_all_particles, 2, mx[all_nodes_valid]))^2/(2*sigmaX)), 2, mixture_weights, "*")
-    tmp_left <- sweep(tmp, 2, rep(nodes_left, each = 5), "*")
-    tmp_right <- sweep(tmp, 2, rep(nodes_right, each = 5), "*")
-    sum_over_neighbours_all <- log(apply(tmp, 1, sum_over_nodes, how_many_nodes))
-    sum_over_neighbours_left <- log(matrix(apply(tmp_left, 1, sum_over_nodes, how_many_nodes), ncol = Nparticles))
-    sum_over_neighbours_right <- log(matrix(apply(tmp_right, 1, sum_over_nodes, how_many_nodes), ncol = Nparticles))
-    lWmix[n] <- log(sum(exp(colSums(sum_over_neighbours_all)))) - log(sum(exp(colSums(sum_over_neighbours_left)))) -
-      log(sum(exp(colSums(sum_over_neighbours_right))))
-    # for (m in 1:Nparticles){
-    #   history_m <- history[, , m]
-    #   # current node
-    #   tmp <- mixture_weights * exp(-(mx[all_nodes_valid] - history_m[all_nodes_neighbours_valid])^2/(2*sigmaX))
-    #   tmp_left <- tmp * rep(nodes_left, each = 5)
-    #   tmp_right <- tmp * rep(nodes_right, each = 5)
-    #   sum_merged <- sum_merged + exp(sum(log(rowSums(matrix(tmp, nrow=how_many_nodes, byrow = TRUE)))))
-    #   sum_over_neighbours_left <- rowSums(matrix(tmp_left, nrow=how_many_nodes, byrow = TRUE))
-    #   sum_over_neighbours_right <- rowSums(matrix(tmp_right, nrow=how_many_nodes, byrow = TRUE))
-    #   sum_left <- sum_left + exp(sum(log(sum_over_neighbours_left[sum_over_neighbours_left>0])))
-    #   sum_right <- sum_right + exp(sum(log(sum_over_neighbours_right[sum_over_neighbours_right>0])))
-    #
-    # }
-    # lWmix[n] <- log(sum_merged) - log(sum_left) - log(sum_right)
+    # ancestors_indices <- matrix(all_nodes_neighbours_valid, nrow = Nparticles, ncol = length(all_nodes_neighbours_valid), byrow = TRUE) + d^2*(0:(Nparticles-1))
+    # history_all_particles <- matrix(history[ancestors_indices], ncol = length(all_nodes_neighbours_valid))
+    # tmp <-  sweep(exp(-(sweep(history_all_particles, 2, mx[all_nodes_valid]))^2/(2*sigmaX)), 2, mixture_weights, "*")
+    # tmp_left <- sweep(tmp, 2, rep(nodes_left, each = 5), "*")
+    # tmp_right <- sweep(tmp, 2, rep(nodes_right, each = 5), "*")
+    # sum_over_neighbours_all <- log(apply(tmp, 1, sum_over_nodes, how_many_nodes))
+    # sum_over_neighbours_left <- log(matrix(apply(tmp_left, 1, sum_over_nodes, how_many_nodes), ncol = Nparticles))
+    # sum_over_neighbours_right <- log(matrix(apply(tmp_right, 1, sum_over_nodes, how_many_nodes), ncol = Nparticles))
+    # lWmix[n] <- log(sum(exp(colSums(sum_over_neighbours_all)))) - log(sum(exp(colSums(sum_over_neighbours_left)))) -
+    #   log(sum(exp(colSums(sum_over_neighbours_right))))
+    for (m in 1:Nparticles){
+      history_m <- history[, , m]
+      # current node
+      tmp <- mixture_weights * exp(-(mx[all_nodes_valid] - history_m[all_nodes_neighbours_valid])^2/(2*sigmaX))
+      tmp_left <- tmp * rep(nodes_left, each = 5)
+      tmp_right <- tmp * rep(nodes_right, each = 5)
+      sum_merged <- sum_merged + exp(sum(log(rowSums(matrix(tmp, nrow=how_many_nodes, byrow = TRUE)))))
+      sum_over_neighbours_left <- rowSums(matrix(tmp_left, nrow=how_many_nodes, byrow = TRUE))
+      sum_over_neighbours_right <- rowSums(matrix(tmp_right, nrow=how_many_nodes, byrow = TRUE))
+      sum_left <- sum_left + exp(sum(log(sum_over_neighbours_left[sum_over_neighbours_left>0])))
+      sum_right <- sum_right + exp(sum(log(sum_over_neighbours_right[sum_over_neighbours_right>0])))
+
+    }
+    lWmix[n] <- log(sum_merged) - log(sum_left) - log(sum_right)
   }
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
   # resampling the new population
   indices <- stratified_resample(Wmix/sum(Wmix), Nparticles)
   return(list("resampled_indices" = cbind(indices1[indices], indices2[indices]), "resampled_particles_lW" = lWmix[indices]))
+}
+
+marginal_nl_light_fast_adaptive <- function(ess_target, u_info, x, history, cir_left, cir_right, cic_left, cic_right,
+                                   lW_left, lW_right, sigmaX){
+  d <- dim(history)[1]
+  Nparticles <- dim(history)[3]
+  nlevels <- log2(d)
+  cic <- unique(c(cic_left, cic_right))
+  cir <- unique(c(cir_left, cir_right))
+  all_nodes_lexicographic <- (rep(cir, times = length(cic)) - 1)*d + rep(cic, each = length(cir))
+  nodes_left <- (rep(cir, times = length(cic)) %in% cir_left) & (rep(cic, each = length(cir)) %in% cic_left)
+  nodes_right <- (rep(cir, times = length(cic)) %in% cir_right) & (rep(cic, each = length(cir)) %in% cic_right)
+  how_many_nodes <- length(all_nodes_lexicographic)
+  all_nodes_neighbours <- matrix(c(all_nodes_lexicographic - d, all_nodes_lexicographic - 1,
+                                   all_nodes_lexicographic, all_nodes_lexicographic + 1,
+                                   all_nodes_lexicographic + d), nrow = how_many_nodes)
+  all_nodes_neighbours_distances <- rep(1/(1+delta), times = 5*how_many_nodes)
+  all_nodes_neighbours_distances[(2*how_many_nodes+1):(3*how_many_nodes)] <- 1/delta
+  all_nodes_neighbours_valid <- (all_nodes_neighbours > 0) & (all_nodes_neighbours <= d^2)
+  mixture_weights <- matrix(all_nodes_neighbours_distances*all_nodes_neighbours_valid, nrow = how_many_nodes, byrow = FALSE)
+  mixture_weights <- mixture_weights/rowSums(mixture_weights)
+  mixture_weights <- c(t(mixture_weights))
+  all_nodes_valid <- rep(all_nodes_lexicographic, each = 5)
+  all_nodes_neighbours_valid <- c(t(all_nodes_neighbours_valid))*c(t(all_nodes_neighbours))
+  all_nodes_neighbours_valid[all_nodes_neighbours_valid == 0] <- 1
+  all_nodes_valid[all_nodes_valid == 0] <- 1
+  # mixture weights
+  lWmix <- rep(0, times = Nparticles)
+  for (n in 1:Nparticles){
+    sum_merged <- 0
+    sum_left <- 0
+    sum_right <- 0
+    # merged x
+    mx <- x[, , n]
+    for (m in 1:Nparticles){
+      history_m <- history[, , m]
+      # current node
+      tmp <- mixture_weights * exp(-(mx[all_nodes_valid] - history_m[all_nodes_neighbours_valid])^2/(2*sigmaX))
+      tmp_left <- tmp * rep(nodes_left, each = 5)
+      tmp_right <- tmp * rep(nodes_right, each = 5)
+      sum_merged <- sum_merged + exp(sum(log(rowSums(matrix(tmp, nrow=how_many_nodes, byrow = TRUE)))))
+      sum_over_neighbours_left <- rowSums(matrix(tmp_left, nrow=how_many_nodes, byrow = TRUE))
+      sum_over_neighbours_right <- rowSums(matrix(tmp_right, nrow=how_many_nodes, byrow = TRUE))
+      sum_left <- sum_left + exp(sum(log(sum_over_neighbours_left[sum_over_neighbours_left>0])))
+      sum_right <- sum_right + exp(sum(log(sum_over_neighbours_right[sum_over_neighbours_right>0])))
+
+    }
+    lWmix[n] <- log(sum_merged) - log(sum_left) - log(sum_right)
+  }
+  if(u_info$u == 1 & u_info$direction == "h"){
+    lWmix <- lWmix + c(lW_left) + c(lW_right)
+  }
+  max.lWmix <- max(lWmix)
+  Wmix <- exp(lWmix - max.lWmix)
+  # build ESS
+  ess_s <- sum(Wmix)
+  ess_ss <- sum(Wmix^2)
+  ess <- ess_s^2/ess_ss
+  # first permutation
+  permutation <- 1:Nparticles
+  theta <- 1
+  while (ess < ess_target & theta<=ceiling(sqrt(Nparticles))) {
+    theta <- theta+1
+    new_perm <- sample.int(Nparticles)
+    # mixture weights
+    lWmix_perm <- rep(0, times = Nparticles)
+    for (n in 1:Nparticles){
+      sum_merged <- 0
+      sum_left <- 0
+      sum_right <- 0
+      # merged x
+      mx <- x[, , n]
+      mx[as.matrix(expand.grid(cir_right, cic_right))] <- x[as.matrix(expand.grid(cir_right, cic_right, new_perm[n]))]
+
+      for (m in 1:Nparticles){
+        history_m <- history[, , m]
+        # current node
+        tmp <- mixture_weights * exp(-(mx[all_nodes_valid] - history_m[all_nodes_neighbours_valid])^2/(2*sigmaX))
+        tmp_left <- tmp * rep(nodes_left, each = 5)
+        tmp_right <- tmp * rep(nodes_right, each = 5)
+        sum_merged <- sum_merged + exp(sum(log(rowSums(matrix(tmp, nrow=how_many_nodes, byrow = TRUE)))))
+        sum_over_neighbours_left <- rowSums(matrix(tmp_left, nrow=how_many_nodes, byrow = TRUE))
+        sum_over_neighbours_right <- rowSums(matrix(tmp_right, nrow=how_many_nodes, byrow = TRUE))
+        sum_left <- sum_left + exp(sum(log(sum_over_neighbours_left[sum_over_neighbours_left>0])))
+        sum_right <- sum_right + exp(sum(log(sum_over_neighbours_right[sum_over_neighbours_right>0])))
+
+      }
+      lWmix_perm[n] <- log(sum_merged) - log(sum_left) - log(sum_right)
+    }
+    if(u_info$u == 1 & u_info$direction == "h"){
+      lWmix_perm <- lWmix_perm + c(lW_left) + c(lW_right)
+    }
+    permutation <- c(permutation, new_perm)
+    max.lWmix <- max(lWmix_perm)
+    Wmix <- exp(lWmix_perm - max.lWmix)
+    # build ESS
+    ess_s <- ess_s + sum(Wmix)
+    ess_ss <- ess_ss + sum(Wmix^2)
+    ess <- ess_s^2/ess_ss
+    lWmix <- c(lWmix, lWmix_perm)
+  }
+  write.table(data.frame("u" = u_info$u, "direction" = u_info$direction, "theta" = theta), file = "data/adaptive_nl.csv", sep = ",", append = TRUE, quote = FALSE,
+              col.names = FALSE, row.names = FALSE)
+  max.lWmix <- max(lWmix)
+  Wmix <- exp(lWmix - max.lWmix)
+  # resampling the new population
+  indices <- stratified_resample(Wmix/sum(Wmix), Nparticles)
+  return(list("resampled_indices" = cbind(rep(1:Nparticles, times = theta)[indices], permutation[indices]),
+              "target_reached" = (ess >= ess_target), "resampled_particles_lW" = lWmix[indices]))
 }
 
 sum_over_nodes <- function(x, how_many_nodes){

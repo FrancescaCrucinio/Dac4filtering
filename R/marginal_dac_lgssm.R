@@ -1,5 +1,5 @@
 # Lightweight resampling DaC for linear Gaussian SSM
-marginal_dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY){
+marginal_dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, adaptive = FALSE){
   # number of samples for lightweight mixture
   theta <- ceiling(sqrt(Nparticles))
   # dimension and number of particles
@@ -40,7 +40,11 @@ marginal_dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY){
       # get children indices
       ci <- child_indices(i, nvNew)
       # lightweight mixture resampling
-      out <- marginal_lgssm_light(i, u, nv, ci, W, Nparticles, theta, lambda, tau, x, xOld)
+      if(adaptive){
+        out <- marginal_lgssm_light_adaptive(Nparticles, i, u, nv, ci, lW, Nparticles, lambda, tau, x, xOld)
+      } else {
+        out <- marginal_lgssm_light(i, u, nv, ci, W, Nparticles, theta, lambda, tau, x, xOld)
+      }
       # update after mixture resampling
       indices <- out$resampled_indices
       xNew[, ci[1]:ci[2]] <- cbind(x[indices[, 1], ci[1]:(ci[1]+nv-1)], x[indices[, 2], (ci[1]+nv):ci[2]])
@@ -212,4 +216,59 @@ marginal_lgssm_light <- function(i, u, nv, ci, W, Nparticles, theta, lambda, tau
   # resampling the new population
   indices <- stratified_resample(Wmix/sum(Wmix), Nparticles)
   return(list("resampled_indices" = cbind(indices1[indices], indices2[indices]), "resampled_particles_lW" = lWmix[indices]))
+}
+
+
+# Adaptive Lightweight resampling for linear Gaussian SSM
+marginal_lgssm_light_adaptive <- function(ess_target, i, u, nv, ci, lW, Nparticles, lambda, tau, x, xOld){
+  # binary tree
+  nchild <- 2
+  # mixture weights
+  if(u == 1){
+    lWmix <- lW[, (nchild*(i-1)+1)] + lW[, i*nchild] - 0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2/(tau+lambda) -
+                                                                      2*x[, (ci[1]+nv-1)] * x[, (ci[1]+nv)]) +
+      log(mean(exp(-0.5*lambda*tau*xOld[, ci[1]+nv] * x[, (ci[1]+nv-1)]/(tau+lambda))))
+  } else{
+    lWmix <- -0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2/(tau+lambda) -
+                              2*x[, (ci[1]+nv-1)] * x[, (ci[1]+nv)]) +
+      log(mean(exp(-0.5*lambda*tau*xOld[, ci[1]+nv] * x[, (ci[1]+nv-1)]/(tau+lambda))))
+  }
+  max.lWmix <- max(lWmix)
+  Wmix <- exp(lWmix - max.lWmix)
+  # build ESS
+  ess_s <- sum(Wmix)
+  ess_ss <- sum(Wmix^2)
+  ess <- ess_s^2/ess_ss
+  # first permutation
+  permutation <- 1:Nparticles
+  theta <- 1
+  while (ess < ess_target & theta <= ceiling(sqrt(Nparticles))) {
+    theta <- theta+1
+    new_perm <- sample.int(Nparticles)
+    if(u == 1){
+      lWmix_perm <- lW[, (nchild*(i-1)+1)] + lW[new_perm, i*nchild] -0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2/(tau+lambda) -
+                                                                                     2*x[, (ci[1]+nv-1)] * x[new_perm, (ci[1]+nv)]) +
+        log(mean(exp(-0.5*lambda*tau*xOld[new_perm, ci[1]+nv] * x[, (ci[1]+nv-1)]/(tau+lambda))))
+    } else{
+      lWmix_perm <- -0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2/(tau+lambda) -
+                                     2*x[, (ci[1]+nv-1)] * x[new_perm, (ci[1]+nv)]) +
+        log(mean(exp(-0.5*lambda*tau*xOld[new_perm, ci[1]+nv] * x[, (ci[1]+nv-1)]/(tau+lambda))))
+    }
+    permutation <- c(permutation, new_perm)
+    max.lWmix <- max(lWmix_perm)
+    Wmix <- exp(lWmix_perm - max.lWmix)
+    # build ESS
+    ess_s <- ess_s + sum(Wmix)
+    ess_ss <- ess_ss + sum(Wmix^2)
+    ess <- ess_s^2/ess_ss
+    lWmix <- c(lWmix, lWmix_perm)
+  }
+  write.table(data.frame("u" = u, "theta" = theta), file = "data/adaptive_lgssm.csv", sep = ",", append = TRUE, quote = FALSE,
+              col.names = FALSE, row.names = FALSE)
+  max.lWmix <- max(lWmix)
+  Wmix <- exp(lWmix - max.lWmix)
+  # resampling the new population
+  indices <- stratified_resample(Wmix/sum(Wmix), Nparticles)
+  return(list("resampled_indices" = cbind(rep(1:Nparticles, times = theta)[indices], permutation[indices]),
+              "target_reached" = (ess >= ess_target), "resampled_particles_lW" = lWmix[indices]))
 }

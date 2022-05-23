@@ -1,6 +1,6 @@
 library(plyr)
 # linear Gaussian
-df <- read.csv("data/adaptive_resampling/adaptive_lgssm_d32N1000T100.csv", col.names = c("u", "m"))
+df <- read.csv("data/adaptive_resampling/adaptive_lgssm.csv", col.names = c("u", "m"))
 ggplot(data = df, aes(x = m)) +
   geom_histogram() +
   facet_grid(~factor(u, levels=c('1','2','3','4', '5'))) +
@@ -9,7 +9,7 @@ ggplot(data = df, aes(x = m)) +
         legend.title = element_blank(), legend.text=element_text(size=20),
         text = element_text(size=20), plot.title = element_text(hjust = 0.5)) +
   ggtitle("Linear Gaussian")
-# ggsave("m_adaptive32_lgssm.pdf", width = 10, height = 5, dpi = 300)
+# ggsave("marginal_adaptive32_lgssm.pdf", width = 10, height = 5, dpi = 300)
 
 # Spatial
 df <- read.csv("data/adaptive_resampling/adaptive_nl.csv", col.names = c("u", "direction", "m"))

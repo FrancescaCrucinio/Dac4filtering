@@ -1,9 +1,9 @@
-marginal_dac_nl_lightweight <- function(history, obs, sigmaX, nu,
-                               covariance = FALSE, obs_old = NULL, tau = NULL){
+marginal_dac_nl_lightweight <- function(history, obs, sigmaX, nu, adaptive = FALSE){
   # dimension and number of particles
   d <- nrow(history)
   Nparticles <- dim(history)[3]
   theta <- ceiling(sqrt(Nparticles))
+  if(adaptive) theta <- NULL
   # tree topology
   nchild <- 2
   nlevels <- log2(d)
