@@ -15,7 +15,17 @@ dfnew$N <- "10^2"
 dfnew$d <- "256"
 dfnew$run <- 1
 df <- rbind(df, dfnew)
+dfnew <- read.csv(paste0("data/lgssm_tempering/marginal_lgssm_d256N100ID1"))
+dfnew$N <- "10^2"
+dfnew$d <- "256"
+dfnew$run <- 1
+df <- rbind(df, dfnew)
 dfnew <- read.csv(paste0("data/lgssm_tempering/lgssm_d2048N100ID1"))
+dfnew$N <- "10^2"
+dfnew$d <- "2048"
+dfnew$run <- 1
+df <- rbind(df, dfnew)
+dfnew <- read.csv(paste0("data/lgssm_tempering/marginal_lgssm_d2048N100ID1"))
 dfnew$N <- "10^2"
 dfnew$d <- "2048"
 dfnew$run <- 1
@@ -125,7 +135,7 @@ ggplot(data = distances, aes(x = runtime_mean, y = w1, group = interaction(algo,
         axis.title.y=element_blank(), strip.text.x = element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=30),
         text = element_text(size=30), legend.position="none", panel.spacing = unit(2, "lines"))
-# ggsave("lgssm_w1.pdf", width = 20, height = 30, dpi = 300)
+# ggsave("marginal_lgssm_w1.pdf", width = 20, height = 30, dpi = 300)
 # Kolmogorov-Smirnov
 ggplot(data = distances, aes(x = runtime_mean, y = ks, group = interaction(algo, N, d), fill = algo, colour = algo)) +
   geom_boxplot(coef = 10, width = 0.1, alpha = 0.1, lwd = 1) +
@@ -145,4 +155,4 @@ ggplot(data = distances, aes(x = runtime_mean, y = ks, group = interaction(algo,
         axis.title.y=element_blank(), strip.text.x = element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=30),
         text = element_text(size=30), legend.position="none", panel.spacing = unit(2, "lines"))
-# ggsave("lgssm_ks.pdf", width = 20, height = 30, dpi = 300)
+# ggsave("marginal_lgssm_ks.pdf", width = 20, height = 30, dpi = 300)

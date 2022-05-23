@@ -1,5 +1,5 @@
 set.seed(1234*5)
-d <- 8
+d <- 4
 sigmaX <- 1
 nu <- 10
 tau <- -1/4
@@ -31,16 +31,16 @@ for (t in 1:Time.step){
   print(paste(t))
 }
 toc()
-tic()
-obs_old <- matrix(0, ncol = d, nrow = d)
-for (t in 1:Time.step){
-  print(paste(t))
-  res_dac_tempering <- dac_nl_lightweight(history_dac_tempering, y_cov[, , t], sigmaX, nu, covariance = TRUE, tempering = FALSE,
-                                          obs_old = obs_old, tau = tau)
-  history_dac_tempering <- res_dac_tempering
-  obs_old <- y_cov[, , t]
-}
-toc()
+# tic()
+# obs_old <- matrix(0, ncol = d, nrow = d)
+# for (t in 1:Time.step){
+#   print(paste(t))
+#   res_dac_tempering <- dac_nl_lightweight(history_dac_tempering, y_cov[, , t], sigmaX, nu, covariance = TRUE, tempering = FALSE,
+#                                           obs_old = obs_old, tau = tau)
+#   history_dac_tempering <- res_dac_tempering
+#   obs_old <- y_cov[, , t]
+# }
+# toc()
 # tic()
 # for (t in 1:Time.step){
 #   print(paste(t))
@@ -56,7 +56,7 @@ toc()
 # }
 # toc()
 mean((apply(res_dac, c(1,2), mean) - nl_data$x[, , Time.step+1])^2, col = grey(seq(0, 1, length = 256)))
-mean((apply(res_dac_tempering, c(1,2), mean) - nl_data$x[, , Time.step+1])^2, col = grey(seq(0, 1, length = 256)))
+# mean((apply(res_dac_tempering, c(1,2), mean) - nl_data$x[, , Time.step+1])^2, col = grey(seq(0, 1, length = 256)))
 # mean((apply(res_nsmc, c(1,2), mean) - nl_data$x[, , Time.step+1])^2, col = grey(seq(0, 1, length = 256)))
 # mean((apply(res_stpf, c(1, 2), mean) - nl_data$x[, , Time.step+1])^2, col = grey(seq(0, 1, length = 256)))
 #

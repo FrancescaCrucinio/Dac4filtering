@@ -8,7 +8,7 @@ marginal_nl_merge <- function(lW, x, history, node_row_left, node_row_right,
     lW_left <- lW[node_row_left, node_col_left, ]
     lW_right <- lW[node_row_right, node_col_right, ]
   }
-  out <- marginal_nl_light(u_info, x, history, cir_left, cir_right, cic_left, cic_right,
+  out <- marginal_nl_light_fast(u_info, x, history, cir_left, cir_right, cic_left, cic_right,
                            lW_left, lW_right, sigmaX, theta)
 
   indices <- out$resampled_indices
