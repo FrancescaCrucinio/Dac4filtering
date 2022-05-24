@@ -16,7 +16,7 @@ nl_obs <- function(d, sigmaX, nu, delta, y.error.var, Time.step){
         y_iid[row, col, t-1] <- x[row, col, t] + rt(1, df = nu)
       }
     }
-    y[, , t-1] <- matrix(rmvt(1, mu = c(x[, , t]), S = y.error.var, df = 5), ncol = d)
+    y[, , t-1] <- matrix(rmvt(1, mu = c(x[, , t]), S = y.error.var, df = nu), ncol = d)
 
   }
   return(list("x" = x, "y" = y, "yiid" = y_iid))
