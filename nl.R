@@ -1,10 +1,10 @@
 set.seed(1234*5)
-d <- 8
+d <- 4
 sigmaX <- 1
 nu <- 10
 tau <- -1/4
 delta <- 1
-Time.step <- 10
+Time.step <- 1
 y.error.prec <- matrix(0, nrow = d^2, ncol = d^2)
 diag(y.error.prec) <- 1
 diag(y.error.prec[-1, ]) <- tau
@@ -17,7 +17,7 @@ y.error.var[upper.tri(y.error.var)] <- t(y.error.var)[upper.tri(y.error.var)]
 nl_data <- nl_obs(d, sigmaX, nu, delta, y.error.var, Time.step)
 y <- nl_data$yiid
 y_cov <- nl_data$y
-Nparticles <- 100
+Nparticles <- 500
 M <- 100
 # initial state
 history_dac <- sqrt(sigmaX)*array(rnorm(Nparticles*d^2), dim = c(d, d, Nparticles))
