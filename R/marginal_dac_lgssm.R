@@ -1,10 +1,10 @@
 # Lightweight resampling DaC for linear Gaussian SSM
-marginal_dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, adaptive = FALSE){
+marginal_dac_lgssm_lightweight <- function(history, obs, tau, lambda, sigmaY, adaptive = FALSE){
   # number of samples for lightweight mixture
   theta <- ceiling(sqrt(Nparticles))
   # dimension and number of particles
-  d <- ncol(xOld)
-  Nparticles <- nrow(xOld)
+  d <- ncol(history)
+  Nparticles <- nrow(history)
   # tree topology
   nchild <- 2
   nlevels <- log2(d)
@@ -17,9 +17,9 @@ marginal_dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, adapt
   for (i in 1:nchild^nlevels){
     sample_from_past <- sample.int(Nparticles, Nparticles, replace = TRUE)
     if (i == 1) {
-      x[, i] <- 0.5*xOld[sample_from_past, i] + rnorm(Nparticles)/sqrt(tau)
+      x[, i] <- 0.5*history[sample_from_past, i] + rnorm(Nparticles)/sqrt(tau)
     } else {
-      x[, i] <- 0.5*tau*xOld[sample_from_past, i]/(tau+lambda) + rnorm(Nparticles)/sqrt(tau+lambda)
+      x[, i] <- 0.5*tau*history[sample_from_past, i]/(tau+lambda) + rnorm(Nparticles)/sqrt(tau+lambda)
     }
     lW[, i] <- -0.5*(obs[i] - x[, i])^2/sigmaY - 0.5*log(2*pi*sigmaY)
     max.lW <- max(lW[, i])
@@ -41,9 +41,9 @@ marginal_dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, adapt
       ci <- child_indices(i, nvNew)
       # lightweight mixture resampling
       if(adaptive){
-        out <- marginal_lgssm_light_adaptive(Nparticles, i, u, nv, ci, lW, Nparticles, lambda, tau, x, xOld)
+        out <- marginal_lgssm_light_adaptive(Nparticles, i, u, nv, ci, lW, Nparticles, lambda, tau, x, history)
       } else {
-        out <- marginal_lgssm_light(i, u, nv, ci, W, Nparticles, theta, lambda, tau, x, xOld)
+        out <- marginal_lgssm_light(i, u, nv, ci, W, Nparticles, theta, lambda, tau, x, history)
       }
       # update after mixture resampling
       indices <- out$resampled_indices
@@ -56,10 +56,10 @@ marginal_dac_lgssm_lightweight <- function(xOld, obs, tau, lambda, sigmaY, adapt
 }
 
 # Mixture resampling DaC for linear Gaussian SSM
-dac_lgssm <- function(xOld, obs, tau, lambda, sigmaY){
+dac_lgssm <- function(history, obs, tau, lambda, sigmaY){
   # dimension and number of particles
-  d <- ncol(xOld)
-  Nparticles <- nrow(xOld)
+  d <- ncol(history)
+  Nparticles <- nrow(history)
   # tree topology
   nchild <- 2
   nlevels <- log2(d)
@@ -69,9 +69,9 @@ dac_lgssm <- function(xOld, obs, tau, lambda, sigmaY){
   lW <- matrix(0, nrow = Nparticles, ncol = d)
   for (i in 1:nchild^nlevels){
     if (i == 1) {
-      x[, i] <- 0.5*xOld[, i] + rnorm(Nparticles)/sqrt(tau)
+      x[, i] <- 0.5*history[, i] + rnorm(Nparticles)/sqrt(tau)
     } else {
-      x[, i] <- 0.5*tau*xOld[, i]/(tau+lambda) + rnorm(Nparticles)/sqrt(tau+lambda)
+      x[, i] <- 0.5*tau*history[, i]/(tau+lambda) + rnorm(Nparticles)/sqrt(tau+lambda)
     }
     lW[, i] <- -0.5*(obs[i] - x[, i])^2/sigmaY - 0.5*log(2*pi*sigmaY)
     max.lW <- max(lW[, i])
@@ -100,7 +100,7 @@ dac_lgssm <- function(xOld, obs, tau, lambda, sigmaY){
             lWmix[n1, n2] <- lW[n1, (nchild*(i-1)+1)] + lW[n2, i*nchild] -
               -0.5*lambda * (lambda *x[n1, (ci[1]+nv-1)]^2/(tau+lambda) -
                                2*x[n1, (ci[1]+nv-1)] * x[n2, (ci[1]+nv)]) +
-              log(mean(exp(-0.5*lambda*tau*xOld[n2, ci[1]+nv] * x[n1, (ci[1]+nv-1)]/(tau+lambda))))
+              log(mean(exp(-0.5*lambda*tau*history[n2, ci[1]+nv] * x[n1, (ci[1]+nv-1)]/(tau+lambda))))
           }
         }
         max.lWmix <- max(lWmix)
@@ -110,7 +110,7 @@ dac_lgssm <- function(xOld, obs, tau, lambda, sigmaY){
           for (n2 in 1:Nparticles) {
             lWmix[n1, n2] <- -0.5*lambda * (lambda *x[n1, (ci[1]+nv-1)]^2/(tau+lambda) -
                                               2*x[n1, (ci[1]+nv-1)] * x[n1, (ci[1]+nv)]) +
-              log(mean(exp(-0.5*lambda*tau*xOld[n2, ci[1]+nv] * x[n1, (ci[1]+nv-1)]/(tau+lambda))))
+              log(mean(exp(-0.5*lambda*tau*history[, ci[1]+nv] * x[n1, (ci[1]+nv-1)]/(tau+lambda))))
           }
         }
         max.lWmix <- max(lWmix)
@@ -133,10 +133,10 @@ dac_lgssm <- function(xOld, obs, tau, lambda, sigmaY){
 }
 
 # Linear cost DaC for linear Gaussian SSM
-dac_lgssm_lc <- function(xOld, obs, tau, lambda, sigmaY){
+dac_lgssm_lc <- function(history, obs, tau, lambda, sigmaY){
   # dimension and number of particles
-  d <- ncol(xOld)
-  Nparticles <- nrow(xOld)
+  d <- ncol(history)
+  Nparticles <- nrow(history)
   # tree topology
   nchild <- 2
   nlevels <- log2(d)
@@ -146,9 +146,9 @@ dac_lgssm_lc <- function(xOld, obs, tau, lambda, sigmaY){
   W <- matrix(0, nrow = Nparticles, ncol = d)
   for (i in 1:nchild^nlevels){
     if (i == 1) {
-      x[, i] <- 0.5*xOld[, i] + rnorm(Nparticles)/sqrt(tau)
+      x[, i] <- 0.5*history[, i] + rnorm(Nparticles)/sqrt(tau)
     } else {
-      x[, i] <- 0.5*tau*xOld[, i]/(tau+lambda) + rnorm(Nparticles)/sqrt(tau+lambda)
+      x[, i] <- 0.5*tau*history[, i]/(tau+lambda) + rnorm(Nparticles)/sqrt(tau+lambda)
     }
     lW <- -0.5*(obs[i] - x[, i])^2/sigmaY - 0.5*log(2*pi*sigmaY)
     max.lW <- max(lW)
@@ -178,7 +178,7 @@ dac_lgssm_lc <- function(xOld, obs, tau, lambda, sigmaY){
       # weights
       lW <- -0.5*lambda * (lambda *x[indices1, (ci[1]+nv-1)]^2/(tau+lambda) -
                              2*x[indices1, (ci[1]+nv-1)] * x[indices2, (ci[1]+nv)]) +
-        log(mean(exp(-0.5*lambda*tau*xOld[indices2, ci[1]+nv] * x[indices1, (ci[1]+nv-1)]/(tau+lambda))))
+        log(rowMeans(exp(-0.5*lambda*tau*outer(x[indices1, (ci[1]+nv-1)], history[, ci[1]+nv], "*")/(tau+lambda))))
       max.lW <- max(lW)
       WNew[, i] <- exp(lW - max.lW)
       # update particles
@@ -192,7 +192,7 @@ dac_lgssm_lc <- function(xOld, obs, tau, lambda, sigmaY){
 }
 
 # Lightweight resampling for linear Gaussian SSM
-marginal_lgssm_light <- function(i, u, nv, ci, W, Nparticles, theta, lambda, tau, x, xOld){
+marginal_lgssm_light <- function(i, u, nv, ci, W, Nparticles, theta, lambda, tau, x, history){
   nchild <- 2
   # resample on each children
   if(u == 1){
@@ -210,7 +210,7 @@ marginal_lgssm_light <- function(i, u, nv, ci, W, Nparticles, theta, lambda, tau
   # mixture weights
   lWmix <- -0.5*lambda * (lambda *x[indices1, (ci[1]+nv-1)]^2/(tau+lambda) -
                             2*x[indices1, (ci[1]+nv-1)] * x[indices2, (ci[1]+nv)]) +
-            log(mean(exp(-0.5*lambda*tau*xOld[indices2, ci[1]+nv] * x[indices1, (ci[1]+nv-1)]/(tau+lambda))))
+    log(rowMeans(exp(-0.5*lambda*tau*outer(x[indices1, (ci[1]+nv-1)], history[, ci[1]+nv], "*")/(tau+lambda))))
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
   # resampling the new population
@@ -220,19 +220,19 @@ marginal_lgssm_light <- function(i, u, nv, ci, W, Nparticles, theta, lambda, tau
 
 
 # Adaptive Lightweight resampling for linear Gaussian SSM
-marginal_lgssm_light_adaptive <- function(ess_target, i, u, nv, ci, lW, Nparticles, lambda, tau, x, xOld){
+marginal_lgssm_light_adaptive <- function(ess_target, i, u, nv, ci, lW, Nparticles, lambda, tau, x, history){
   # binary tree
   nchild <- 2
   # mixture weights
+  integral_part <- log(rowMeans(exp(-0.5*lambda*tau*outer(x[, (ci[1]+nv-1)], history[, ci[1]+nv], "*")/(tau+lambda))))
   if(u == 1){
     lWmix <- lW[, (nchild*(i-1)+1)] + lW[, i*nchild] - 0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2/(tau+lambda) -
-                                                                      2*x[, (ci[1]+nv-1)] * x[, (ci[1]+nv)]) +
-      log(mean(exp(-0.5*lambda*tau*xOld[, ci[1]+nv] * x[, (ci[1]+nv-1)]/(tau+lambda))))
+                                                                      2*x[, (ci[1]+nv-1)] * x[, (ci[1]+nv)])
   } else{
     lWmix <- -0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2/(tau+lambda) -
-                              2*x[, (ci[1]+nv-1)] * x[, (ci[1]+nv)]) +
-      log(mean(exp(-0.5*lambda*tau*xOld[, ci[1]+nv] * x[, (ci[1]+nv-1)]/(tau+lambda))))
+                              2*x[, (ci[1]+nv-1)] * x[, (ci[1]+nv)])
   }
+  lWmix <- lWmix + integral_part
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
   # build ESS
@@ -247,13 +247,12 @@ marginal_lgssm_light_adaptive <- function(ess_target, i, u, nv, ci, lW, Nparticl
     new_perm <- sample.int(Nparticles)
     if(u == 1){
       lWmix_perm <- lW[, (nchild*(i-1)+1)] + lW[new_perm, i*nchild] -0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2/(tau+lambda) -
-                                                                                     2*x[, (ci[1]+nv-1)] * x[new_perm, (ci[1]+nv)]) +
-        log(mean(exp(-0.5*lambda*tau*xOld[new_perm, ci[1]+nv] * x[, (ci[1]+nv-1)]/(tau+lambda))))
+                                                                                     2*x[, (ci[1]+nv-1)] * x[new_perm, (ci[1]+nv)])
     } else{
       lWmix_perm <- -0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2/(tau+lambda) -
-                                     2*x[, (ci[1]+nv-1)] * x[new_perm, (ci[1]+nv)]) +
-        log(mean(exp(-0.5*lambda*tau*xOld[new_perm, ci[1]+nv] * x[, (ci[1]+nv-1)]/(tau+lambda))))
+                                     2*x[, (ci[1]+nv-1)] * x[new_perm, (ci[1]+nv)])
     }
+    lWmix_perm <- lWmix_perm + integral_part
     permutation <- c(permutation, new_perm)
     max.lWmix <- max(lWmix_perm)
     Wmix <- exp(lWmix_perm - max.lWmix)

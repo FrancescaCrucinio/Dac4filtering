@@ -26,7 +26,7 @@ history_nsmc <- sqrt(sigmaX)*array(rnorm(Nparticles*d^2), dim = c(d, d, Nparticl
 history_stpf <- sqrt(sigmaX)*array(rnorm(Nparticles*M*d^2), dim = c(d, d, Nparticles, M))
 tic()
 for (t in 1:Time.step){
-  res_dac <- marginal_dac_nl_lightweight(history_dac, y[, , t], sigmaX, nu, adaptive = TRUE)
+  res_dac <- marginal_dac_nl_lightweight(history_dac, y[, , t], sigmaX, nu, adaptive = FALSE)
   history_dac <- res_dac
   print(paste(t))
 }
