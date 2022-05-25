@@ -28,7 +28,7 @@ marginal_dac_nl_lightweight <- function(history, obs, sigmaX, nu, adaptive = FAL
     nodes <- nchild^(nlevels-u)
     # number of variables in each node
     nvNew <- nchild^u
-
+    print(paste(u, u, u, u))
     for (i in 1:nodes) {
       # row indices of children (column 1 = left child, column 2 = right child)
       cir <- matrix(c(((i-1)*nvNew+1):((2*i-1)*nv), ((2*i-1)*nv+1):(i*nvNew)), ncol = 2)

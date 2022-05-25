@@ -24,23 +24,28 @@ marginal_nl_light_fast <- function(u_info, x, history, cir_left, cir_right, cic_
   }
   # mixture weights
   lWmix <- rep(0, times = theta*Nparticles)
-  all_nodes_lexicographic <- (rep(cir, times = length(cic)) - 1)*d + rep(cic, each = length(cir))
-  nodes_left <- (rep(cir, times = length(cic)) %in% cir_left) & (rep(cic, each = length(cir)) %in% cic_left)
-  nodes_right <- (rep(cir, times = length(cic)) %in% cir_right) & (rep(cic, each = length(cir)) %in% cic_right)
-  how_many_nodes <- length(all_nodes_lexicographic)
-  all_nodes_neighbours <- matrix(c(all_nodes_lexicographic - d, all_nodes_lexicographic - 1,
-                            all_nodes_lexicographic, all_nodes_lexicographic + 1,
-                            all_nodes_lexicographic + d), nrow = how_many_nodes)
-  all_nodes_neighbours_distances <- rep(1/(1+delta), times = 5*how_many_nodes)
-  all_nodes_neighbours_distances[(2*how_many_nodes+1):(3*how_many_nodes)] <- 1/delta
-  all_nodes_neighbours_valid <- (all_nodes_neighbours > 0) & (all_nodes_neighbours <= d^2)
-  mixture_weights <- matrix(all_nodes_neighbours_distances*all_nodes_neighbours_valid, nrow = how_many_nodes, byrow = FALSE)
-  mixture_weights <- mixture_weights/rowSums(mixture_weights)
-  mixture_weights <- c(t(mixture_weights))
-  all_nodes_valid <- rep(all_nodes_lexicographic, each = 5)
-  all_nodes_neighbours_valid <- c(t(all_nodes_neighbours_valid))*c(t(all_nodes_neighbours))
-  all_nodes_neighbours_valid[all_nodes_neighbours_valid == 0] <- 1
-  all_nodes_valid[all_nodes_valid == 0] <- 1
+  all_nodes <- as.matrix(expand.grid(cir, cic))
+  how_many_nodes <- nrow(all_nodes)
+  nodes_left <- rep((all_nodes[, 1] %in% cir_left) & (all_nodes[, 2] %in% cic_left), each = 5)
+  nodes_right <- rep((all_nodes[, 1] %in% cir_right) & (all_nodes[, 2] %in% cic_right), each = 5)
+  all_nodes_neighbours <- do.call(rbind, apply(all_nodes, 1, get_all_neighbours, d, simplify = FALSE))
+  all_nodes_replicates <- all_nodes[rep(1:how_many_nodes, each = 5), ]
+  all_nodes_neighbours[all_nodes_neighbours[, 3] == 0, 1:2] <- 1
+
+
+  # how_many_nodes <- length(all_nodes_lexicographic)
+  # all_nodes_neighbours <- matrix(c(all_nodes_lexicographic - d, all_nodes_lexicographic - 1,
+  #                           all_nodes_lexicographic, all_nodes_lexicographic + 1,
+  #                           all_nodes_lexicographic + d), nrow = how_many_nodes)
+  # all_nodes_neighbours_distances <- rep(1/(1+delta), times = 5*how_many_nodes)
+  # all_nodes_neighbours_distances[(2*how_many_nodes+1):(3*how_many_nodes)] <- 1/delta
+  # all_nodes_neighbours_valid <- (all_nodes_neighbours > 0) & (all_nodes_neighbours <= d^2)
+  # mixture_weights <- matrix(all_nodes_neighbours_distances*all_nodes_neighbours_valid, nrow = how_many_nodes, byrow = FALSE)
+  # mixture_weights <- mixture_weights/rowSums(mixture_weights)
+  # mixture_weights <- c(t(mixture_weights))
+  # all_nodes_valid <- rep(all_nodes_lexicographic, each = 5)
+  # all_nodes_neighbours_valid_coordinates <- c(t(all_nodes_neighbours_valid))*c(t(all_nodes_neighbours))
+  # all_nodes_neighbours_valid_coordinates[all_nodes_neighbours_valid_coordinates == 0] <- 1
   for (n in 1:(theta*Nparticles)){
     sum_merged <- 0
     sum_left <- 0
@@ -61,15 +66,15 @@ marginal_nl_light_fast <- function(u_info, x, history, cir_left, cir_right, cic_
     for (m in 1:Nparticles){
       history_m <- history[, , m]
       # current node
-      tmp <- mixture_weights * exp(-(mx[all_nodes_valid] - history_m[all_nodes_neighbours_valid])^2/(2*sigmaX))
-      tmp_left <- tmp * rep(nodes_left, each = 5)
-      tmp_right <- tmp * rep(nodes_right, each = 5)
-      sum_merged <- sum_merged + exp(sum(log(rowSums(matrix(tmp, nrow=how_many_nodes, byrow = TRUE)))))
+      tmp <- all_nodes_neighbours[, 3] * exp(-(mx[all_nodes_replicates] - history_m[all_nodes_neighbours[, 1:2]])^2/(2*sigmaX))
+      tmp_left <- tmp * nodes_left
+      tmp_right <- tmp * nodes_right
       sum_over_neighbours_left <- rowSums(matrix(tmp_left, nrow=how_many_nodes, byrow = TRUE))
       sum_over_neighbours_right <- rowSums(matrix(tmp_right, nrow=how_many_nodes, byrow = TRUE))
+      sum_over_neighbours_merged <- rowSums(matrix(tmp, nrow=how_many_nodes, byrow = TRUE))
       sum_left <- sum_left + exp(sum(log(sum_over_neighbours_left[sum_over_neighbours_left>0])))
       sum_right <- sum_right + exp(sum(log(sum_over_neighbours_right[sum_over_neighbours_right>0])))
-
+      sum_merged <- sum_merged + exp(sum(log(sum_over_neighbours_merged[sum_over_neighbours_merged>0])))
     }
     lWmix[n] <- log(sum_merged) - log(sum_left) - log(sum_right)
   }
@@ -87,23 +92,13 @@ marginal_nl_light_fast_adaptive <- function(ess_target, u_info, x, history, cir_
   nlevels <- log2(d)
   cic <- unique(c(cic_left, cic_right))
   cir <- unique(c(cir_left, cir_right))
-  all_nodes_lexicographic <- (rep(cir, times = length(cic)) - 1)*d + rep(cic, each = length(cir))
-  nodes_left <- (rep(cir, times = length(cic)) %in% cir_left) & (rep(cic, each = length(cir)) %in% cic_left)
-  nodes_right <- (rep(cir, times = length(cic)) %in% cir_right) & (rep(cic, each = length(cir)) %in% cic_right)
-  how_many_nodes <- length(all_nodes_lexicographic)
-  all_nodes_neighbours <- matrix(c(all_nodes_lexicographic - d, all_nodes_lexicographic - 1,
-                                   all_nodes_lexicographic, all_nodes_lexicographic + 1,
-                                   all_nodes_lexicographic + d), nrow = how_many_nodes)
-  all_nodes_neighbours_distances <- rep(1/(1+delta), times = 5*how_many_nodes)
-  all_nodes_neighbours_distances[(2*how_many_nodes+1):(3*how_many_nodes)] <- 1/delta
-  all_nodes_neighbours_valid <- (all_nodes_neighbours > 0) & (all_nodes_neighbours <= d^2)
-  mixture_weights <- matrix(all_nodes_neighbours_distances*all_nodes_neighbours_valid, nrow = how_many_nodes, byrow = FALSE)
-  mixture_weights <- mixture_weights/rowSums(mixture_weights)
-  mixture_weights <- c(t(mixture_weights))
-  all_nodes_valid <- rep(all_nodes_lexicographic, each = 5)
-  all_nodes_neighbours_valid <- c(t(all_nodes_neighbours_valid))*c(t(all_nodes_neighbours))
-  all_nodes_neighbours_valid[all_nodes_neighbours_valid == 0] <- 1
-  all_nodes_valid[all_nodes_valid == 0] <- 1
+  all_nodes <- as.matrix(expand.grid(cir, cic))
+  how_many_nodes <- nrow(all_nodes)
+  nodes_left <- rep((all_nodes[, 1] %in% cir_left) & (all_nodes[, 2] %in% cic_left), each = 5)
+  nodes_right <- rep((all_nodes[, 1] %in% cir_right) & (all_nodes[, 2] %in% cic_right), each = 5)
+  all_nodes_neighbours <- do.call(rbind, apply(all_nodes, 1, get_all_neighbours, d, simplify = FALSE))
+  all_nodes_replicates <- all_nodes[rep(1:how_many_nodes, each = 5), ]
+  all_nodes_neighbours[all_nodes_neighbours[, 3] == 0, 1:2] <- 1
   # mixture weights
   lWmix <- rep(0, times = Nparticles)
   for (n in 1:Nparticles){
@@ -115,14 +110,15 @@ marginal_nl_light_fast_adaptive <- function(ess_target, u_info, x, history, cir_
     for (m in 1:Nparticles){
       history_m <- history[, , m]
       # current node
-      tmp <- mixture_weights * exp(-(mx[all_nodes_valid] - history_m[all_nodes_neighbours_valid])^2/(2*sigmaX))
-      tmp_left <- tmp * rep(nodes_left, each = 5)
-      tmp_right <- tmp * rep(nodes_right, each = 5)
-      sum_merged <- sum_merged + exp(sum(log(rowSums(matrix(tmp, nrow=how_many_nodes, byrow = TRUE)))))
+      tmp <- all_nodes_neighbours[, 3] * exp(-(mx[all_nodes_replicates] - history_m[all_nodes_neighbours[, 1:2]])^2/(2*sigmaX))
+      tmp_left <- tmp * nodes_left
+      tmp_right <- tmp * nodes_right
       sum_over_neighbours_left <- rowSums(matrix(tmp_left, nrow=how_many_nodes, byrow = TRUE))
       sum_over_neighbours_right <- rowSums(matrix(tmp_right, nrow=how_many_nodes, byrow = TRUE))
+      sum_over_neighbours_merged <- rowSums(matrix(tmp, nrow=how_many_nodes, byrow = TRUE))
       sum_left <- sum_left + exp(sum(log(sum_over_neighbours_left[sum_over_neighbours_left>0])))
       sum_right <- sum_right + exp(sum(log(sum_over_neighbours_right[sum_over_neighbours_right>0])))
+      sum_merged <- sum_merged + exp(sum(log(sum_over_neighbours_merged[sum_over_neighbours_merged>0])))
 
     }
     lWmix[n] <- log(sum_merged) - log(sum_left) - log(sum_right)
@@ -151,19 +147,17 @@ marginal_nl_light_fast_adaptive <- function(ess_target, u_info, x, history, cir_
       # merged x
       mx <- x[, , n]
       mx[as.matrix(expand.grid(cir_right, cic_right))] <- x[as.matrix(expand.grid(cir_right, cic_right, new_perm[n]))]
-
       for (m in 1:Nparticles){
         history_m <- history[, , m]
-        # current node
-        tmp <- mixture_weights * exp(-(mx[all_nodes_valid] - history_m[all_nodes_neighbours_valid])^2/(2*sigmaX))
-        tmp_left <- tmp * rep(nodes_left, each = 5)
-        tmp_right <- tmp * rep(nodes_right, each = 5)
-        sum_merged <- sum_merged + exp(sum(log(rowSums(matrix(tmp, nrow=how_many_nodes, byrow = TRUE)))))
+        tmp <- all_nodes_neighbours[, 3] * exp(-(mx[all_nodes_replicates] - history_m[all_nodes_neighbours[, 1:2]])^2/(2*sigmaX))
+        tmp_left <- tmp * nodes_left
+        tmp_right <- tmp * nodes_right
         sum_over_neighbours_left <- rowSums(matrix(tmp_left, nrow=how_many_nodes, byrow = TRUE))
         sum_over_neighbours_right <- rowSums(matrix(tmp_right, nrow=how_many_nodes, byrow = TRUE))
+        sum_over_neighbours_merged <- rowSums(matrix(tmp, nrow=how_many_nodes, byrow = TRUE))
         sum_left <- sum_left + exp(sum(log(sum_over_neighbours_left[sum_over_neighbours_left>0])))
         sum_right <- sum_right + exp(sum(log(sum_over_neighbours_right[sum_over_neighbours_right>0])))
-
+        sum_merged <- sum_merged + exp(sum(log(sum_over_neighbours_merged[sum_over_neighbours_merged>0])))
       }
       lWmix_perm[n] <- log(sum_merged) - log(sum_left) - log(sum_right)
     }
@@ -187,9 +181,4 @@ marginal_nl_light_fast_adaptive <- function(ess_target, u_info, x, history, cir_
   indices <- stratified_resample(Wmix/sum(Wmix), Nparticles)
   return(list("resampled_indices" = cbind(rep(1:Nparticles, times = theta)[indices], permutation[indices]),
               "target_reached" = (ess >= ess_target), "resampled_particles_lW" = lWmix[indices]))
-}
-
-sum_over_nodes <- function(x, how_many_nodes){
-  out <- rowSums(matrix(x, nrow=how_many_nodes, byrow = TRUE))
-  return(out[out>0])
 }

@@ -35,3 +35,15 @@ marginal_sample_mixture <- function(n, mixture_weights, current_x_neighbours, xO
   xMean <- xOld[component_coordinates[1], component_coordinates[2], sample.int(Nparticles, 1)]
   return(xMean)
 }
+
+# Get neighbours weights for the nonlinear model
+get_all_neighbours <- function(rowcol, d){
+  delta <- 1
+  neighbours_distance <- c(1, 1, 0, 1, 1)
+  x_neighbours <- matrix(c(-1, 0, 0, 0, 1, 0, -1, 0, 1, 0), ncol = 2)
+  current_x_neighbours <- x_neighbours + matrix(rep(c(rowcol[1], rowcol[2]), each = 5), ncol = 2)
+  current_valid <- as.logical(rowSums((current_x_neighbours > 0) * (current_x_neighbours < d+1)) - 1)
+  mixture_weights <- 1/(neighbours_distance+delta) * current_valid
+  mixture_weights <- mixture_weights/sum(mixture_weights)
+  return(cbind(current_x_neighbours, mixture_weights))
+}
