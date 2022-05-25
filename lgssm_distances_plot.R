@@ -129,8 +129,8 @@ ggplot(data = distances, aes(x = runtime_mean, y = w1, group = interaction(algo,
     labels = scales::trans_format("log10", scales::math_format(10^.x))
   ) +
   facet_wrap(~factor(d, levels = c("32", "256", "2048")), ncol = 1, nrow = 3) +
-  scale_fill_manual(values=c("#F8766D", "#999999", "#00BA38", "#619CFF")) +
-  scale_color_manual(values=c("#F8766D", "#999999", "#00BA38", "#619CFF")) +
+  scale_fill_manual(values=c("#F8766D", "#999999", "#E69F00", "#00BA38", "#619CFF")) +
+  scale_color_manual(values=c("#F8766D", "#999999", "#E69F00", "#00BA38", "#619CFF")) +
   theme(axis.title.x=element_blank(),  axis.text = element_text(size=30),
         axis.title.y=element_blank(), strip.text.x = element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=30),
@@ -149,8 +149,8 @@ ggplot(data = distances, aes(x = runtime_mean, y = ks, group = interaction(algo,
     labels = scales::trans_format("log10", scales::math_format(10^.x))
   ) +
   facet_wrap(~factor(d, levels = c("32", "256", "2048")), ncol = 1, nrow = 3) +
-  scale_fill_manual(values=c("#F8766D", "#999999", "#00BA38", "#619CFF")) +
-  scale_color_manual(values=c("#F8766D", "#999999", "#00BA38", "#619CFF")) +
+  scale_fill_manual(values=c("#F8766D", "#999999", "#E69F00", "#00BA38", "#619CFF")) +
+  scale_color_manual(values=c("#F8766D", "#999999", "#E69F00", "#00BA38", "#619CFF")) +
   theme(axis.title.x=element_blank(), axis.text = element_text(size=30),
         axis.title.y=element_blank(), strip.text.x = element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=30),
