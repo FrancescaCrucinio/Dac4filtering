@@ -1,6 +1,5 @@
-devtools::load_all("/storage/u1693998/Dac4filtering")
 ### Linear Gaussian SSM -- comparison of dac and dac with mixture reweighting (both lightweight and full cost)
-ID <- as.numeric(Sys.getenv("SGE_TASK_ID"))
+ID <- 1
 set.seed(1234*ID)
 
 d <- 128
@@ -84,6 +83,6 @@ runtime <- toc()
 se <- (colMeans(res_dac_lc) - true_means[Time.step, ])^2
 df <- data.frame(t(c(se, runtime)))
 df$algo <- as.factor(c("lc"))
-filename <- paste0("/storage/u1693998/results/lc__marginal_resampling_comparison_d", d, "N", Nparticles, "ID", ID, "timeinterval", timeinterval)
+filename <- paste0("/storage/u1693998/results/lc_marginal_resampling_comparison_d", d, "N", Nparticles, "ID", ID, "timeinterval", timeinterval)
 write.csv(x=df, file=filename)
 

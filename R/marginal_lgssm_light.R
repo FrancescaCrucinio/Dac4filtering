@@ -1,5 +1,5 @@
 # Lightweight resampling for linear Gaussian SSM
-marginal_lgssm_light <- function(i, u, nv, ci, W, Nparticles, theta, lambda, tau, x, history){
+marginal_lgssm_light <- function(i, u, nv, ci, W, Nparticles, theta, lambda, tau, x, history, memory = FALSE){
   nchild <- 2
   # resample on each children
   if(u == 1){
@@ -15,10 +15,20 @@ marginal_lgssm_light <- function(i, u, nv, ci, W, Nparticles, theta, lambda, tau
     indices2 <- sample.int(Nparticles, size = theta*Nparticles, replace = TRUE)
   }
   # mixture weights
-  lWmix <- -0.5*lambda * (lambda *x[indices1, (ci[1]+nv-1)]^2/(tau+lambda) -
-                            2*x[indices1, (ci[1]+nv-1)] * x[indices2, (ci[1]+nv)]) +
-    log(rowMeans(exp(-0.5*outer(x[indices1, (ci[1]+nv-1)], history[, ci[1]+nv], "-")^2/(tau+lambda) -
-                       0.5*lambda*tau*outer(x[indices1, (ci[1]+nv-1)], history[, ci[1]+nv], "*")/(tau+lambda))))
+  if(memory){
+    lWmix <- rep(0, times = theta*Nparticles)
+    for (n in 1:(theta*Nparticles)) {
+      lWmix[n] <- -0.5*lambda * (lambda *x[indices1[n], (ci[1]+nv-1)]^2/(tau+lambda) -
+                                   2*x[indices1[n], (ci[1]+nv-1)] * x[indices2[n], (ci[1]+nv)])+
+        log(mean(exp(-0.5*(x[indices1[n], (ci[1]+nv-1)]-history[, ci[1]+nv])^2/(tau+lambda) -
+                       0.5*lambda*tau*history[, ci[1]+nv] * x[indices1[n], (ci[1]+nv-1)]/(tau+lambda))))
+    }
+  } else {
+    lWmix <- -0.5*lambda * (lambda *x[indices1, (ci[1]+nv-1)]^2/(tau+lambda) -
+                              2*x[indices1, (ci[1]+nv-1)] * x[indices2, (ci[1]+nv)]) +
+      log(rowMeans(exp(-0.5*outer(x[indices1, (ci[1]+nv-1)], history[, ci[1]+nv], "-")^2/(tau+lambda) -
+                         0.5*lambda*tau*outer(x[indices1, (ci[1]+nv-1)], history[, ci[1]+nv], "*")/(tau+lambda))))
+  }
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
   # resampling the new population
@@ -71,8 +81,8 @@ marginal_lgssm_light_adaptive <- function(ess_target, i, u, nv, ci, lW, Nparticl
     ess <- ess_s^2/ess_ss
     lWmix <- c(lWmix, lWmix_perm)
   }
-  # write.table(data.frame("u" = u, "theta" = theta), file = "data/adaptive_lgssm.csv", sep = ",", append = TRUE, quote = FALSE,
-  #             col.names = FALSE, row.names = FALSE)
+  write.table(data.frame("u" = u, "theta" = theta), file = "data/adaptive_lgssm.csv", sep = ",", append = TRUE, quote = FALSE,
+              col.names = FALSE, row.names = FALSE)
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
   # resampling the new population
