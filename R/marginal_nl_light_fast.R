@@ -119,7 +119,6 @@ marginal_nl_light_fast_adaptive <- function(ess_target, u_info, x, history, cir_
       sum_left <- sum_left + exp(sum(log(sum_over_neighbours_left[sum_over_neighbours_left>0])))
       sum_right <- sum_right + exp(sum(log(sum_over_neighbours_right[sum_over_neighbours_right>0])))
       sum_merged <- sum_merged + exp(sum(log(sum_over_neighbours_merged[sum_over_neighbours_merged>0])))
-
     }
     lWmix[n] <- log(sum_merged) - log(sum_left) - log(sum_right)
   }
