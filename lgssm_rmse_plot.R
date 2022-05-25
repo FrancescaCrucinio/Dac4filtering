@@ -10,6 +10,11 @@ dfnew$N <- "10^2"
 dfnew$d <- "32"
 dfnew$run <- 1
 df <- rbind(df, dfnew)
+dfnew <- read.csv(paste0("data/lgssm_tempering/adaptive_marginal_lgssm_d32N100ID1"))
+dfnew$N <- "10^2"
+dfnew$d <- "32"
+dfnew$run <- 1
+df <- rbind(df, dfnew)
 dfnew <- read.csv(paste0("data/lgssm_tempering/lgssm_d256N100ID1"))
 dfnew$N <- "10^2"
 dfnew$d <- "256"
@@ -20,12 +25,22 @@ dfnew$N <- "10^2"
 dfnew$d <- "256"
 dfnew$run <- 1
 df <- rbind(df, dfnew)
+dfnew <- read.csv(paste0("data/lgssm_tempering/adaptive_marginal_lgssm_d256N100ID1"))
+dfnew$N <- "10^2"
+dfnew$d <- "256"
+dfnew$run <- 1
+df <- rbind(df, dfnew)
 dfnew <- read.csv(paste0("data/lgssm_tempering/lgssm_d2048N100ID1"))
 dfnew$N <- "10^2"
 dfnew$d <- "2048"
 dfnew$run <- 1
 df <- rbind(df, dfnew)
 dfnew <- read.csv(paste0("data/lgssm_tempering/marginal_lgssm_d2048N100ID1"))
+dfnew$N <- "10^2"
+dfnew$d <- "2048"
+dfnew$run <- 1
+df <- rbind(df, dfnew)
+dfnew <- read.csv(paste0("data/lgssm_tempering/adaptive_marginal_lgssm_d2048N100ID1"))
 dfnew$N <- "10^2"
 dfnew$d <- "2048"
 dfnew$run <- 1
@@ -42,6 +57,11 @@ for (id in 2:50){
   dfnew$d <- "32"
   dfnew$run <- id
   df <- rbind(df, dfnew)
+  dfnew <- read.csv(paste0("data/lgssm_tempering/adaptive_marginal_lgssm_d32N100ID", id, sep = ""))
+  dfnew$N <- "10^2"
+  dfnew$d <- "32"
+  dfnew$run <- id
+  df <- rbind(df, dfnew)
   filename <- paste0("data/lgssm_tempering/lgssm_d256N100ID", id, sep = "")
   dfnew <- read.csv(filename)
   dfnew$N <- "10^2"
@@ -53,6 +73,11 @@ for (id in 2:50){
   dfnew$d <- "256"
   dfnew$run <- id
   df <- rbind(df, dfnew)
+  dfnew <- read.csv(paste0("data/lgssm_tempering/adaptive_marginal_lgssm_d256N100ID", id, sep = ""))
+  dfnew$N <- "10^2"
+  dfnew$d <- "256"
+  dfnew$run <- id
+  df <- rbind(df, dfnew)
   filename <- paste0("data/lgssm_tempering/lgssm_d2048N100ID", id, sep = "")
   dfnew <- read.csv(filename)
   dfnew$N <- "10^2"
@@ -60,6 +85,12 @@ for (id in 2:50){
   dfnew$run <- id
   df <- rbind(df, dfnew)
   filename <- paste0("data/lgssm_tempering/marginal_lgssm_d2048N100ID", id, sep = "")
+  dfnew <- read.csv(filename)
+  dfnew$N <- "10^2"
+  dfnew$d <- "2048"
+  dfnew$run <- id
+  df <- rbind(df, dfnew)
+  filename <- paste0("data/lgssm_tempering/adaptive_marginal_lgssm_d2048N100ID", id, sep = "")
   dfnew <- read.csv(filename)
   dfnew$N <- "10^2"
   dfnew$d <- "2048"
@@ -131,6 +162,8 @@ for (id in 1:50){
 }
 df <- df[, -1]
 df <- df[df$algo != "dac_ada", ]
+# df <- df[df$algo != "dac-light", ]
+# df$algo[df$algo == "dac-light-marginal"] <- "dac"
 Time.step <- ncol(df) - 7
 colnames(df)[(Time.step+1):(Time.step+3)] <- c("w1", "ks", "runtime")
 

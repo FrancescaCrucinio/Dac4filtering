@@ -12,9 +12,8 @@ ggplot(data = df, aes(x = runtime, y = d_means, group = interaction(algo, N), fi
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
   ) +
-  theme(axis.title.x=element_blank(), axis.text = element_text(size=30),
+  theme(axis.title.x=element_blank(), axis.text = element_text(size=40),
         axis.title.y=element_blank(),
-        legend.title = element_blank(), legend.text=element_text(size=30),
-        text = element_text(size=30), legend.position = "bottom")
-# ggsave("resampling_comparison.pdf", width = 40, height = 40, dpi = 300)
-
+        legend.title = element_blank(), legend.text=element_text(size=100),
+        legend.position = "top", legend.key.width = unit(5, 'cm'))
+# ggsave("marginal_resampling_comparison.pdf", width = 40, height = 20, dpi = 300)
