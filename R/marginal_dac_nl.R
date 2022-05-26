@@ -1,4 +1,4 @@
-marginal_dac_nl_lightweight <- function(history, obs, sigmaX, nu, adaptive = FALSE){
+marginal_dac_nl_lightweight <- function(history, obs, sigmaX, nu, adaptive = FALSE, covariance = TRUE, tau = NULL){
   # dimension and number of particles
   d <- nrow(history)
   Nparticles <- dim(history)[3]
@@ -39,17 +39,17 @@ marginal_dac_nl_lightweight <- function(history, obs, sigmaX, nu, adaptive = FAL
         ### Step 1
         print("h1")
         out_top_merge <- marginal_nl_merge(lW, x, history, 2*i-1, 2*i-1, 2*j-1, 2*j, cir[, 1], cic[, 1],
-                                  cir[, 1], cic[, 2], nv, nvNew, list("u" = u, "direction" = "h"), theta)
+                                  cir[, 1], cic[, 2], nv, nvNew, list("u" = u, "direction" = "h"), theta, covariance, tau, nu)
         x[cir[, 1], c(cic), ] <- out_top_merge$x
         ### Step 2
         print("h2")
         out_bottom_merge <- marginal_nl_merge(lW, x, history, 2*i, 2*i, 2*j-1, 2*j, cir[, 2], cic[, 1],
-                                     cir[, 2], cic[, 2], nv, nvNew, list("u" = u, "direction" = "h"), theta)
+                                     cir[, 2], cic[, 2], nv, nvNew, list("u" = u, "direction" = "h"), theta, covariance, tau, nu)
         x[cir[, 2], c(cic), ] <- out_bottom_merge$x
         #### VERTICAL MERGE ###
         print("v")
         out_merge <- marginal_nl_merge(lW, x, history, 2*i-1, 2*i, 2*j-1, 2*j-1, cir[, 1], c(cic),
-                              cir[, 2], c(cic), nv, nvNew, list("u" = u, "direction" = "v"), theta)
+                              cir[, 2], c(cic), nv, nvNew, list("u" = u, "direction" = "v"), theta, covariance, tau, nu)
         x[c(cir), c(cic), ] <- out_merge$x
       }
     }

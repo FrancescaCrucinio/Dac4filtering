@@ -102,7 +102,8 @@ marginal_dac_lgssm_mix <- function(history, obs, tau, lambda, sigmaY){
               -0.5*lambda * (lambda *x[n1, (ci[1]+nv-1)]^2/(tau+lambda) -
                                2*x[n1, (ci[1]+nv-1)] * x[n2, (ci[1]+nv)]) +
               log(mean(exp(-0.5*(x[n1, (ci[1]+nv-1)]-history[, ci[1]+nv])^2/(tau+lambda) -
-                             0.5*lambda*tau*history[, ci[1]+nv] * x[n1, (ci[1]+nv-1)]/(tau+lambda))))
+                             0.5*lambda*tau*history[, ci[1]+nv] * x[n1, (ci[1]+nv-1)]/(tau+lambda)))) -
+              log(mean(exp(-0.5*(x[n1, (ci[1]+nv-1)]-history[, ci[1]+nv])^2/(tau+lambda))))
           }
         }
         max.lWmix <- max(lWmix)
@@ -113,7 +114,8 @@ marginal_dac_lgssm_mix <- function(history, obs, tau, lambda, sigmaY){
             lWmix[n1, n2] <- -0.5*lambda * (lambda *x[n1, (ci[1]+nv-1)]^2/(tau+lambda) -
                                               2*x[n1, (ci[1]+nv-1)] * x[n1, (ci[1]+nv)]) +
               log(mean(exp(-0.5*(x[n1, (ci[1]+nv-1)]-history[, ci[1]+nv])^2/(tau+lambda) -
-                             0.5*lambda*tau*history[, ci[1]+nv] * x[n1, (ci[1]+nv-1)]/(tau+lambda))))
+                             0.5*lambda*tau*history[, ci[1]+nv] * x[n1, (ci[1]+nv-1)]/(tau+lambda)))) -
+              log(mean(exp(-0.5*(x[n1, (ci[1]+nv-1)]-history[, ci[1]+nv])^2/(tau+lambda))))
           }
         }
         max.lWmix <- max(lWmix)
@@ -182,7 +184,8 @@ marginal_dac_lgssm_lc <- function(history, obs, tau, lambda, sigmaY){
       lW <- -0.5*lambda * (lambda *x[indices1, (ci[1]+nv-1)]^2/(tau+lambda) -
                              2*x[indices1, (ci[1]+nv-1)] * x[indices2, (ci[1]+nv)]) +
         log(rowMeans(exp(-0.5*outer(x[indices1, (ci[1]+nv-1)], history[, ci[1]+nv], "-")^2/(tau+lambda) -
-                           0.5*lambda*tau*outer(x[indices1, (ci[1]+nv-1)], history[, ci[1]+nv], "*")/(tau+lambda))))
+                           0.5*lambda*tau*outer(x[indices1, (ci[1]+nv-1)], history[, ci[1]+nv], "*")/(tau+lambda))))  -
+        log(rowMeans(exp(-0.5*outer(x[indices1, (ci[1]+nv-1)], history[, ci[1]+nv], "-")^2/(tau+lambda))))
       max.lW <- max(lW)
       WNew[, i] <- exp(lW - max.lW)
       # update particles

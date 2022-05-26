@@ -1,6 +1,6 @@
 marginal_nl_merge <- function(lW, x, history, node_row_left, node_row_right,
                      node_col_left, node_col_right, cir_left, cic_left, cir_right, cic_right,
-                     nv, nvNew, u_info, theta){
+                     nv, nvNew, u_info, theta, covariance, tau, nu){
   Nparticles <- dim(history)[3]
   d <- dim(history)[2]
   sigmaX <- 1
@@ -9,11 +9,24 @@ marginal_nl_merge <- function(lW, x, history, node_row_left, node_row_right,
     lW_right <- lW[node_row_right, node_col_right, ]
   }
   if(is.null(theta)){
-    out <- marginal_nl_light_fast_adaptive(Nparticles, u_info, x, history, cir_left, cir_right, cic_left, cic_right,
-                                  lW_left, lW_right, sigmaX)
+    if(covariance){
+      out <- marginal_nl_light_covariance_fast_adaptive(Nparticles, u_info, x, history, cir_left, cir_right, cic_left, cic_right,
+                                               lW_left, lW_right, sigmaX, theta, tau, nu)
+    }
+    else {
+      out <- marginal_nl_light_fast_adaptive(Nparticles, u_info, x, history, cir_left, cir_right, cic_left, cic_right,
+                                             lW_left, lW_right, sigmaX)
+    }
+
   } else {
-    out <- marginal_nl_light_fast(u_info, x, history, cir_left, cir_right, cic_left, cic_right,
+    if(covariance){
+      out <- marginal_nl_light_covariance_fast(u_info, x, history, cir_left, cir_right, cic_left, cic_right,
+                                              lW_left, lW_right, sigmaX, theta, tau, nu)
+    }
+    else {
+      out <- marginal_nl_light_fast(u_info, x, history, cir_left, cir_right, cic_left, cic_right,
                                   lW_left, lW_right, sigmaX, theta)
+    }
   }
 
 
