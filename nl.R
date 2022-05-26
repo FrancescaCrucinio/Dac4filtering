@@ -17,7 +17,7 @@ y.error.var[upper.tri(y.error.var)] <- t(y.error.var)[upper.tri(y.error.var)]
 nl_data <- nl_obs(d, sigmaX, nu, delta, y.error.var, Time.step)
 y <- nl_data$yiid
 y_cov <- nl_data$y
-Nparticles <- 100
+Nparticles <- 1000
 M <- 100
 # initial state
 history_dac <- sqrt(sigmaX)*array(rnorm(Nparticles*d^2), dim = c(d, d, Nparticles))
@@ -26,7 +26,7 @@ history_nsmc <- sqrt(sigmaX)*array(rnorm(Nparticles*d^2), dim = c(d, d, Nparticl
 history_stpf <- sqrt(sigmaX)*array(rnorm(Nparticles*M*d^2), dim = c(d, d, Nparticles, M))
 tic()
 for (t in 1:Time.step){
-  res_dac <- marginal_dac_nl_lightweight(history_dac, y_cov[, , t], sigmaX, nu, adaptive = TRUE)
+  res_dac <- marginal_dac_nl_lightweight(history_dac, y_cov[, , t], sigmaX, nu, adaptive = TRUE, covariance = TRUE, tau)
   history_dac <- res_dac
   print(paste(t))
 }
