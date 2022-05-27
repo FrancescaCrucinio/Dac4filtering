@@ -1,4 +1,5 @@
 library(plyr)
+library(ggplot2)
 # linear Gaussian
 df <- read.csv("data/adaptive_resampling/adaptive_lgssm.csv", col.names = c("u", "m"))
 ggplot(data = df, aes(x = m)) +
