@@ -52,3 +52,11 @@ get_all_neighbours <- function(rowcol, d, tau = NULL){
   }
   return(out)
 }
+
+# Get indices of the neighbours of i on a 2D lattice
+get_previous_neighbours <- function(row, col, d){
+  x_neighbours <- matrix(c(-1, 0, 0, -1), ncol = 2)
+  current_x_neighbours <- x_neighbours + matrix(rep(c(row, col), each = 2), ncol = 2)
+  current_valid <- as.logical(rowSums((current_x_neighbours > 0) * (current_x_neighbours < d+1)) - 1)
+  return(list("current_x_neighbours" = current_x_neighbours, "current_valid" = current_valid))
+}

@@ -17,10 +17,10 @@ y.error.var[upper.tri(y.error.var)] <- t(y.error.var)[upper.tri(y.error.var)]
 nl_data <- nl_obs(d, sigmaX, nu, delta, y.error.var, Time.step)
 y <- nl_data$yiid
 y_cov <- nl_data$y
-Nparticles <- 1000
+Nparticles <- 10
 M <- 100
 # initial state
-history_dac <- sqrt(sigmaX)*array(rnorm(Nparticles*d^2), dim = c(d, d, Nparticles))
+history <- sqrt(sigmaX)*array(rnorm(Nparticles*d^2), dim = c(d, d, Nparticles))
 history_dac_tempering <- history_dac
 history_nsmc <- sqrt(sigmaX)*array(rnorm(Nparticles*d^2), dim = c(d, d, Nparticles))
 history_stpf <- sqrt(sigmaX)*array(rnorm(Nparticles*M*d^2), dim = c(d, d, Nparticles, M))
