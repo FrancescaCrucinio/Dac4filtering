@@ -2,7 +2,6 @@ marginal_spatial_light <- function(u_info, x, obs, cir_left, cir_right, cic_left
                                               lW_left, lW_right, sigmaX, theta, tau, nu){
   d <- dim(history)[1]
   Nparticles <- dim(history)[3]
-  nlevels <- log2(d)
   cic <- unique(c(cic_left, cic_right))
   cir <- unique(c(cir_left, cir_right))
   nchild <- 2
@@ -25,8 +24,7 @@ marginal_spatial_light <- function(u_info, x, obs, cir_left, cir_right, cic_left
     indices1 <- stratified_resample(W_left/sum(W_left), theta*Nparticles)
     # child 2 (with random permutation)
     indices2 <- sample(stratified_resample(W_right/sum(W_right), theta*Nparticles))
-  }
-  else{
+  } else {
     # child 1
     indices1 <- sample.int(Nparticles, size = theta*Nparticles, replace = TRUE)
     # child 2
@@ -36,9 +34,12 @@ marginal_spatial_light <- function(u_info, x, obs, cir_left, cir_right, cic_left
   lWmix <- rep(0, times = theta*Nparticles)
   all_nodes <- as.matrix(expand.grid(cir, cic))
   how_many_nodes <- nrow(all_nodes)
-  nodes_left <- rep((all_nodes[, 1] %in% cir_left) & (all_nodes[, 2] %in% cic_left), each = 5)
-  nodes_right <- rep((all_nodes[, 1] %in% cir_right) & (all_nodes[, 2] %in% cic_right), each = 5)
   all_nodes_neighbours <- do.call(rbind, apply(all_nodes, 1, get_all_neighbours, d, tau, simplify = FALSE))
+  neighbours_in_node <- (all_nodes_neighbours[, 1] %in% cir) & (all_nodes_neighbours[, 2] %in% cic)
+  neighbours_in_left <- ((all_nodes_neighbours[, 1] %in% cir_left) & (all_nodes_neighbours[, 2] %in% cic_left)) *
+    rep((all_nodes[, 1] %in% cir_left) & (all_nodes[, 2] %in% cic_left), each = 5)
+  neighbours_in_right <- ((all_nodes_neighbours[, 1] %in% cir_right) & (all_nodes_neighbours[, 2] %in% cic_right)) *
+    rep((all_nodes[, 1] %in% cir_right) & (all_nodes[, 2] %in% cic_right), each = 5)
   all_nodes_replicates <- all_nodes[rep(1:how_many_nodes, each = 5), ]
   all_nodes_neighbours[all_nodes_neighbours[, 3] == 0, 1:2] <- 1
   for (n in 1:(theta*Nparticles)){
@@ -46,9 +47,9 @@ marginal_spatial_light <- function(u_info, x, obs, cir_left, cir_right, cic_left
     mx <- x[, , indices1[n]]
     mx[as.matrix(expand.grid(cir_right, cic_right))] <- x[as.matrix(expand.grid(cir_right, cic_right, indices2[n]))]
     # contribution of g_{t, u}
-    tmp_obs <- all_nodes_neighbours[, 4]*(mx[all_nodes_replicates] - obs[all_nodes_replicates])*(mx[all_nodes_neighbours[, 1:2]] - obs[all_nodes_neighbours[, 1:2]])
-    tmp_obs_left <- tmp_obs * nodes_left
-    tmp_obs_right <- tmp_obs * nodes_right
+    tmp_obs <- neighbours_in_node*all_nodes_neighbours[, 4]*(mx[all_nodes_replicates] - obs[all_nodes_replicates])*(mx[all_nodes_neighbours[, 1:2]] - obs[all_nodes_neighbours[, 1:2]])
+    tmp_obs_left <- tmp_obs * neighbours_in_left
+    tmp_obs_right <- tmp_obs * neighbours_in_right
     sum_over_neighbours_obs_left <- sum(tmp_obs_left)
     sum_over_neighbours_obs_right <-sum(tmp_obs_right)
     sum_over_neighbours_obs_merged <- sum(tmp_obs)
@@ -66,7 +67,6 @@ marginal_spatial_light_adaptive <- function(ess_target, u_info, x, obs, cir_left
                                                        lW_left, lW_right, sigmaX, tau, nu){
   d <- dim(history)[1]
   Nparticles <- dim(history)[3]
-  nlevels <- log2(d)
   cic <- unique(c(cic_left, cic_right))
   cir <- unique(c(cir_left, cir_right))
   nchild <- 2
@@ -81,9 +81,12 @@ marginal_spatial_light_adaptive <- function(ess_target, u_info, x, obs, cir_left
   }
   all_nodes <- as.matrix(expand.grid(cir, cic))
   how_many_nodes <- nrow(all_nodes)
-  nodes_left <- rep((all_nodes[, 1] %in% cir_left) & (all_nodes[, 2] %in% cic_left), each = 5)
-  nodes_right <- rep((all_nodes[, 1] %in% cir_right) & (all_nodes[, 2] %in% cic_right), each = 5)
   all_nodes_neighbours <- do.call(rbind, apply(all_nodes, 1, get_all_neighbours, d, tau, simplify = FALSE))
+  neighbours_in_node <- (all_nodes_neighbours[, 1] %in% cir) & (all_nodes_neighbours[, 2] %in% cic)
+  neighbours_in_left <- ((all_nodes_neighbours[, 1] %in% cir_left) & (all_nodes_neighbours[, 2] %in% cic_left)) *
+    rep((all_nodes[, 1] %in% cir_left) & (all_nodes[, 2] %in% cic_left), each = 5)
+  neighbours_in_right <- ((all_nodes_neighbours[, 1] %in% cir_right) & (all_nodes_neighbours[, 2] %in% cic_right)) *
+    rep((all_nodes[, 1] %in% cir_right) & (all_nodes[, 2] %in% cic_right), each = 5)
   all_nodes_replicates <- all_nodes[rep(1:how_many_nodes, each = 5), ]
   all_nodes_neighbours[all_nodes_neighbours[, 3] == 0, 1:2] <- 1
   # mixture weights
@@ -92,9 +95,9 @@ marginal_spatial_light_adaptive <- function(ess_target, u_info, x, obs, cir_left
     # merged x
     mx <- x[, , n]
     # contribution of g_{t, u}
-    tmp_obs <- all_nodes_neighbours[, 4]*(mx[all_nodes_replicates] - obs[all_nodes_replicates])*(mx[all_nodes_neighbours[, 1:2]] - obs[all_nodes_neighbours[, 1:2]])
-    tmp_obs_left <- tmp_obs * nodes_left
-    tmp_obs_right <- tmp_obs * nodes_right
+    tmp_obs <- neighbours_in_node*all_nodes_neighbours[, 4]*(mx[all_nodes_replicates] - obs[all_nodes_replicates])*(mx[all_nodes_neighbours[, 1:2]] - obs[all_nodes_neighbours[, 1:2]])
+    tmp_obs_left <- tmp_obs * neighbours_in_left
+    tmp_obs_right <- tmp_obs * neighbours_in_right
     sum_over_neighbours_obs_left <- sum(tmp_obs_left)
     sum_over_neighbours_obs_right <-sum(tmp_obs_right)
     sum_over_neighbours_obs_merged <- sum(tmp_obs)
@@ -123,9 +126,9 @@ marginal_spatial_light_adaptive <- function(ess_target, u_info, x, obs, cir_left
       mx <- x[, , n]
       mx[as.matrix(expand.grid(cir_right, cic_right))] <- x[as.matrix(expand.grid(cir_right, cic_right, new_perm[n]))]
       # contribution of g_{t, u}
-      tmp_obs <- all_nodes_neighbours[, 4]*(mx[all_nodes_replicates] - obs[all_nodes_replicates])*(mx[all_nodes_neighbours[, 1:2]] - obs[all_nodes_neighbours[, 1:2]])
-      tmp_obs_left <- tmp_obs * nodes_left
-      tmp_obs_right <- tmp_obs * nodes_right
+      tmp_obs <- neighbours_in_node*all_nodes_neighbours[, 4]*(mx[all_nodes_replicates] - obs[all_nodes_replicates])*(mx[all_nodes_neighbours[, 1:2]] - obs[all_nodes_neighbours[, 1:2]])
+      tmp_obs_left <- tmp_obs * neighbours_in_left
+      tmp_obs_right <- tmp_obs * neighbours_in_right
       sum_over_neighbours_obs_left <- sum(tmp_obs_left)
       sum_over_neighbours_obs_right <-sum(tmp_obs_right)
       sum_over_neighbours_obs_merged <- sum(tmp_obs)
