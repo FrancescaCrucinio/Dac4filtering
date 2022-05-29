@@ -1,10 +1,10 @@
 set.seed(1234*1)
-d <- 16
+d <- 8
 sigmaX <- 1
 nu <- 10
 tau_diag <- 1
 tau <- -0.25
-Time.step <- 3
+Time.step <- 10
 spatial_data <- spatial_obs(d, sigmaX, nu, tau, tau_diag, Time.step)
 y <- spatial_data$y
 Nparticles <- 1000
