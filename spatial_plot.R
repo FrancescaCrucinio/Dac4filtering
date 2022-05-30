@@ -11,7 +11,7 @@ Time.step <- 10
 ### IID
 df <- data.frame()
 
-for (Nparticles in c(100, 1000, 10000)) {
+for (Nparticles in c(100)) {
   df_dac <- read.csv(paste0("data/spatial/stats_dac_spatial_tau", tau, "d", d, "N", Nparticles),
                       row.names = 1)
   mse_dac <- df_dac[1:d, 1:d]

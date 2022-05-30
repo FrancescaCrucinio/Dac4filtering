@@ -15,7 +15,7 @@ timeinterval <- 1
 ti_begin <- 1 + (timeinterval - 1)*1
 ti_end <- timeinterval*1
 
-Nparticles <- 1000
+Nparticles <- 10000
 df_dac <- data.frame()
 
 if(timeinterval == 1){
@@ -40,4 +40,4 @@ filename <- paste0("/storage/u1693998/results/dac_spatial_d", d, "N", Nparticles
 write.table(data.frame(matrix(res_dac, ncol = Nparticles)), file = filename, append = FALSE, sep = " ", dec = ".",
             row.names = TRUE, col.names = TRUE)
 
-write.csv(x=df_dac, file=paste0("/storage/u1693998/results/dac_spatial_d", d, "N", Nparticles, "ID", ID, "step", timeinterval))
+write.csv(x=df_dac, file=paste0("/storage/u1693998/results/means_dac_spatial_d", d, "N", Nparticles, "ID", ID, "step", timeinterval))
