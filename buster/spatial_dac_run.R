@@ -7,12 +7,13 @@ d <- 32
 # parameters
 sigmaX <- 1
 nu <- 10
-tau <- -1/4
-delta <- 1
-Time.step <- 100
+tau_diag <- 1
+tau <- -0.25
+# number of time steps
+Time.step <- 10
 timeinterval <- 1
-ti_begin <- 1 + (timeinterval - 1)*10
-ti_end <- timeinterval*10
+ti_begin <- 1 + (timeinterval - 1)*1
+ti_end <- timeinterval*1
 
 Nparticles <- 1000
 df_dac <- data.frame()
@@ -20,23 +21,23 @@ df_dac <- data.frame()
 if(timeinterval == 1){
   res_dac <- sqrt(sigmaX)*array(rnorm(Nparticles*d^2), dim = c(d, d, Nparticles))
 } else {
-  filename <- paste0("/storage/u1693998/results/dac_nl_d", d, "N", Nparticles, "ID", ID, "step", timeinterval-1)
+  filename <- paste0("/storage/u1693998/results/dac_spatial_d", d, "N", Nparticles, "ID", ID, "step", timeinterval-1)
   res_dac <- unname(data.matrix(read.table(filename, row.names = 1)))
-  dim(res_dac)<-c(d, d, Nparticles)
+  dim(res_dac) <- c(d, d, Nparticles)
 }
 
 tic()
 for (t in ti_begin:ti_end){
-  print(paste(t))
-  y <- unname(data.matrix(read.csv(paste0("/storage/u1693998/data/data_iid_nl_tau_", -tau, "d", d, "ID", ID),
+  y <- unname(data.matrix(read.csv(paste0("data/data_spatial_tau_", -tau, "d", d, "ID", ID),
                                    row.names = 1, nrows=d, skip=(t-1)*d)))
-  res_dac <- dac_nl_lightweight(res_dac, y, sigmaX, nu, covariance = FALSE, tempering = FALSE)
+  res_dac <- marginal_dac_spatial(res_dac, y, sigmaX, nu, tau, adaptive = TRUE)
   df_dac <- rbind(df_dac, cbind(apply(res_dac, c(1,2), mean), rep(t, times = d)))
+  print(paste(t))
 }
 runtime <- toc()
 df_dac$runtime <- runtime
-filename <- paste0("/storage/u1693998/results/dac_nl_d", d, "N", Nparticles, "ID", ID, "step", timeinterval)
+filename <- paste0("/storage/u1693998/results/dac_spatial_d", d, "N", Nparticles, "ID", ID, "step", timeinterval)
 write.table(data.frame(matrix(res_dac, ncol = Nparticles)), file = filename, append = FALSE, sep = " ", dec = ".",
             row.names = TRUE, col.names = TRUE)
 
-write.csv(x=df_dac, file=paste0("/storage/u1693998/results/results/dac_nl_d", d, "N", Nparticles, "ID", ID, "step", timeinterval))
+write.csv(x=df_dac, file=paste0("/storage/u1693998/results/dac_spatial_d", d, "N", Nparticles, "ID", ID, "step", timeinterval))

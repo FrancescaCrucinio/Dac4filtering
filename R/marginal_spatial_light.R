@@ -1,7 +1,7 @@
 marginal_spatial_light <- function(u_info, x, obs, cir_left, cir_right, cic_left, cic_right,
                                               lW_left, lW_right, sigmaX, theta, tau, nu){
-  d <- dim(history)[1]
-  Nparticles <- dim(history)[3]
+  d <- dim(x)[1]
+  Nparticles <- dim(x)[3]
   cic <- unique(c(cic_left, cic_right))
   cir <- unique(c(cir_left, cir_right))
   nchild <- 2
@@ -65,8 +65,8 @@ marginal_spatial_light <- function(u_info, x, obs, cir_left, cir_right, cic_left
 
 marginal_spatial_light_adaptive <- function(ess_target, u_info, x, obs, cir_left, cir_right, cic_left, cic_right,
                                                        lW_left, lW_right, sigmaX, tau, nu){
-  d <- dim(history)[1]
-  Nparticles <- dim(history)[3]
+  d <- dim(x)[1]
+  Nparticles <- dim(x)[3]
   cic <- unique(c(cic_left, cic_right))
   cir <- unique(c(cir_left, cir_right))
   nchild <- 2
@@ -147,8 +147,8 @@ marginal_spatial_light_adaptive <- function(ess_target, u_info, x, obs, cir_left
     ess <- ess_s^2/ess_ss
     lWmix <- c(lWmix, lWmix_perm)
   }
-  write.table(data.frame("u" = u_info$u, "direction" = u_info$direction, "theta" = theta), file = "data/adaptive_nl.csv", sep = ",", append = TRUE, quote = FALSE,
-              col.names = FALSE, row.names = FALSE)
+  # write.table(data.frame("u" = u_info$u, "direction" = u_info$direction, "theta" = theta), file = "data/adaptive_nl.csv", sep = ",", append = TRUE, quote = FALSE,
+  #             col.names = FALSE, row.names = FALSE)
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
   # resampling the new population

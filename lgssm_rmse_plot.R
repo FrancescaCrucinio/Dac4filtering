@@ -176,12 +176,12 @@ for (id in 1:50){
 #   dfnew$d <- "32"
 #   dfnew$run <- id
 #   df <- rbind(df, dfnew)
-#   dfnew <- read.csv(paste0("data/lgssm_tempering/adaptive_marginal_lgssm_d32N10000ID", id, sep = ""))
-#   dfnew$N <- "10^4"
-#   dfnew$d <- "32"
-#   dfnew$algo <- "ada"
-#   dfnew$run <- id
-#   df <- rbind(df, dfnew)
+  dfnew <- read.csv(paste0("data/lgssm_tempering/adaptive_marginal_lgssm_d32N10000ID", id, sep = ""))
+  dfnew$N <- "10^4"
+  dfnew$d <- "32"
+  dfnew$algo <- "dac-ada"
+  dfnew$run <- id
+  df <- rbind(df, dfnew)
   filename <- paste0("data/lgssm_tempering/lgssm_d256N10000ID", id, sep = "")
   dfnew <- read.csv(filename)
   dfnew$N <- "10^4"
@@ -202,7 +202,7 @@ Time.step <- ncol(df) - 7
 colnames(df)[(Time.step+1):(Time.step+3)] <- c("w1", "ks", "runtime")
 
 tmp <- aggregate(. ~ algo + N + d, data = df, FUN = "mean")
-rmse_data <- data.frame(rep(1:Time.step, times = 24), rep(tmp$algo, each = 100), rep(tmp$N, each = 100), rep(tmp$d, each = 100))
+rmse_data <- data.frame(rep(1:Time.step, times = 25), rep(tmp$algo, each = 100), rep(tmp$N, each = 100), rep(tmp$d, each = 100))
 colnames(rmse_data) <- c("Time.step", "algo", "N", "d")
 rmse_data <- rmse_data[order(rmse_data$algo, rmse_data$N, rmse_data$d), ]
 tmp <- tmp[order(tmp$algo, tmp$N, tmp$d), ]

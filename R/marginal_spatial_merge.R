@@ -1,8 +1,8 @@
 marginal_spatial_merge <- function(lW, x, obs, node_row_left, node_row_right,
                               node_col_left, node_col_right, cir_left, cic_left, cir_right, cic_right,
                               nv, nvNew, u_info, theta, tau, nu){
-  Nparticles <- dim(history)[3]
-  d <- dim(history)[2]
+  Nparticles <- dim(x)[3]
+  d <- dim(x)[2]
   if(u_info$u == 1 & u_info$direction == "h"){
     lW_left <- lW[node_row_left, node_col_left, ]
     lW_right <- lW[node_row_right, node_col_right, ]

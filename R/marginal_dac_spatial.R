@@ -2,6 +2,7 @@ marginal_dac_spatial <- function(history, obs, sigmaX, nu, tau, adaptive = FALSE
   # dimension and number of particles
   d <- nrow(history)
   Nparticles <- dim(history)[3]
+
   theta <- ceiling(sqrt(Nparticles))
   if(adaptive) theta <- NULL
   # tree topology
@@ -27,19 +28,16 @@ marginal_dac_spatial <- function(history, obs, sigmaX, nu, tau, adaptive = FALSE
         cic <- matrix(c(((j-1)*nvNew+1):((2*j-1)*nv), ((2*j-1)*nv+1):(j*nvNew)), ncol = 2)
         #### HORIZONTAL MERGE ###
         ### Step 1
-        print("h1")
         out_top_merge <- marginal_spatial_merge(lW, x, obs, 2*i-1, 2*i-1, 2*j-1, 2*j,
                                            cir[, 1], cic[, 1], cir[, 1], cic[, 2],
                                            nv, nvNew, list("u" = u, "direction" = "h"), theta, tau, nu)
         x[cir[, 1], c(cic), ] <- out_top_merge$x
         ### Step 2
-        print("h2")
         out_bottom_merge <- marginal_spatial_merge(lW, x, obs, 2*i, 2*i, 2*j-1, 2*j,
                                                                cir[, 2], cic[, 1], cir[, 2], cic[, 2],
                                                                nv, nvNew, list("u" = u, "direction" = "h"), theta, tau, nu)
         x[cir[, 2], c(cic), ] <- out_bottom_merge$x
         #### VERTICAL MERGE ###
-        print("v")
         out_merge <- marginal_spatial_merge(lW, x, obs, 2*i-1, 2*i, 2*j-1, 2*j-1,
                                                              cir[, 1], c(cic), cir[, 2], c(cic),
                                                              nv, nvNew, list("u" = u, "direction" = "v"), theta, tau, nu)
