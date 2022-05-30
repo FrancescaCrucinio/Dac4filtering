@@ -37,3 +37,14 @@ ggplot(data = df, aes(x = col , y = factor(r_id, level = paste0("r", d:1)), fill
         legend.title = element_blank(), legend.text=element_text(size=25),
         text = element_text(size=20), aspect.ratio = 1)
 # ggsave("spatial_mse.pdf", width = 20, height = 15, dpi = 300)
+df_collective <- aggregate(cbind(mse, runtime) ~ N, data = df, FUN = "mean")
+ggplot(data = df, aes(x=runtime, y=mse))+
+  geom_boxplot(coef = 10, width = 0.1, alpha = 0.1, lwd = 1) +
+  scale_x_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
+        legend.title = element_blank(), legend.text=element_text(size=25),
+        text = element_text(size=20))
+# ggsave("spatial_mse_runtime.pdf", width = 20, height = 15, dpi = 300)
