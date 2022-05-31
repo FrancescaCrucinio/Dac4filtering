@@ -3,7 +3,7 @@ d <- 32
 sigmaX <- 1
 nu <- 10
 tau_diag <- 1
-tau <- -0.1
+tau <- -0.25
 Time.step <- 1
 spatial_data <- spatial_obs(d, sigmaX, nu, tau, tau_diag, Time.step)
 Nparticles <- 1000

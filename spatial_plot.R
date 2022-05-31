@@ -12,7 +12,7 @@ Time.step <- 10
 df <- data.frame()
 
 for (Nparticles in c(100)) {
-  df_dac <- read.csv(paste0("data/spatial/stats_dac_spatial_tau", tau, "d", d, "N", Nparticles),
+  df_dac <- read.csv(paste0("data/spatial/corrected_stats_dac_spatial_tau", tau, "d", d, "N", Nparticles),
                       row.names = 1)
   mse_dac <- df_dac[1:d, 1:d]
   colnames(mse_dac) <- paste0("c",seq(1,d))
@@ -37,7 +37,6 @@ ggplot(data = df, aes(x = col , y = factor(r_id, level = paste0("r", d:1)), fill
         legend.title = element_blank(), legend.text=element_text(size=25),
         text = element_text(size=20), aspect.ratio = 1)
 # ggsave("spatial_mse.pdf", width = 20, height = 15, dpi = 300)
-df_collective <- aggregate(cbind(mse, runtime) ~ N, data = df, FUN = "mean")
 ggplot(data = df, aes(x=runtime, y=mse))+
   geom_boxplot(coef = 10, width = 0.1, alpha = 0.1, lwd = 1) +
   scale_x_log10(

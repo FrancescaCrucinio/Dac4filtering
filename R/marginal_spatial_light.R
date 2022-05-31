@@ -147,8 +147,8 @@ marginal_spatial_light_adaptive <- function(ess_target, u_info, x, obs, cir_left
     ess <- ess_s^2/ess_ss
     lWmix <- c(lWmix, lWmix_perm)
   }
-  # write.table(data.frame("u" = u_info$u, "direction" = u_info$direction, "theta" = theta), file = "data/adaptive_nl.csv", sep = ",", append = TRUE, quote = FALSE,
-  #             col.names = FALSE, row.names = FALSE)
+  write.table(data.frame("u" = u_info$u, "direction" = u_info$direction, "theta" = theta), file = "data/adaptive_spatial.csv", sep = ",", append = TRUE, quote = FALSE,
+              col.names = FALSE, row.names = FALSE)
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
   # resampling the new population
