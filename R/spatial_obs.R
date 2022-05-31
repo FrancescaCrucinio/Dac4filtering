@@ -15,7 +15,6 @@ spatial_obs <- function(d, sigmaX, nu, tau, tau_diag, Time.step){
 
   for (t in 2:(Time.step+1)) {
     x[, , t] <- x[, , t-1] + sqrt(sigmaX)*matrix(rnorm(d^2), nrow = d, ncol = d)
-    tmp = rmvt(1, mu = c(x[, , t]), S = y.error.var, df = nu)
     y[, , t-1] <- matrix(rmvt(1, mu = c(x[, , t]), S = y.error.var, df = nu), ncol = d)
   }
 
