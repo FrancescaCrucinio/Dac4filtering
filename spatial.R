@@ -3,10 +3,10 @@ d <- 32
 sigmaX <- 1
 nu <- 10
 tau_diag <- 1
-tau <- -0.25
+tau <- -0.1
 Time.step <- 1
 spatial_data <- spatial_obs(d, sigmaX, nu, tau, tau_diag, Time.step)
-Nparticles <- 100
+Nparticles <- 1000
 # initial state
 history <- sqrt(sigmaX)*array(rnorm(Nparticles*d^2), dim = c(d, d, Nparticles))
 tic()
@@ -16,6 +16,6 @@ for (t in 1:Time.step){
   print(paste(t))
 }
 toc()
-boxplot(c((apply(res_dac, c(1,2), mean) - spatial_data$x[, , Time.step+1])^2))
+boxplot(c((apply(res_dac, c(1,2), mean) - spatial_data$x[, , Time.step+1])^2), log="y")
 image((apply(res_dac, c(1,2), mean) - spatial_data$x[, , Time.step+1])^2)
 mean((apply(res_dac, c(1,2), mean) - spatial_data$x[, , Time.step+1])^2)
