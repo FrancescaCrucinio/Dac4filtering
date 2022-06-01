@@ -20,7 +20,7 @@ ggplot(data = df, aes(x = m)) +
   facet_wrap(~interaction(factor(u, levels = c('1', '2', '3', '4', '5')), factor(direction, levels = c('h', 'v'))), nrow = 2, ncol = 5) +
   scale_y_continuous(trans='log1p') +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
-        legend.title = element_blank(), legend.text=element_text(size=20),
-        text = element_text(size=20), plot.title = element_text(hjust = 0.5)) +
+        legend.title = element_blank(), legend.text=element_text(size=30),
+        text = element_text(size=30), plot.title = element_text(hjust = 0.5)) +
   ggtitle("Spatial")
 # ggsave("m_adaptive_spatial.pdf", width = 10, height = 8, dpi = 300)
