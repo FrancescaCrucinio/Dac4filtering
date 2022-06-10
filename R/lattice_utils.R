@@ -37,7 +37,7 @@ marginal_sample_mixture <- function(n, mixture_weights, current_x_neighbours, xO
 }
 
 # Get neighbours weights for the nonlinear model
-get_all_neighbours <- function(rowcol, d, tau = NULL){
+get_all_neighbours <- function(rowcol, d, tau = NULL, tau_diag = NULL){
   delta <- 1
   neighbours_distance <- c(1, 1, 0, 1, 1)
   x_neighbours <- matrix(c(-1, 0, 0, 0, 1, 0, -1, 0, 1, 0), ncol = 2)
@@ -47,9 +47,14 @@ get_all_neighbours <- function(rowcol, d, tau = NULL){
   mixture_weights <- mixture_weights/sum(mixture_weights)
   out <- cbind(current_x_neighbours, mixture_weights)
   if(!is.null(tau)) {
-    obs_weights <- tau^(neighbours_distance)* current_valid
+    # obs_weights <- tau^(neighbours_distance)* current_valid
+    obs_weights <- tau * neighbours_distance + tau_diag *(1-neighbours_distance)
+    obs_weights <- obs_weights * current_valid
     out <- cbind(out, obs_weights)
   }
+  # current_x_neighbours_lexicographic <- current_x_neighbours[, 1] + (current_x_neighbours[, 2] - 1)*d
+  # current_x_neighbours_covariance <- full_covariance[sort(current_x_neighbours_lexicographic), sort(current_x_neighbours_lexicographic)]
+  # current_x_neighbours_precision <- solve(current_x_neighbours_covariance)
   return(out)
 }
 

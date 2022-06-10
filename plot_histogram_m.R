@@ -21,6 +21,6 @@ ggplot(data = df, aes(x = m)) +
   scale_y_continuous(trans='log1p') +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=30),
-        text = element_text(size=30), plot.title = element_text(hjust = 0.5)) +
+        text = element_text(size=25), plot.title = element_text(hjust = 0.5)) +
   ggtitle("Spatial")
-# ggsave("m_adaptive_spatial.pdf", width = 10, height = 8, dpi = 300)
+# ggsave("m_adaptive_spatial.pdf", width = 14, height = 12, dpi = 300)

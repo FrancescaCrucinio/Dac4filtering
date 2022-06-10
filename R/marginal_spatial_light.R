@@ -1,5 +1,5 @@
 marginal_spatial_light <- function(u_info, x, obs, cir_left, cir_right, cic_left, cic_right,
-                                              lW_left, lW_right, sigmaX, theta, tau, nu){
+                                              lW_left, lW_right, sigmaX, theta, tau, tau_diag, nu){
   d <- dim(x)[1]
   Nparticles <- dim(x)[3]
   cic <- unique(c(cic_left, cic_right))
@@ -64,7 +64,7 @@ marginal_spatial_light <- function(u_info, x, obs, cir_left, cir_right, cic_left
 }
 
 marginal_spatial_light_adaptive <- function(ess_target, u_info, x, obs, cir_left, cir_right, cic_left, cic_right,
-                                                       lW_left, lW_right, sigmaX, tau, nu){
+                                                       lW_left, lW_right, sigmaX, tau, tau_diag, nu){
   d <- dim(x)[1]
   Nparticles <- dim(x)[3]
   cic <- unique(c(cic_left, cic_right))
@@ -81,7 +81,7 @@ marginal_spatial_light_adaptive <- function(ess_target, u_info, x, obs, cir_left
   }
   all_nodes <- as.matrix(expand.grid(cir, cic))
   how_many_nodes <- nrow(all_nodes)
-  all_nodes_neighbours <- do.call(rbind, apply(all_nodes, 1, get_all_neighbours, d, tau, simplify = FALSE))
+  all_nodes_neighbours <- do.call(rbind, apply(all_nodes, 1, get_all_neighbours, d, tau, tau_diag, simplify = FALSE))
   neighbours_in_node <- (all_nodes_neighbours[, 1] %in% cir) & (all_nodes_neighbours[, 2] %in% cic)
   neighbours_in_left <- ((all_nodes_neighbours[, 1] %in% cir_left) & (all_nodes_neighbours[, 2] %in% cic_left)) *
     rep((all_nodes[, 1] %in% cir_left) & (all_nodes[, 2] %in% cic_left), each = 5)
@@ -117,6 +117,7 @@ marginal_spatial_light_adaptive <- function(ess_target, u_info, x, obs, cir_left
   permutation <- 1:Nparticles
   theta <- 1
   while (ess < ess_target & theta<=ceiling(sqrt(Nparticles))) {
+  # while (ess < ess_target) {
     theta <- theta+1
     new_perm <- sample.int(Nparticles)
     # mixture weights

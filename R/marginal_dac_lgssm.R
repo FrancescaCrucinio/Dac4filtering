@@ -112,7 +112,7 @@ marginal_dac_lgssm_mix <- function(history, obs, tau, lambda, sigmaY){
         for (n1 in 1:Nparticles) {
           for (n2 in 1:Nparticles) {
             lWmix[n1, n2] <- -0.5*lambda * (lambda *x[n1, (ci[1]+nv-1)]^2/(tau+lambda) -
-                                              2*x[n1, (ci[1]+nv-1)] * x[n1, (ci[1]+nv)]) +
+                                              2*x[n1, (ci[1]+nv-1)] * x[n2, (ci[1]+nv)]) +
               log(mean(exp(-0.5*(x[n1, (ci[1]+nv-1)]-history[, ci[1]+nv])^2/(tau+lambda) -
                              0.5*lambda*tau*history[, ci[1]+nv] * x[n1, (ci[1]+nv-1)]/(tau+lambda)))) -
               log(mean(exp(-0.5*(x[n1, (ci[1]+nv-1)]-history[, ci[1]+nv])^2/(tau+lambda))))
