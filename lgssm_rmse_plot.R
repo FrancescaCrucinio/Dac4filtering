@@ -176,7 +176,7 @@ for (id in 1:50){
 #   dfnew$d <- "32"
 #   dfnew$run <- id
 #   df <- rbind(df, dfnew)
-  dfnew <- read.csv(paste0("data/lgssm_tempering/adaptive_marginal_lgssm_d32N10000ID", id, sep = ""))
+  dfnew <- read.csv(paste0("data/lgssm_marginal/adaptive_marginal_lgssm_d32N10000ID", id, sep = ""))
   dfnew$N <- "10^4"
   dfnew$d <- "32"
   dfnew$algo <- "dac-ada"
@@ -195,6 +195,15 @@ for (id in 1:50){
 #   # dfnew$run <- id
 #   # df <- rbind(df, dfnew)
 }
+for (id in c(1,2, 4:13, 15:18, 22:26, 28:31)){
+  filename <- paste0("data/lgssm_marginal/adaptive_marginal_lgssm_d256N10000ID", id, sep = "")
+  dfnew <- read.csv(filename)
+  dfnew$N <- "10^4"
+  dfnew$d <- "256"
+  dfnew$algo <- "dac-ada"
+  dfnew$run <- id
+  df <- rbind(df, dfnew)
+}
 df <- df[, -1]
 df <- df[df$algo != "dac_ada", ]
 df <- df[df$algo != "dac-light", ]
@@ -202,16 +211,17 @@ Time.step <- ncol(df) - 7
 colnames(df)[(Time.step+1):(Time.step+3)] <- c("w1", "ks", "runtime")
 
 tmp <- aggregate(. ~ algo + N + d, data = df, FUN = "mean")
-rmse_data <- data.frame(rep(1:Time.step, times = 25), rep(tmp$algo, each = 100), rep(tmp$N, each = 100), rep(tmp$d, each = 100))
+rmse_data <- data.frame(rep(1:Time.step, times = 26), rep(tmp$algo, each = 100), rep(tmp$N, each = 100), rep(tmp$d, each = 100))
 colnames(rmse_data) <- c("Time.step", "algo", "N", "d")
 rmse_data <- rmse_data[order(rmse_data$algo, rmse_data$N, rmse_data$d), ]
 tmp <- tmp[order(tmp$algo, tmp$N, tmp$d), ]
 rmse_data$rmse <- as.vector(t(as.matrix(tmp[, 4:103])))
+cbPalette <- c("#E69F00", "#009E73", "#0072B2", "#D55E00", "#CC79A7")
 ggplot(data = rmse_data, aes(x = Time.step, y = rmse, group = algo, colour = algo)) +
-  geom_line(size = 2) +
+  geom_line(size = 1, aes(linetype = algo)) +
   scale_y_continuous(trans='log10') +
   facet_wrap(~factor(interaction(N, d), levels=c("10^2.32", "10^3.32", "10^4.32", "10^2.256", "10^3.256", "10^4.256", "10^2.2048", "10^3.2048")), ncol = 3, nrow = 3) +
-  scale_color_manual(values=c("#F8766D", "#E69F00", "#00BA38", "#619CFF")) +
+  scale_color_manual(values=cbPalette) +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         axis.text = element_text(size=20), strip.text.x = element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=20),
