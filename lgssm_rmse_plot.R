@@ -195,7 +195,7 @@ for (id in 1:50){
 #   # dfnew$run <- id
 #   # df <- rbind(df, dfnew)
 }
-for (id in c(1,2, 4:13, 15:18, 22:26, 28:31)){
+for (id in c(1:13, 15:18, 22:26, 28:31, 36, 38:41, 43:50)){
   filename <- paste0("data/lgssm_marginal/adaptive_marginal_lgssm_d256N10000ID", id, sep = "")
   dfnew <- read.csv(filename)
   dfnew$N <- "10^4"
