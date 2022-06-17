@@ -19,11 +19,11 @@ for (Nparticles in c(100, 500, 1000)) {
 # last time step
 df_end <- df[df$t == Time.step, ]
 df_iqr_mean <- aggregate(mean ~ dim + N, data = df_end, FUN = IQR)
-df_iqr_var <- aggregate(var ~ dim + N, data = df_end, FUN = IQR)
 
 ggplot(data = df_iqr_mean, aes(x=N, y=mean, group=dim, color=dim)) +
   geom_line(alpha=0.5) +
-  geom_abline(slope = -0.5, intercept = 1, size = 1) +
+  geom_abline(slope = -0.5, intercept = 10^(-0.0), size = 2, linetype = "dashed") +
+  # geom_smooth(method='lm', formula= y~x, fill = NA, aes(group=1)) +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
@@ -34,10 +34,11 @@ ggplot(data = df_iqr_mean, aes(x=N, y=mean, group=dim, color=dim)) +
   ) +
   labs(color='d') +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
-        axis.text = element_text(size=20), strip.text.x = element_blank(), text = element_text(size=15))
+        axis.text = element_text(size=20), strip.text.x = element_blank(),
+        legend.text=element_text(size=20), legend.title=element_text(size=30))
+# ggsave("spatial32_iqr.pdf", width = 8.5, height = 4, dpi = 300)
 
-
-dim <- 36
+dim <- 34
 t <- 10
 df_plot <- df[df$t == t & df$dim == dim,]
 ggplot(data = df_plot, aes(x=runtime, y=mean, group = N))+
@@ -49,7 +50,7 @@ ggplot(data = df_plot, aes(x=runtime, y=mean, group = N))+
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=30),
         text = element_text(size=30))
-# ggsave("spatial8_boxplot_node22_var.pdf", width = 8.5, height = 6, dpi = 300)
+# ggsave("spatial32_boxplot_node22_mean.pdf", width = 8.5, height = 6, dpi = 300)
 
 ground_truth <- unname(data.matrix(read.csv(paste0("data/spatial/corrected_data_truth_spatial_tau_", -tau, "d", d, "ID", 1),
                                             row.names = 1, nrows=d, skip=(Time.step)*d)))
