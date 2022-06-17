@@ -1,5 +1,5 @@
-set.seed(1234*11)
-d <- 4
+set.seed(1234*1)
+d <- 2
 sigmaX <- 1
 nu <- 10
 tau_diag <- 1

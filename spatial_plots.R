@@ -51,20 +51,3 @@ ggplot(data = df_plot, aes(x=runtime, y=mean, group = N))+
         legend.title = element_blank(), legend.text=element_text(size=30),
         text = element_text(size=30))
 # ggsave("spatial32_boxplot_node22_mean.pdf", width = 8.5, height = 6, dpi = 300)
-
-ground_truth <- unname(data.matrix(read.csv(paste0("data/spatial/corrected_data_truth_spatial_tau_", -tau, "d", d, "ID", 1),
-                                            row.names = 1, nrows=d, skip=(Time.step)*d)))
-df_mse <- df[df$t == 10, ]
-df_mse$col <- ceiling(df_mse$dim/d)
-df_mse$row <- df_mse$dim - (df_mse$col - 1)*d
-df_mse$mse <- (df_mse$mean - rep(c(ground_truth), times = 3*50))^2
-tmp <- aggregate(mse ~  N + col + row, data = df_mse, FUN = "mean")
-ggplot(data = tmp, aes(x = col, y = row, fill = mse)) +
-  geom_raster() +
-  scale_fill_viridis_c() +
-  facet_wrap(~N, ncol = 4, nrow = 1) +
-  theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
-        axis.text = element_blank(), axis.ticks = element_blank(),
-        strip.text.x = element_blank(), panel.spacing = unit(1, "lines"),
-        legend.title = element_blank(), legend.text=element_text(size=25),
-        text = element_text(size=20), aspect.ratio = 1)
