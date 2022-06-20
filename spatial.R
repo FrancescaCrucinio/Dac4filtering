@@ -6,8 +6,8 @@ tau_diag <- 1
 tau <- -0.25
 Time.step <- 10
 spatial_data <- spatial_obs(d, sigmaX, nu, tau, tau_diag, Time.step)
-N <- 10000
-history <- sqrt(sigmaX)*array(rnorm(N*d^2), dim = c(d, d, N))
+Nparticles <- 1000
+history <- sqrt(sigmaX)*array(rnorm(N*d^2), dim = c(d, d, Nparticles))
 tic()
 for (t in 1:Time.step){
   res_dac <- marginal_dac_spatial(history, spatial_data$y[, , t], sigmaX, nu, tau, tau_diag, adaptive = TRUE)
@@ -15,10 +15,18 @@ for (t in 1:Time.step){
   print(paste(t))
 }
 toc()
-df <- data.frame(mean = c(apply(res_dac, c(1,2), mean)), variance = c(apply(res_dac^2, c(1,2), mean) - apply(res_dac, c(1,2), mean)^2),
-                 first_q = c(apply(res_dac, c(1,2), quantile, probs = 0.25)), third_q = c(apply(res_dac, c(1,2), quantile, probs = 0.75)))
-write_csv(x=df, file = "d4N10000results")
-df <- read.csv("d4N10000results")
+tic()
+for (t in 1:Time.step){
+  res_bpf <- spatial_bpf(sigmaX, spatial_data$variance, spatial_data$y, Nparticles)
+  history <- res_dac
+  print(paste(t))
+}
+toc()
+colMeans(res_bpf)
+apply(res_dac, c(1,2), mean)
+
+
+
 mean((spatial_data$x[, , Time.step+1]- df$mean)^2)
 Nparticles <- c(100, 500, 1000)
 Nrep <- 10
