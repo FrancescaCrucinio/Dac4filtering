@@ -18,5 +18,5 @@ spatial_obs <- function(d, sigmaX, nu, tau, tau_diag, Time.step){
     y[, , t-1] <- matrix(rmvt(1, mu = c(x[, , t]), S = y.error.var, df = nu), ncol = d)
   }
 
-  return(list("x" = x, "y" = y, "variance" = y.error.var*nu/(nu-2)))
+  return(list("x" = x, "y" = y, "precision" = y.error.prec))
 }

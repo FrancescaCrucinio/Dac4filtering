@@ -137,7 +137,7 @@ marginal_spatial_light_adaptive <- function(ess_target, u_info, x, obs, cir_left
       + 0.5*(nu+nodes_dimension_child)*(log(1+abs(sum_over_neighbours_obs_left)/nu) + log(1+abs(sum_over_neighbours_obs_right)/nu))
     }
     if(u_info$u == 1 & u_info$direction == "h"){
-      lWmix_perm <- lWmix_perm + c(lW_left) + c(lW_right)
+      lWmix_perm <- lWmix_perm + c(lW_left) + c(lW_right[new_perm])
     }
     permutation <- c(permutation, new_perm)
     max.lWmix <- max(lWmix_perm)

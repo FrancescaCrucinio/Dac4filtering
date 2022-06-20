@@ -1,0 +1,43 @@
+devtools::load_all("/storage/u1693998/Dac4filtering")
+### Linear Gaussian SSM -- comparison of dac, stpf, nsmc
+ID <- as.numeric(Sys.getenv("SGE_TASK_ID"))
+set.seed(1234*ID)
+# dimension
+d <- 2
+# parameters
+sigmaX <- 1
+nu <- 10
+tau_diag <- 1
+tau <- -0.25
+y.error.prec <- matrix(c(1, -0.25, -0.25, 0, -0.25, 1, 0, -0.25, -0.25, 0, 1, -0.25, 0, -0.25, -0.25, 1), nrow = 4)
+# number of time steps
+Time.step <- 10
+# data
+timeinterval <- 1
+ti_begin <- 1 + (timeinterval - 1)*10
+ti_end <- timeinterval*10
+Nparticles <- 100
+# initial state
+res_bpf <- matrix(rnorm(Nparticles*d^2, sd = sqrt(sigmaX)), nrow = Nparticles, ncol = d^2)
+df_bpf <- data.frame(matrix(ncol = 6, nrow = 0))
+colnames(df_bpf) <- c("mean", "var", "first_q", "second_q", "third_q", "time")
+
+tic()
+for (t in ti_begin:ti_end){
+  print(paste(t))
+  y <- unname(data.matrix(read.csv(paste0("/storage/u1693998/data/corrected_data_spatial_tau_", -tau, "d", d, "ID", 1),
+                                   row.names = 1, nrows=d, skip=(t-1)*d)))
+  res_bpf <- spatial_bpf(res_bpf, sigmaX, y.error.prec, c(y), Nparticles)
+  df_bpf <- rbind(df_bpf, cbind(colMeans(res_bpf), colVars(res_bpf), apply(res_bpf, 2, quantile, probs = 0.25),
+                                apply(res_bpf, 2, quantile, probs = 0.5), apply(res_bpf, 2, quantile, probs = 0.75),
+                                rep(t, times = d^2)))
+  print(paste(t))
+}
+runtime <- toc()
+df_bpf$runtime <- runtime
+filename <- paste0("/storage/u1693998/results/same_nt_corrected_bpf_spatial_d", d, "N", Nparticles, "ID", ID, "step", timeinterval)
+write.table(data.frame(matrix(res_bpf, ncol = Nparticles)), file = filename, append = FALSE, sep = " ", dec = ".",
+            row.names = TRUE, col.names = TRUE)
+
+write.csv(x=df_bpf, file=paste0("/storage/u1693998/results/same_nt_corrected_means_bpf_spatial_d", d, "N", Nparticles, "ID", ID, "step", timeinterval))
+
