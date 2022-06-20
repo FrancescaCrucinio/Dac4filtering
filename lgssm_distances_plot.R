@@ -11,8 +11,8 @@ distances_mean <- merge(distances_mean, time_means, by=c("algo", "N", "d"))
 cbPalette <- c("#E69F00", "#009E73", "#0072B2", "#D55E00", "#CC79A7")
 # Wasserstein-1
 ggplot(data = distances, aes(x = runtime_mean, y = w1, group = interaction(algo, N, d), fill = algo, colour = algo)) +
-  geom_boxplot(coef = 6, width = 0.1, alpha = 0.1, lwd = 1) +
-  # geom_point(data = distances_mean, shape = 4, lwd = 1, aes(x = runtime, y = w1, group = interaction(algo, N, d), fill = algo, colour = algo)) +
+  geom_boxplot(coef = 6, width = 0.1, alpha = 0.7, lwd = 1) +
+  geom_point(data = distances_mean, shape = 4, lwd = 1, aes(x = runtime, y = w1, group = interaction(algo, N, d), fill = algo, colour = algo)) +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
@@ -31,8 +31,8 @@ ggplot(data = distances, aes(x = runtime_mean, y = w1, group = interaction(algo,
 # ggsave("marginal_lgssm_w1.pdf", width = 20, height = 35, dpi = 300)
 # Kolmogorov-Smirnov
 ggplot(data = distances, aes(x = runtime_mean, y = ks, group = interaction(algo, N, d), fill = algo, colour = algo)) +
-  geom_boxplot(coef = 10, width = 0.1, alpha = 0.1, lwd = 1) +
-  # geom_point(data = distances_mean, shape = 4, lwd = 1, aes(x = runtime, y = ks, group = interaction(algo, N, d), fill = algo, colour = algo)) +
+  geom_boxplot(coef = 10, width = 0.1, alpha = 0.7, lwd = 1) +
+  geom_point(data = distances_mean, shape = 4, lwd = 1, aes(x = runtime, y = ks, group = interaction(algo, N, d), fill = algo, colour = algo)) +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
@@ -51,7 +51,7 @@ ggplot(data = distances, aes(x = runtime_mean, y = ks, group = interaction(algo,
 # ggsave("marginal_lgssm_ks.pdf", width = 20, height = 35, dpi = 300)
 
 p <- ggplot(data = distances, aes(x = runtime_mean, y = ks, group = interaction(algo, N, d), fill = algo, colour = algo)) +
-  geom_boxplot(coef = 10, width = 0.1, alpha = 0.1, lwd = 1) +
+  geom_boxplot(coef = 10, width = 0.1, alpha = 0.7, lwd = 1) +
   geom_point(data = distances_mean, shape = 4, lwd = 1, aes(x = runtime, y = ks, group = interaction(algo, N, d), fill = algo, colour = algo)) +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
