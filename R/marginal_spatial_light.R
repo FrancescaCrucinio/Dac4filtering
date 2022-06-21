@@ -34,7 +34,7 @@ marginal_spatial_light <- function(u_info, x, obs, cir_left, cir_right, cic_left
   lWmix <- rep(0, times = theta*Nparticles)
   all_nodes <- as.matrix(expand.grid(cir, cic))
   how_many_nodes <- nrow(all_nodes)
-  all_nodes_neighbours <- do.call(rbind, apply(all_nodes, 1, get_all_neighbours, d, tau, simplify = FALSE))
+  all_nodes_neighbours <- do.call(rbind, apply(all_nodes, 1, get_all_neighbours, d, tau, tau_diag, simplify = FALSE))
   neighbours_in_node <- (all_nodes_neighbours[, 1] %in% cir) & (all_nodes_neighbours[, 2] %in% cic)
   neighbours_in_left <- ((all_nodes_neighbours[, 1] %in% cir_left) & (all_nodes_neighbours[, 2] %in% cic_left)) *
     rep((all_nodes[, 1] %in% cir_left) & (all_nodes[, 2] %in% cic_left), each = 5)
@@ -95,7 +95,7 @@ marginal_spatial_light_adaptive <- function(ess_target, u_info, x, obs, cir_left
     # merged x
     mx <- x[, , n]
     # contribution of g_{t, u}
-    tmp_obs <- neighbours_in_node*all_nodes_neighbours[, 4]*(mx[all_nodes_replicates] - obs[all_nodes_replicates])*(mx[all_nodes_neighbours[, 1:2]] - obs[all_nodes_neighbours[, 1:2]])
+    tmp_obs <- neighbours_in_node*all_nodes_neighbours[, 4]*(obs[all_nodes_replicates] - mx[all_nodes_replicates])*(obs[all_nodes_neighbours[, 1:2]] - mx[all_nodes_neighbours[, 1:2]])
     tmp_obs_left <- tmp_obs * neighbours_in_left
     tmp_obs_right <- tmp_obs * neighbours_in_right
     sum_over_neighbours_obs_left <- sum(tmp_obs_left)
@@ -117,9 +117,8 @@ marginal_spatial_light_adaptive <- function(ess_target, u_info, x, obs, cir_left
   permutation <- 1:Nparticles
   theta <- 1
   while (ess < ess_target & theta<=ceiling(sqrt(Nparticles))) {
-  # while (ess < ess_target) {
     theta <- theta+1
-    new_perm <- sample.int(Nparticles)
+    new_perm <- sample.int(Nparticles, replace = TRUE)
     # mixture weights
     lWmix_perm <- rep(0, times = Nparticles)
     for (n in 1:Nparticles){
@@ -127,7 +126,7 @@ marginal_spatial_light_adaptive <- function(ess_target, u_info, x, obs, cir_left
       mx <- x[, , n]
       mx[as.matrix(expand.grid(cir_right, cic_right))] <- x[as.matrix(expand.grid(cir_right, cic_right, new_perm[n]))]
       # contribution of g_{t, u}
-      tmp_obs <- neighbours_in_node*all_nodes_neighbours[, 4]*(mx[all_nodes_replicates] - obs[all_nodes_replicates])*(mx[all_nodes_neighbours[, 1:2]] - obs[all_nodes_neighbours[, 1:2]])
+      tmp_obs <- neighbours_in_node*all_nodes_neighbours[, 4]*(obs[all_nodes_replicates] - mx[all_nodes_replicates])*(obs[all_nodes_neighbours[, 1:2]] - mx[all_nodes_neighbours[, 1:2]])
       tmp_obs_left <- tmp_obs * neighbours_in_left
       tmp_obs_right <- tmp_obs * neighbours_in_right
       sum_over_neighbours_obs_left <- sum(tmp_obs_left)

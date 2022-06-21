@@ -4,15 +4,15 @@ sigmaX <- 1
 nu <- 10
 tau_diag <- 1
 tau <- -0.25
-Time.step <- 1
+Time.step <- 10
 spatial_data <- spatial_obs(d, sigmaX, nu, tau, tau_diag, Time.step)
 y.error.prec <- matrix(c(1, -0.25, -0.25, 0, -0.25, 1, 0, -0.25, -0.25, 0, 1, -0.25, 0, -0.25, -0.25, 1), nrow = 4)
-Nparticles <- 1000
+Nparticles <- 5000
 history <- sqrt(sigmaX)*array(rnorm(Nparticles*d^2), dim = c(d, d, Nparticles))
 res_dac <- history
 tic()
 for (t in 1:Time.step){
-  res_dac <- marginal_dac_spatial(res_dac, spatial_data$y[, , t], sigmaX, nu, tau, tau_diag, adaptive = TRUE)
+  res_dac <- marginal_dac_spatial_2grid(res_dac, spatial_data$y[, , t], sigmaX, nu)
   # history <- res_dac
   print(paste(t))
 }
@@ -24,5 +24,5 @@ for (t in 1:Time.step){
   print(paste(t))
 }
 toc()
-colMeans(res_bpf)
-apply(res_dac, c(1,2), mean)
+(colMeans(res_bpf) - c(spatial_data$x[, , 11]))^2
+(apply(res_dac, c(1,2), mean) - spatial_data$x[, , 11])^2
