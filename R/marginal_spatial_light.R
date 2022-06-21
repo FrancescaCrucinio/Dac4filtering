@@ -53,8 +53,8 @@ marginal_spatial_light <- function(u_info, x, obs, cir_left, cir_right, cic_left
     sum_over_neighbours_obs_left <- sum(tmp_obs_left)
     sum_over_neighbours_obs_right <-sum(tmp_obs_right)
     sum_over_neighbours_obs_merged <- sum(tmp_obs)
-    lWmix[n] <- - 0.5*(nu+nodes_dimension)*log(1+abs(sum_over_neighbours_obs_merged)/nu)
-    + 0.5*(nu+nodes_dimension_child)*(log(1+abs(sum_over_neighbours_obs_left)/nu) + log(1+abs(sum_over_neighbours_obs_right)/nu))
+    lWmix[n] <- - 0.5*(nu+nodes_dimension)*log(1+abs(sum_over_neighbours_obs_merged)/nu) +
+     0.5*(nu+nodes_dimension_child)*(log(1+abs(sum_over_neighbours_obs_left)/nu) + log(1+abs(sum_over_neighbours_obs_right)/nu))
   }
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
@@ -101,8 +101,8 @@ marginal_spatial_light_adaptive <- function(ess_target, u_info, x, obs, cir_left
     sum_over_neighbours_obs_left <- sum(tmp_obs_left)
     sum_over_neighbours_obs_right <-sum(tmp_obs_right)
     sum_over_neighbours_obs_merged <- sum(tmp_obs)
-    lWmix[n] <- - 0.5*(nu+nodes_dimension)*log(1+abs(sum_over_neighbours_obs_merged)/nu)
-    + 0.5*(nu+nodes_dimension_child)*(log(1+abs(sum_over_neighbours_obs_left)/nu) + log(1+abs(sum_over_neighbours_obs_right)/nu))
+    lWmix[n] <- - 0.5*(nu+nodes_dimension)*log(1+abs(sum_over_neighbours_obs_merged)/nu) +
+    0.5*(nu+nodes_dimension_child)*(log(1+abs(sum_over_neighbours_obs_left)/nu) + log(1+abs(sum_over_neighbours_obs_right)/nu))
   }
   if(u_info$u == 1 & u_info$direction == "h"){
     lWmix <- lWmix + c(lW_left) + c(lW_right)
@@ -132,8 +132,8 @@ marginal_spatial_light_adaptive <- function(ess_target, u_info, x, obs, cir_left
       sum_over_neighbours_obs_left <- sum(tmp_obs_left)
       sum_over_neighbours_obs_right <-sum(tmp_obs_right)
       sum_over_neighbours_obs_merged <- sum(tmp_obs)
-      lWmix_perm[n] <- - 0.5*(nu+nodes_dimension)*log(1+abs(sum_over_neighbours_obs_merged)/nu)
-      + 0.5*(nu+nodes_dimension_child)*(log(1+abs(sum_over_neighbours_obs_left)/nu) + log(1+abs(sum_over_neighbours_obs_right)/nu))
+      lWmix_perm[n] <- - 0.5*(nu+nodes_dimension)*log(1+abs(sum_over_neighbours_obs_merged)/nu) +
+        0.5*(nu+nodes_dimension_child)*(log(1+abs(sum_over_neighbours_obs_left)/nu) + log(1+abs(sum_over_neighbours_obs_right)/nu))
     }
     if(u_info$u == 1 & u_info$direction == "h"){
       lWmix_perm <- lWmix_perm + c(lW_left) + c(lW_right[new_perm])
@@ -147,8 +147,8 @@ marginal_spatial_light_adaptive <- function(ess_target, u_info, x, obs, cir_left
     ess <- ess_s^2/ess_ss
     lWmix <- c(lWmix, lWmix_perm)
   }
-  write.table(data.frame("u" = u_info$u, "direction" = u_info$direction, "theta" = theta), file = "data/adaptive_spatial.csv", sep = ",", append = TRUE, quote = FALSE,
-              col.names = FALSE, row.names = FALSE)
+  # write.table(data.frame("u" = u_info$u, "direction" = u_info$direction, "theta" = theta), file = "data/adaptive_spatial.csv", sep = ",", append = TRUE, quote = FALSE,
+  #             col.names = FALSE, row.names = FALSE)
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
   # resampling the new population

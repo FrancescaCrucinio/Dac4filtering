@@ -20,7 +20,7 @@ for (Nparticles in c(100, 500, 1000, 5000, 10000)) {
   df <- rbind(df, df_dac, df_bpf)
 }
 
-dim <- 2
+dim <- 4
 t <- 10
 df_plot <- df[df$t == t & df$dim == dim,]
 ggplot(data = df_plot, aes(x=N, y=mean, group = interaction(N, type), color = type, fill = type))+

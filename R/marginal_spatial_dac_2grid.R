@@ -2,7 +2,9 @@ marginal_dac_spatial_2grid <- function(history, obs, sigmaX, nu){
   # dimension and number of particles
   d <- nrow(history)
   Nparticles <- dim(history)[3]
-  y.error.var <- solve(matrix(c(1, -0.25, -0.25, 0, -0.25, 1, 0, -0.25, -0.25, 0, 1, -0.25, 0, -0.25, -0.25, 1), nrow = 4))
+  ess_target <- Nparticles
+  y.error.prec <- matrix(c(1, -0.25, -0.25, 0, -0.25, 1, 0, -0.25, -0.25, 0, 1, -0.25, 0, -0.25, -0.25, 1), nrow = 4)
+  y.error.var <- solve(y.error.prec)
   # tree topology
   nchild <- 2
   nlevels <- log2(d)
@@ -11,7 +13,7 @@ marginal_dac_spatial_2grid <- function(history, obs, sigmaX, nu){
   # leaves
   sample_from_past <- sample.int(Nparticles, Nparticles, replace = TRUE)
   x <- history[, , sample_from_past] + sqrt(sigmaX)*array(rnorm(Nparticles*d^2), dim = c(d, d, Nparticles))
-  lW <- -0.5*(nu+1)*log(1+sweep(x, 1:2, obs)^2/nu)
+  lW <- -0.5*(nu+1)*log(1+y.error.prec[1, 1]*sweep(x, 1:2, obs)^2/nu)
   ### tree has only one level
   # number of variables in each node
   nvNew <- 2
@@ -29,11 +31,11 @@ marginal_dac_spatial_2grid <- function(history, obs, sigmaX, nu){
     # merged x
     mx <- x[, , n]
     # contribution of g_{t, u}
-    sum_over_neighbours_obs_left <- (obs[1, 1] - mx[1, 1]) %*% solve(y.error.var[1, 1]) %*% (obs[1, 1] - mx[1, 1])
-    sum_over_neighbours_obs_right <- (obs[1, 2] - mx[1, 2]) %*% solve(y.error.var[3, 3]) %*% (obs[1, 2] - mx[1, 2])
-    sum_over_neighbours_obs_merged <- (obs[1, ] - mx[1, ]) %*% solve(y.error.var[c(1, 3), c(1, 3)]) %*% (obs[1, ] - mx[1, ])
-    lWmix[n] <- - 0.5*(nu+nodes_dimension)*log(1+abs(sum_over_neighbours_obs_merged)/nu)
-    + 0.5*(nu+nodes_dimension_child)*(log(1+abs(sum_over_neighbours_obs_left)/nu) + log(1+abs(sum_over_neighbours_obs_right)/nu))
+    sum_over_neighbours_obs_left <- (obs[1, 1] - mx[1, 1]) %*% y.error.prec[1, 1] %*% (obs[1, 1] - mx[1, 1])
+    sum_over_neighbours_obs_right <- (obs[1, 2] - mx[1, 2]) %*% y.error.prec[3, 3] %*% (obs[1, 2] - mx[1, 2])
+    sum_over_neighbours_obs_merged <- (obs[1, ] - mx[1, ]) %*% y.error.prec[c(1, 3), c(1, 3)] %*% (obs[1, ] - mx[1, ])
+    lWmix[n] <- - 0.5*(nu+2)*log(1+abs(sum_over_neighbours_obs_merged)/nu) +
+      0.5*(nu+1)*(log(1+abs(sum_over_neighbours_obs_left)/nu) + log(1+abs(sum_over_neighbours_obs_right)/nu))
   }
   lWmix <- lWmix + c(lW_left) + c(lW_right)
   max.lWmix <- max(lWmix)
@@ -55,11 +57,11 @@ marginal_dac_spatial_2grid <- function(history, obs, sigmaX, nu){
       mx <- x[, , n]
       mx[1, 2] <- x[1, 2, new_perm[n]]
       # contribution of g_{t, u}
-      sum_over_neighbours_obs_left <- (obs[1, 1] - mx[1, 1]) %*% solve(y.error.var[1, 1]) %*% (obs[1, 1] - mx[1, 1])
-      sum_over_neighbours_obs_right <- (obs[1, 2] - mx[1, 2]) %*% solve(y.error.var[3, 3]) %*% (obs[1, 2] - mx[1, 2])
-      sum_over_neighbours_obs_merged <- (obs[1, ] - mx[1, ]) %*% solve(y.error.var[c(1, 3), c(1, 3)]) %*% (obs[1, ] - mx[1, ])
-      lWmix_perm[n] <- - 0.5*(nu+nodes_dimension)*log(1+abs(sum_over_neighbours_obs_merged)/nu)
-      + 0.5*(nu+nodes_dimension_child)*(log(1+abs(sum_over_neighbours_obs_left)/nu) + log(1+abs(sum_over_neighbours_obs_right)/nu))
+      sum_over_neighbours_obs_left <- (obs[1, 1] - mx[1, 1]) %*% y.error.prec[1, 1] %*% (obs[1, 1] - mx[1, 1])
+      sum_over_neighbours_obs_right <- (obs[1, 2] - mx[1, 2]) %*% y.error.prec[3, 3] %*% (obs[1, 2] - mx[1, 2])
+      sum_over_neighbours_obs_merged <- (obs[1, ] - mx[1, ]) %*% y.error.prec[c(1, 3), c(1, 3)] %*% (obs[1, ] - mx[1, ])
+      lWmix_perm[n] <- - 0.5*(nu+2)*log(1+abs(sum_over_neighbours_obs_merged)/nu) +
+        0.5*(nu+1)*(log(1+abs(sum_over_neighbours_obs_left)/nu) + log(1+abs(sum_over_neighbours_obs_right)/nu))
     }
     lWmix_perm <- lWmix_perm + c(lW_left) + c(lW_right[new_perm])
     permutation <- c(permutation, new_perm)
@@ -88,11 +90,11 @@ marginal_dac_spatial_2grid <- function(history, obs, sigmaX, nu){
     # merged x
     mx <- x[, , n]
     # contribution of g_{t, u}
-    sum_over_neighbours_obs_left <- (obs[2, 1] - mx[2, 1]) %*% solve(y.error.var[2, 2]) %*% (obs[2, 1] - mx[2, 1])
-    sum_over_neighbours_obs_right <- (obs[2, 2] - mx[2, 2]) %*% solve(y.error.var[4, 4]) %*% (obs[2, 2] - mx[2, 2])
-    sum_over_neighbours_obs_merged <- (obs[2, ] - mx[2, ]) %*% solve(y.error.var[c(2, 4), c(2, 4)]) %*% (obs[2, ] - mx[2, ])
-    lWmix[n] <- - 0.5*(nu+nodes_dimension)*log(1+abs(sum_over_neighbours_obs_merged)/nu)
-    + 0.5*(nu+nodes_dimension_child)*(log(1+abs(sum_over_neighbours_obs_left)/nu) + log(1+abs(sum_over_neighbours_obs_right)/nu))
+    sum_over_neighbours_obs_left <- (obs[2, 1] - mx[2, 1]) %*% (y.error.prec[2, 2]) %*% (obs[2, 1] - mx[2, 1])
+    sum_over_neighbours_obs_right <- (obs[2, 2] - mx[2, 2]) %*% (y.error.prec[4, 4]) %*% (obs[2, 2] - mx[2, 2])
+    sum_over_neighbours_obs_merged <- (obs[2, ] - mx[2, ]) %*% (y.error.prec[c(2, 4), c(2, 4)]) %*% (obs[2, ] - mx[2, ])
+    lWmix[n] <- - 0.5*(nu+2)*log(1+abs(sum_over_neighbours_obs_merged)/nu) +
+      0.5*(nu+1)*(log(1+abs(sum_over_neighbours_obs_left)/nu) + log(1+abs(sum_over_neighbours_obs_right)/nu))
   }
   lWmix <- lWmix + c(lW_left) + c(lW_right)
   max.lWmix <- max(lWmix)
@@ -114,11 +116,11 @@ marginal_dac_spatial_2grid <- function(history, obs, sigmaX, nu){
       mx <- x[, , n]
       mx[2, 2] <- x[2, 2, new_perm[n]]
       # contribution of g_{t, u}
-      sum_over_neighbours_obs_left <- (obs[2, 1] - mx[2, 1]) %*% solve(y.error.var[2, 2]) %*% (obs[2, 1] - mx[2, 1])
-      sum_over_neighbours_obs_right <- (obs[2, 2] - mx[2, 2]) %*% solve(y.error.var[4, 4]) %*% (obs[2, 2] - mx[2, 2])
-      sum_over_neighbours_obs_merged <- (obs[2, ] - mx[2, ]) %*% solve(y.error.var[c(2, 4), c(2, 4)]) %*% (obs[2, ] - mx[2, ])
-      lWmix_perm[n] <- - 0.5*(nu+nodes_dimension)*log(1+abs(sum_over_neighbours_obs_merged)/nu)
-      + 0.5*(nu+nodes_dimension_child)*(log(1+abs(sum_over_neighbours_obs_left)/nu) + log(1+abs(sum_over_neighbours_obs_right)/nu))
+      sum_over_neighbours_obs_left <- (obs[2, 1] - mx[2, 1]) %*% (y.error.prec[2, 2]) %*% (obs[2, 1] - mx[2, 1])
+      sum_over_neighbours_obs_right <- (obs[2, 2] - mx[2, 2]) %*% (y.error.prec[4, 4]) %*% (obs[2, 2] - mx[2, 2])
+      sum_over_neighbours_obs_merged <- (obs[2, ] - mx[2, ]) %*% (y.error.prec[c(2, 4), c(2, 4)]) %*% (obs[2, ] - mx[2, ])
+      lWmix_perm[n] <- - 0.5*(nu+2)*log(1+abs(sum_over_neighbours_obs_merged)/nu) +
+        0.5*(nu+1)*(log(1+abs(sum_over_neighbours_obs_left)/nu) + log(1+abs(sum_over_neighbours_obs_right)/nu))
     }
     lWmix_perm <- lWmix_perm + c(lW_left) + c(lW_right[new_perm])
     permutation <- c(permutation, new_perm)
@@ -145,11 +147,11 @@ marginal_dac_spatial_2grid <- function(history, obs, sigmaX, nu){
     # merged x
     mx <- x[, , n]
     # contribution of g_{t, u}
-    sum_over_neighbours_obs_left <- (obs[1, ] - mx[1, ]) %*% solve(y.error.var[c(1, 3), c(1, 3)]) %*% (obs[1, ] - mx[1, ])
-    sum_over_neighbours_obs_right <- (obs[2, ] - mx[2, ]) %*% solve(y.error.var[c(2, 4), c(2, 4)]) %*% (obs[2, ] - mx[2, ])
-    sum_over_neighbours_obs_merged <- c(obs - mx) %*% solve(y.error.var) %*% c(obs - mx)
-    lWmix[n] <- - 0.5*(nu+nodes_dimension)*log(1+abs(sum_over_neighbours_obs_merged)/nu)
-    + 0.5*(nu+nodes_dimension_child)*(log(1+abs(sum_over_neighbours_obs_left)/nu) + log(1+abs(sum_over_neighbours_obs_right)/nu))
+    sum_over_neighbours_obs_left <- (obs[1, ] - mx[1, ]) %*% (y.error.prec[c(1, 3), c(1, 3)]) %*% (obs[1, ] - mx[1, ])
+    sum_over_neighbours_obs_right <- (obs[2, ] - mx[2, ]) %*% (y.error.prec[c(2, 4), c(2, 4)]) %*% (obs[2, ] - mx[2, ])
+    sum_over_neighbours_obs_merged <- c(obs - mx) %*% (y.error.prec) %*% c(obs - mx)
+    lWmix[n] <- - 0.5*(nu+4)*log(1+abs(sum_over_neighbours_obs_merged)/nu) +
+      0.5*(nu+2)*(log(1+abs(sum_over_neighbours_obs_left)/nu) + log(1+abs(sum_over_neighbours_obs_right)/nu))
   }
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
@@ -170,11 +172,11 @@ marginal_dac_spatial_2grid <- function(history, obs, sigmaX, nu){
       mx <- x[, , n]
       mx[2, ] <- x[2, , new_perm[n]]
       # contribution of g_{t, u}
-      sum_over_neighbours_obs_left <- (obs[1, ] - mx[1, ]) %*% solve(y.error.var[c(1, 3), c(1, 3)]) %*% (obs[1, ] - mx[1, ])
-      sum_over_neighbours_obs_right <- (obs[2, ] - mx[2, ]) %*% solve(y.error.var[c(2, 4), c(2, 4)]) %*% (obs[2, ] - mx[2, ])
-      sum_over_neighbours_obs_merged <- c(obs - mx) %*% solve(y.error.var) %*% c(obs - mx)
-      lWmix_perm[n] <- - 0.5*(nu+nodes_dimension)*log(1+abs(sum_over_neighbours_obs_merged)/nu)
-      + 0.5*(nu+nodes_dimension_child)*(log(1+abs(sum_over_neighbours_obs_left)/nu) + log(1+abs(sum_over_neighbours_obs_right)/nu))
+      sum_over_neighbours_obs_left <- (obs[1, ] - mx[1, ]) %*% (y.error.prec[c(1, 3), c(1, 3)]) %*% (obs[1, ] - mx[1, ])
+      sum_over_neighbours_obs_right <- (obs[2, ] - mx[2, ]) %*% (y.error.prec[c(2, 4), c(2, 4)]) %*% (obs[2, ] - mx[2, ])
+      sum_over_neighbours_obs_merged <- c(obs - mx) %*% (y.error.prec) %*% c(obs - mx)
+      lWmix_perm[n] <- - 0.5*(nu+4)*log(1+abs(sum_over_neighbours_obs_merged)/nu) +
+        0.5*(nu+2)*(log(1+abs(sum_over_neighbours_obs_left)/nu) + log(1+abs(sum_over_neighbours_obs_right)/nu))
     }
     permutation <- c(permutation, new_perm)
     max.lWmix <- max(lWmix_perm)
