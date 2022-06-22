@@ -14,17 +14,17 @@ for (Nparticles in c(100, 500, 1000, 5000, 10000)) {
   df_dac <- read.csv(paste0("data/spatial/same_nt_corrected_stats_dac_spatial_tau", -tau, "d", d, "N", Nparticles),
                      row.names = 1)
   df_dac$type <- "dac"
-  df_bpf <- read.csv(paste0("data/spatial/same_nt_corrected_stats_bpf_spatial_tau", -tau, "d", d, "N", Nparticles),
-                     row.names = 1)
-  df_bpf$type <- "bpf"
-  df <- rbind(df, df_dac, df_bpf)
+  df <- rbind(df, df_dac)
 }
-
+df_bpf <- read.csv(paste0("data/spatial/same_nt_corrected_stats_bpf_spatial_tau", -tau, "d", d, "N", 100000),
+                   row.names = 1)
 dim <- 4
 t <- 10
 df_plot <- df[df$t == t & df$dim == dim,]
-ggplot(data = df_plot, aes(x=N, y=mean, group = interaction(N, type), color = type, fill = type))+
-  geom_boxplot(coef = 10, width = 0.1, alpha = 0.1, lwd = 1) +
+df_bpf_plot <- df_bpf[df_bpf$t == t & df_bpf$dim == dim,]
+ggplot(data = df_plot, aes(x=N, y=mean, group = N))+
+  geom_boxplot(coef = 10, width = 0.1, alpha = 0.3, lwd = 1, color = "dark gray", fill = "dark gray") +
+  geom_hline(yintercept = mean(df_bpf_plot$mean), lwd = 1, linetype = "dashed") +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
