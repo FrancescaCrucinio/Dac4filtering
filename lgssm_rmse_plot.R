@@ -171,11 +171,6 @@ for (id in 1:50){
   dfnew$d <- "32"
   dfnew$run <- id
   df <- rbind(df, dfnew)
-#   dfnew <- read.csv(paste0("data/lgssm_tempering/marginal_lgssm_d32N10000ID", id, sep = ""))
-#   dfnew$N <- "10^4"
-#   dfnew$d <- "32"
-#   dfnew$run <- id
-#   df <- rbind(df, dfnew)
   dfnew <- read.csv(paste0("data/lgssm_marginal/adaptive_marginal_lgssm_d32N10000ID", id, sep = ""))
   dfnew$N <- "10^4"
   dfnew$d <- "32"
@@ -188,12 +183,6 @@ for (id in 1:50){
   dfnew$d <- "256"
   dfnew$run <- id
   df <- rbind(df, dfnew)
-#   # filename <- paste0("data/lgssm_tempering/marginal_lgssm_d256N10000ID", id, sep = "")
-#   # dfnew <- read.csv(filename)
-#   # dfnew$N <- "10^4"
-#   # dfnew$d <- "256"
-#   # dfnew$run <- id
-#   # df <- rbind(df, dfnew)
 }
 for (id in c(1:36, 38:50)){
   filename <- paste0("data/lgssm_marginal/adaptive_marginal_lgssm_d256N10000ID", id, sep = "")

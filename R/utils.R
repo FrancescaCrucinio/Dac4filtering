@@ -1,25 +1,3 @@
-# Bisection using ESS
-bisection_ess <- function(lW, ess_target){
-  W <- exp(lW - max(lW))
-  ess_alpha <- function(alpha){ sum(W^(alpha))^2/sum(W^(2*alpha)) - ess_target}
-  alpha_star <- bisect(ess_alpha, 0, 1)$root
-  return(alpha_star)
-}
-
-# Bisection using CESS
-bisection_cess <- function(lOmega, lW, current_alpha, ess_decay_threshold){
-  W <- exp(lW - max(lW))
-  omega <- exp(lOmega - max(lOmega))
-  omega <- omega/sum(omega)
-  cess_alpha <- function(alpha){ sum(omega*W^(alpha-current_alpha))^2/sum(omega*W^(2*(alpha-current_alpha))) - ess_decay_threshold}
-  if(sign(cess_alpha(current_alpha)) == sign(cess_alpha(1))){
-    return(list("alpha_star" = current_alpha, "same_sign" = TRUE))
-  } else{
-    alpha_star <- bisect(cess_alpha, current_alpha, 1)$root
-    return(list("alpha_star" = alpha_star, "same_sign" = FALSE))
-  }
-}
-
 # Index of first and last child of node i in level u
 child_indices <- function(i, nv){
   rbind(nv*(i-1)+1, i*nv)
@@ -43,26 +21,6 @@ w1_dist <- function(x, N){
   wasserstein1d(x[1:N], x[N:length(x)])
 }
 
-# multinomial resampling
-mult_resample <- function(W, N){
-  W <- c(W)
-  # vector to store number of offsprings
-  indices <- rep(0, times = N)
-
-  # inverse transform
-  un <- sort(runif(N))
-  s <- W[1]
-  m <- 1
-  for(i in 1:N){
-    while(s < un[i]){
-      m <- m+1
-      s <- s+W[m]
-    }
-    indices[i] <- m
-  }
-  return(indices)
-}
-
 # Stratified resampling
 stratified_resample <- function(W, N){
   W <- c(W)
@@ -83,4 +41,22 @@ stratified_resample <- function(W, N){
     indices[i] <- m
   }
   return(indices)
+}
+
+# Get neighbours weights for the nonlinear spatial model
+get_all_neighbours <- function(rowcol, d, tau = NULL, tau_diag = NULL){
+  delta <- 1
+  neighbours_distance <- c(1, 1, 0, 1, 1)
+  x_neighbours <- matrix(c(-1, 0, 0, 0, 1, 0, -1, 0, 1, 0), ncol = 2)
+  current_x_neighbours <- x_neighbours + matrix(rep(c(rowcol[1], rowcol[2]), each = 5), ncol = 2)
+  current_valid <- as.logical(rowSums((current_x_neighbours > 0) * (current_x_neighbours < d+1)) - 1)
+  mixture_weights <- 1/(neighbours_distance+delta) * current_valid
+  mixture_weights <- mixture_weights/sum(mixture_weights)
+  out <- cbind(current_x_neighbours, mixture_weights)
+  if(!is.null(tau)) {
+    obs_weights <- tau * neighbours_distance + tau_diag *(1-neighbours_distance)
+    obs_weights <- obs_weights * current_valid
+    out <- cbind(out, obs_weights)
+  }
+  return(out)
 }

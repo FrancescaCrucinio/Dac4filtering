@@ -12,7 +12,7 @@ lambda <- 1
 sigmaY <- 0.5^2
 Time.step <- 100
 
-Nparticles <- 1000
+Nparticles <- 100
 M <- 100
 
 # observations
@@ -31,7 +31,7 @@ for (t in 1:Time.step){
   y <- unname(data.matrix(read.csv(filename, row.names = 1, nrows = 1, skip = t-1)))[1:d]
   # dac (lightweight)
   tic()
-  res_dac <- dac_lgssm_lightweight_crossover(res_dac, y, tau, lambda, sigmaY)
+  res_dac <- marginal_dac_lgssm_lightweight(res_dac, y, tau, lambda, sigmaY)
   rt <- toc()
   df_dac <- data.frame(rbind(df_dac, cbind(colMeans(res_dac), t, rt)))
 
