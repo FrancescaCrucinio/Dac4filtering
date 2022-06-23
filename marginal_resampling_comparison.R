@@ -9,7 +9,7 @@ ti_begin <- 1 + (timeinterval - 1)*10
 ti_end <- timeinterval*10
 Time.step <- 10
 
-filename <- paste0("/storage/u1693998/data/data_lgssm_d", d, "ID", ID)
+filename <- paste0("data/data_lgssm_d", d, "ID", ID)
 data <- read.csv(filename, row.names = 1)
 
 # parameters
@@ -25,7 +25,7 @@ rm(data)
 Nparticles <- 100
 
 if(timeinterval>1){
-  filename <- paste0("/storage/u1693998/results/dac_lgssm_d", d, "N", Nparticles, "ID", ID, "timeinterval", timeinterval-1)
+  filename <- paste0("/data/results/dac_lgssm_d", d, "N", Nparticles, "ID", ID, "timeinterval", timeinterval-1)
   data_dac <- read.table(filename, row.names = 1)
   history <- data.matrix(data_dac)
 } else{
@@ -43,7 +43,7 @@ runtime <- toc()
 se <- (colMeans(res_dac_light) - true_means[Time.step, ])^2
 df <- data.frame(t(c(se, runtime)))
 df$algo <- as.factor(c("light"))
-filename <- paste0("/storage/u1693998/results/light_marginal_resampling_comparison_d", d, "N", Nparticles, "ID", ID, "timeinterval", timeinterval)
+filename <- paste0("/data/results/light_marginal_resampling_comparison_d", d, "N", Nparticles, "ID", ID, "timeinterval", timeinterval)
 write.csv(x=df, file=filename)
 
 
@@ -57,7 +57,7 @@ runtime <- toc()
 se <- (colMeans(res_dac_light_ada) - true_means[Time.step, ])^2
 df <- data.frame(t(c(se, runtime)))
 df$algo <- as.factor(c("light-ada"))
-filename <- paste0("/storage/u1693998/results/ada_light_marginal_resampling_comparison_d", d, "N", Nparticles, "ID", ID, "timeinterval", timeinterval)
+filename <- paste0("/data/results/ada_light_marginal_resampling_comparison_d", d, "N", Nparticles, "ID", ID, "timeinterval", timeinterval)
 write.csv(x=df, file=filename)
 
 # mix
@@ -70,7 +70,7 @@ runtime <- toc()
 se <- (colMeans(res_dac_mix) - true_means[Time.step, ])^2
 df <- data.frame(t(c(se, runtime)))
 df$algo <- as.factor(c("mix"))
-filename <- paste0("/storage/u1693998/results/mix_marginal_resampling_comparison_d", d, "N", Nparticles, "ID", ID, "timeinterval", timeinterval)
+filename <- paste0("/data/results/mix_marginal_resampling_comparison_d", d, "N", Nparticles, "ID", ID, "timeinterval", timeinterval)
 write.csv(x=df, file=filename)
 
 # linear cost
@@ -83,6 +83,6 @@ runtime <- toc()
 se <- (colMeans(res_dac_lc) - true_means[Time.step, ])^2
 df <- data.frame(t(c(se, runtime)))
 df$algo <- as.factor(c("lc"))
-filename <- paste0("/storage/u1693998/results/lc_marginal_resampling_comparison_d", d, "N", Nparticles, "ID", ID, "timeinterval", timeinterval)
+filename <- paste0("/data/results/lc_marginal_resampling_comparison_d", d, "N", Nparticles, "ID", ID, "timeinterval", timeinterval)
 write.csv(x=df, file=filename)
 
