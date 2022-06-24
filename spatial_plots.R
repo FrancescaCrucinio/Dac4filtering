@@ -10,7 +10,7 @@ tau <- -0.25
 Time.step <- 10
 df <- data.frame()
 
-for (Nparticles in c(100, 500, 1000)) {
+for (Nparticles in c(100, 500, 1000, 5000)) {
   df_dac <- read.csv(paste0("data/spatial/same_nt_corrected_stats_dac_spatial_tau", -tau, "d", d, "N", Nparticles),
                      row.names = 1)
   df <- rbind(df, df_dac)
@@ -38,7 +38,7 @@ ggplot(data = df_iqr_mean, aes(x=N, y=mean, group=dim, color=dim)) +
         legend.text=element_text(size=20), legend.title=element_text(size=30))
 # ggsave("spatial32_iqr.pdf", width = 8.5, height = 4, dpi = 300)
 
-dim <- 34
+dim <- 1
 t <- 10
 df_plot <- df[df$t == t & df$dim == dim,]
 ggplot(data = df_plot, aes(x=runtime, y=mean, group = N))+
