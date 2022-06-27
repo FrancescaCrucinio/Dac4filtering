@@ -18,7 +18,7 @@ for (Nparticles in c(100, 500, 1000, 5000, 10000)) {
 }
 df_bpf <- read.csv(paste0("data/spatial/new_stats_bpf_spatial_tau", -tau, "d", d, "N", 100000),
                    row.names = 1)
-dim <- 1
+dim <- 4
 t <- 10
 df_plot <- df[df$t == t & df$dim == dim,]
 df_bpf_plot <- df_bpf[df_bpf$t == t & df_bpf$dim == dim,]
@@ -34,4 +34,4 @@ ggplot(data = df_plot, aes(x=N, y=mean, group = N))+
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=30),
         text = element_text(size=30))
-# ggsave("spatial2_boxplot_node11_mean.pdf", width = 8.5, height = 6, dpi = 300)
+# ggsave("spatial2_boxplot_node22_mean.pdf", width = 8.5, height = 6, dpi = 300)
