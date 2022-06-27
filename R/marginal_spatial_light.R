@@ -1,5 +1,5 @@
 marginal_spatial_light <- function(u_info, x, obs, cir_left, cir_right, cic_left, cic_right,
-                                              lW_left, lW_right, sigmaX, theta, tau, tau_diag, nu){
+                                              lW_left, lW_right, sigmaX, theta, tau, tau_diag, nu, history){
   d <- dim(x)[1]
   Nparticles <- dim(x)[3]
   cic <- unique(c(cic_left, cic_right))
@@ -75,7 +75,7 @@ marginal_spatial_light <- function(u_info, x, obs, cir_left, cir_right, cic_left
 }
 
 marginal_spatial_light_adaptive <- function(ess_target, u_info, x, obs, cir_left, cir_right, cic_left, cic_right,
-                                                       lW_left, lW_right, sigmaX, tau, tau_diag, nu){
+                                                       lW_left, lW_right, sigmaX, tau, tau_diag, nu, history){
   d <- dim(x)[1]
   Nparticles <- dim(x)[3]
   cic <- unique(c(cic_left, cic_right))
