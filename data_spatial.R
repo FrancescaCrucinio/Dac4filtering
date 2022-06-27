@@ -3,7 +3,7 @@ ID <- 1
 set.seed(1234*ID)
 
 # dimension
-d <- 32
+d <- 2
 # parameters
 sigmaX <- 1
 nu <- 10

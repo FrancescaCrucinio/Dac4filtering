@@ -2,9 +2,10 @@
 spatial_obs <- function(d, sigmaX, nu, tau, tau_diag, Time.step){
   y.error.prec <- matrix(0, nrow = d^2, ncol = d^2)
   diag(y.error.prec) <- tau_diag
-  diag(y.error.prec[-1, ]) <- tau
   vertical_neighbours <- ((0:d^2) * (d^2 + 1) + d+1)
+  horizontal_neighbours <- (0:(d^2-1)) * (d^2+1) + 2
   y.error.prec[vertical_neighbours[(vertical_neighbours <= d^4)]] <- tau
+  y.error.prec[horizontal_neighbours[mod(horizontal_neighbours, 2) == 0]] <- tau
   y.error.prec[upper.tri(y.error.prec)] <- t(y.error.prec)[upper.tri(y.error.prec)]
   y.error.var <- inv(y.error.prec)
   y.error.var[upper.tri(y.error.var)] <- t(y.error.var)[upper.tri(y.error.var)]
