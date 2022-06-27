@@ -80,7 +80,16 @@ marginal_spatial_light_adaptive <- function(ess_target, u_info, x, obs, cir_left
     nodes_dimension_child <- nchild^(u-1)
   }
   all_nodes <- as.matrix(expand.grid(cir, cic))
+  all_nodes_left <- cbind(all_nodes[(all_nodes[, 1] %in% cir_left) & (all_nodes[, 2] %in% cic_left), 1],
+                          all_nodes[(all_nodes[, 1] %in% cir_left) & (all_nodes[, 2] %in% cic_left), 2])
+  all_nodes_right <- cbind(all_nodes[(all_nodes[, 1] %in% cir_right) & (all_nodes[, 2] %in% cic_right), 1],
+                           all_nodes[(all_nodes[, 1] %in% cir_right) & (all_nodes[, 2] %in% cic_right), 2])
   how_many_nodes <- nrow(all_nodes)
+  how_many_nodes_left <- nrow(all_nodes_left)
+  how_many_nodes_right <- nrow(all_nodes_right)
+  all_nodes_history <- cbind(do.call(rbind, replicate(Nparticles, all_nodes, simplify=FALSE)), rep(1:Nparticles, each = how_many_nodes))
+  all_nodes_history_left <- cbind(do.call(rbind, replicate(Nparticles, all_nodes_left, simplify=FALSE)), rep(1:Nparticles, each =how_many_nodes_left))
+  all_nodes_history_right <- cbind(do.call(rbind, replicate(Nparticles, all_nodes_right, simplify=FALSE)), rep(1:Nparticles, each = how_many_nodes_right))
   all_nodes_neighbours <- do.call(rbind, apply(all_nodes, 1, get_all_neighbours, d, tau, tau_diag, simplify = FALSE))
   neighbours_in_node <- (all_nodes_neighbours[, 1] %in% cir) & (all_nodes_neighbours[, 2] %in% cic)
   neighbours_in_left <- ((all_nodes_neighbours[, 1] %in% cir_left) & (all_nodes_neighbours[, 2] %in% cic_left)) *
@@ -101,8 +110,13 @@ marginal_spatial_light_adaptive <- function(ess_target, u_info, x, obs, cir_left
     sum_over_neighbours_obs_left <- sum(tmp_obs_left)
     sum_over_neighbours_obs_right <-sum(tmp_obs_right)
     sum_over_neighbours_obs_merged <- sum(tmp_obs)
+    # contribution of f_{t, u}
+    transition_node <- log(sum(exp(-rowSums(sweep(matrix(history[all_nodes_history], ncol = how_many_nodes, byrow = TRUE), 2, mx[all_nodes])^2/(2*sigmaX)))))
+    transition_left <- log(sum(exp(-rowSums(sweep(matrix(history[all_nodes_history_left], ncol = how_many_nodes_left, byrow = TRUE), 2, mx[all_nodes_left])^2/(2*sigmaX)))))
+    transition_right <- log(sum(exp(-rowSums(sweep(matrix(history[all_nodes_history_right], ncol = how_many_nodes_right, byrow = TRUE), 2, mx[all_nodes_right])^2/(2*sigmaX)))))
     lWmix[n] <- - 0.5*(nu+nodes_dimension)*log(1+abs(sum_over_neighbours_obs_merged)/nu) +
-     0.5*(nu+nodes_dimension_child)*(log(1+abs(sum_over_neighbours_obs_left)/nu) + log(1+abs(sum_over_neighbours_obs_right)/nu))
+     0.5*(nu+nodes_dimension_child)*(log(1+abs(sum_over_neighbours_obs_left)/nu) + log(1+abs(sum_over_neighbours_obs_right)/nu)) +
+      transition_node - transition_right - transition_left
   }
   if(u_info$u == 1 & u_info$direction == "h"){
     lWmix <- lWmix + c(lW_left) + c(lW_right)
@@ -132,8 +146,13 @@ marginal_spatial_light_adaptive <- function(ess_target, u_info, x, obs, cir_left
       sum_over_neighbours_obs_left <- sum(tmp_obs_left)
       sum_over_neighbours_obs_right <-sum(tmp_obs_right)
       sum_over_neighbours_obs_merged <- sum(tmp_obs)
+      # contribution of f_{t, u}
+      transition_node <- log(sum(exp(-rowSums(sweep(matrix(history[all_nodes_history], ncol = how_many_nodes, byrow = TRUE), 2, mx[all_nodes])^2/(2*sigmaX)))))
+      transition_left <- log(sum(exp(-rowSums(sweep(matrix(history[all_nodes_history_left], ncol = how_many_nodes_left, byrow = TRUE), 2, mx[all_nodes_left])^2/(2*sigmaX)))))
+      transition_right <- log(sum(exp(-rowSums(sweep(matrix(history[all_nodes_history_right], ncol = how_many_nodes_right, byrow = TRUE), 2, mx[all_nodes_right])^2/(2*sigmaX)))))
       lWmix_perm[n] <- - 0.5*(nu+nodes_dimension)*log(1+abs(sum_over_neighbours_obs_merged)/nu) +
-        0.5*(nu+nodes_dimension_child)*(log(1+abs(sum_over_neighbours_obs_left)/nu) + log(1+abs(sum_over_neighbours_obs_right)/nu))
+        0.5*(nu+nodes_dimension_child)*(log(1+abs(sum_over_neighbours_obs_left)/nu) + log(1+abs(sum_over_neighbours_obs_right)/nu)) +
+        transition_node - transition_right - transition_left
     }
     if(u_info$u == 1 & u_info$direction == "h"){
       lWmix_perm <- lWmix_perm + c(lW_left) + c(lW_right[new_perm])
