@@ -11,12 +11,12 @@ Time.step <- 10
 df <- data.frame()
 
 for (Nparticles in c(100, 500, 1000, 5000, 10000)) {
-  df_dac <- read.csv(paste0("data/spatial/stats_dac_spatial_tau", -tau, "d", d, "N", Nparticles),
+  df_dac <- read.csv(paste0("data/spatial/new_stats_dac_spatial_tau", -tau, "d", d, "N", Nparticles),
                      row.names = 1)
   df_dac$type <- "dac"
   df <- rbind(df, df_dac)
 }
-df_bpf <- read.csv(paste0("data/spatial/stats_bpf_spatial_tau", -tau, "d", d, "N", 100000),
+df_bpf <- read.csv(paste0("data/spatial/new_stats_bpf_spatial_tau", -tau, "d", d, "N", 100000),
                    row.names = 1)
 dim <- 1
 t <- 10
