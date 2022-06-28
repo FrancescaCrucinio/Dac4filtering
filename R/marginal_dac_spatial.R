@@ -29,17 +29,17 @@ marginal_dac_spatial <- function(history, obs, sigmaX, nu, tau, tau_diag, adapti
         ### Step 1
         out_top_merge <- marginal_spatial_merge(lW, x, obs, 2*i-1, 2*i-1, 2*j-1, 2*j,
                                            cir[, 1], cic[, 1], cir[, 1], cic[, 2],
-                                           nv, nvNew, list("u" = u, "direction" = "h"), theta, tau, tau_diag, nu)
+                                           nv, nvNew, list("u" = u, "direction" = "h"), theta, tau, tau_diag, nu, history)
         x[cir[, 1], c(cic), ] <- out_top_merge$x
         ### Step 2
         out_bottom_merge <- marginal_spatial_merge(lW, x, obs, 2*i, 2*i, 2*j-1, 2*j,
                                                                cir[, 2], cic[, 1], cir[, 2], cic[, 2],
-                                                               nv, nvNew, list("u" = u, "direction" = "h"), theta, tau, tau_diag, nu)
+                                                               nv, nvNew, list("u" = u, "direction" = "h"), theta, tau, tau_diag, nu, history)
         x[cir[, 2], c(cic), ] <- out_bottom_merge$x
         #### VERTICAL MERGE ###
         out_merge <- marginal_spatial_merge(lW, x, obs, 2*i-1, 2*i, 2*j-1, 2*j-1,
                                                              cir[, 1], c(cic), cir[, 2], c(cic),
-                                                             nv, nvNew, list("u" = u, "direction" = "v"), theta, tau, tau_diag, nu)
+                                                             nv, nvNew, list("u" = u, "direction" = "v"), theta, tau, tau_diag, nu, history)
         x[c(cir), c(cic), ] <- out_merge$x
       }
     }

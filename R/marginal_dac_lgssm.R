@@ -1,5 +1,5 @@
 # Lightweight resampling DaC for linear Gaussian SSM
-marginal_dac_lgssm_lightweight <- function(history, obs, tau, lambda, sigmaY, adaptive = FALSE){
+marginal_dac_lgssm_lightweight <- function(history, obs, tau, lambda, sigmaY, x.error.prec, adaptive = FALSE){
   # number of samples for lightweight mixture
   theta <- ceiling(sqrt(Nparticles))
   # dimension and number of particles
@@ -42,7 +42,7 @@ marginal_dac_lgssm_lightweight <- function(history, obs, tau, lambda, sigmaY, ad
       ci <- child_indices(i, nvNew)
       # lightweight mixture resampling
       if(adaptive){
-        out <- marginal_lgssm_light_adaptive(Nparticles, i, u, nv, ci, lW, Nparticles, lambda, tau, x, history)
+        out <- marginal_lgssm_light_adaptive(Nparticles, i, u, nv, ci, lW, Nparticles, lambda, tau, x, history, x.error.prec)
       } else {
         out <- marginal_lgssm_light(i, u, nv, ci, W, Nparticles, theta, lambda, tau, x, history, memory)
       }
