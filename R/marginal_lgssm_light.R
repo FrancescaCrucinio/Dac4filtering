@@ -20,16 +20,16 @@ marginal_lgssm_light <- function(i, u, nv, ci, W, Nparticles, theta, lambda, tau
     for (n in 1:(theta*Nparticles)) {
       lWmix[n] <- -0.5*lambda * (lambda *x[indices1[n], (ci[1]+nv-1)]^2/(tau+lambda) -
                                    2*x[indices1[n], (ci[1]+nv-1)] * x[indices2[n], (ci[1]+nv)])+
-        log(mean(exp(-0.5*(x[indices1[n], (ci[1]+nv-1)]-history[, ci[1]+nv])^2/(tau+lambda) -
+        log(mean(exp(-0.5*(x[indices1[n], (ci[1]+nv)]-history[, ci[1]+nv])^2/(tau+lambda) -
                        0.5*lambda*tau*history[, ci[1]+nv] * x[indices1[n], (ci[1]+nv-1)]/(tau+lambda)))) -
-        log(mean(exp(-0.5*(x[indices1[n], (ci[1]+nv-1)]-history[, ci[1]+nv])^2/(tau+lambda))))
+        log(mean(exp(-0.5*(x[indices1[n], (ci[1]+nv)]-history[, ci[1]+nv])^2/(tau+lambda))))
     }
   } else {
     lWmix <- -0.5*lambda * (lambda *x[indices1, (ci[1]+nv-1)]^2/(tau+lambda) -
                               2*x[indices1, (ci[1]+nv-1)] * x[indices2, (ci[1]+nv)]) +
-      log(rowMeans(exp(-0.5*outer(x[indices1, (ci[1]+nv-1)], history[, ci[1]+nv], "-")^2/(tau+lambda) -
+      log(rowMeans(exp(-0.5*outer(x[indices1, (ci[1]+nv)], history[, ci[1]+nv], "-")^2/(tau+lambda) -
                          0.5*lambda*tau*outer(x[indices1, (ci[1]+nv-1)], history[, ci[1]+nv], "*")/(tau+lambda)))) -
-      log(rowMeans(exp(-0.5*outer(x[indices1, (ci[1]+nv-1)], history[, ci[1]+nv], "-")^2/(tau+lambda))))
+      log(rowMeans(exp(-0.5*outer(x[indices1, (ci[1]+nv)], history[, ci[1]+nv], "-")^2/(tau+lambda))))
   }
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
@@ -43,25 +43,9 @@ marginal_lgssm_light <- function(i, u, nv, ci, W, Nparticles, theta, lambda, tau
 marginal_lgssm_light_adaptive <- function(ess_target, i, u, nv, ci, lW, Nparticles, lambda, tau, x, history){
   # binary tree
   nchild <- 2
-  # normal_density <- function(z, coeff_mat, prec_mat, past) {
-  #   normal_mean <- -sweep(0.5*coeff_mat %*% past, 1, z)
-  #   out <- exp(-0.5*apply(normal_mean, 2, FUN = function(z) {t(z)%*%prec_mat%*%z}))
-  #   return(out)
-  # }
-
-  # mixture weights
-  # integral_left <- apply(x[, ci[1]:(ci[1]+nv-1), drop = FALSE], 1, FUN = normal_density,
-  #                    x.coeff[ci[1]:(ci[1]+nv-1), ci[1]:(ci[1]+nv-1)], x.error.prec[ci[1]:(ci[1]+nv-1), ci[1]:(ci[1]+nv-1)],
-  #                    t(history[, ci[1]:(ci[1]+nv-1)]))
-  # integral_right <- apply(x[, (ci[1]+nv):ci[2], drop = FALSE], 1, FUN = normal_density,
-  #                       x.coeff[(ci[1]+nv):ci[2], (ci[1]+nv):ci[2]], x.error.prec[(ci[1]+nv):ci[2],(ci[1]+nv):ci[2]],
-  #                       t(history[, (ci[1]+nv):ci[2]]))
-  # integral_merged <- apply(x[, ci[1]:ci[2], drop = FALSE], 1, FUN = normal_density,
-  #                      x.coeff[ci[1]:ci[2], ci[1]:ci[2]], x.error.prec[ci[1]:ci[2],ci[1]:ci[2]],
-  #                      t(history[, ci[1]:ci[2]]))
-  integral_part <- log(rowMeans(exp(-0.5*outer(x[, (ci[1]+nv-1)], history[, ci[1]+nv], "-")^2/(tau+lambda) -
+  integral_part <- log(rowMeans(exp(-0.5*outer(x[, (ci[1]+nv)], history[, ci[1]+nv], "-")^2/(tau+lambda) -
                                       0.5*lambda*tau*outer(x[, (ci[1]+nv-1)], history[, ci[1]+nv], "*")/(tau+lambda))))  -
-            log(rowMeans(exp(-0.5*outer(x[, (ci[1]+nv-1)], history[, ci[1]+nv], "-")^2/(tau+lambda))))
+            log(rowMeans(exp(-0.5*outer(x[, (ci[1]+nv)], history[, ci[1]+nv], "-")^2/(tau+lambda))))
   if(u == 1){
     lWmix <- lW[, (nchild*(i-1)+1)] + lW[, i*nchild] - 0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2/(tau+lambda) -
                                                                       2*x[, (ci[1]+nv-1)] * x[, (ci[1]+nv)])
@@ -69,12 +53,6 @@ marginal_lgssm_light_adaptive <- function(ess_target, i, u, nv, ci, lW, Nparticl
     lWmix <- -0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2/(tau+lambda) -
                               2*x[, (ci[1]+nv-1)] * x[, (ci[1]+nv)])
   }
-  # if(u == 1){
-  #   lWmix <- lW[, (nchild*(i-1)+1)] + lW[, i*nchild] +
-  #     log(colSums(integral_merged)) - log(sum(integral_left)) - log(sum(integral_right))
-  # } else{
-  #   lWmix <- log(sum(integral_merged)) - log(sum(integral_left)) - log(sum(integral_right))
-  # }
   lWmix <- lWmix + integral_part
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
@@ -88,12 +66,6 @@ marginal_lgssm_light_adaptive <- function(ess_target, i, u, nv, ci, lW, Nparticl
   while (ess < ess_target & theta <= ceiling(sqrt(Nparticles))) {
     theta <- theta+1
     new_perm <- sample.int(Nparticles)
-    # integral_right <- apply(x[new_perm, (ci[1]+nv):ci[2], drop = FALSE], 1, FUN = normal_density,
-    #                         x.coeff[(ci[1]+nv):ci[2], (ci[1]+nv):ci[2]], x.error.prec[(ci[1]+nv):ci[2],(ci[1]+nv):ci[2]],
-    #                         t(history[, (ci[1]+nv):ci[2]]))
-    # integral_merged <- apply(cbind(x[, ci[1]:(ci[1]+nv-1)], x[new_perm, (ci[1]+nv):ci[2]]), 1, FUN = normal_density,
-    #                          x.coeff[ci[1]:ci[2], ci[1]:ci[2]], x.error.prec[ci[1]:ci[2],ci[1]:ci[2]],
-    #                          t(history[, ci[1]:ci[2]]))
     if(u == 1){
       lWmix_perm <- lW[, (nchild*(i-1)+1)] + lW[new_perm, i*nchild] -0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2/(tau+lambda) -
                                                                                      2*x[, (ci[1]+nv-1)] * x[new_perm, (ci[1]+nv)])
@@ -101,12 +73,6 @@ marginal_lgssm_light_adaptive <- function(ess_target, i, u, nv, ci, lW, Nparticl
       lWmix_perm <- -0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2/(tau+lambda) -
                                      2*x[, (ci[1]+nv-1)] * x[new_perm, (ci[1]+nv)])
     }
-    # if(u == 1){
-    #   lWmix_perm <- lW[, (nchild*(i-1)+1)] + lW[new_perm, i*nchild] +
-    #     log(sum(integral_merged)) - log(sum(integral_left)) - log(sum(integral_right))
-    # } else{
-    #   lWmix_perm <- log(sum(integral_merged)) - log(sum(integral_left)) - log(sum(integral_right))
-    # }
     lWmix_perm <- lWmix_perm + integral_part
     permutation <- c(permutation, new_perm)
     max.lWmix <- max(lWmix_perm)
