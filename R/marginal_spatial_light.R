@@ -111,6 +111,7 @@ marginal_spatial_light_adaptive <- function(ess_target, u_info, x, obs, cir_left
   all_nodes_neighbours[all_nodes_neighbours[, 3] == 0, 1:2] <- 1
   # mixture weights
   lWmix <- rep(0, times = Nparticles)
+  print(paste(u))
   for (n in 1:Nparticles){
     # merged x
     mx <- x[, , n]
@@ -122,12 +123,13 @@ marginal_spatial_light_adaptive <- function(ess_target, u_info, x, obs, cir_left
     sum_over_neighbours_obs_right <-sum(tmp_obs_right)
     sum_over_neighbours_obs_merged <- sum(tmp_obs)
     # contribution of f_{t, u}
-    transition_node <- log(sum(exp(-rowSums(sweep(matrix(history[all_nodes_history], ncol = how_many_nodes, byrow = TRUE), 2, mx[all_nodes])^2/(2*sigmaX)))))
-    transition_left <- log(sum(exp(-rowSums(sweep(matrix(history[all_nodes_history_left], ncol = how_many_nodes_left, byrow = TRUE), 2, mx[all_nodes_left])^2/(2*sigmaX)))))
-    transition_right <- log(sum(exp(-rowSums(sweep(matrix(history[all_nodes_history_right], ncol = how_many_nodes_right, byrow = TRUE), 2, mx[all_nodes_right])^2/(2*sigmaX)))))
+    transition_node <- log(mean(exp(-rowSums(sweep(matrix(history[all_nodes_history], ncol = how_many_nodes, byrow = TRUE), 2, mx[all_nodes])^2/(2*sigmaX)))))
+    transition_left <- log(mean(exp(-rowSums(sweep(matrix(history[all_nodes_history_left], ncol = how_many_nodes_left, byrow = TRUE), 2, mx[all_nodes_left])^2/(2*sigmaX)))))
+    transition_right <- log(mean(exp(-rowSums(sweep(matrix(history[all_nodes_history_right], ncol = how_many_nodes_right, byrow = TRUE), 2, mx[all_nodes_right])^2/(2*sigmaX)))))
     lWmix[n] <- - 0.5*(nu+nodes_dimension)*log(1+abs(sum_over_neighbours_obs_merged)/nu) +
      0.5*(nu+nodes_dimension_child)*(log(1+abs(sum_over_neighbours_obs_left)/nu) + log(1+abs(sum_over_neighbours_obs_right)/nu)) +
       transition_node - transition_right - transition_left
+    print(paste(transition_node, transition_left, transition_right))
   }
   if(u_info$u == 1 & u_info$direction == "h"){
     lWmix <- lWmix + c(lW_left) + c(lW_right)
@@ -141,8 +143,14 @@ marginal_spatial_light_adaptive <- function(ess_target, u_info, x, obs, cir_left
   # first permutation
   permutation <- 1:Nparticles
   theta <- 1
-  while (ess < ess_target & theta<=ceiling(sqrt(Nparticles))) {
+  print(paste(theta))
+
+  tmp2 <- (theta<=ceiling(sqrt(Nparticles)))
+  tmp1 <- (ess < ess_target)
+  print(paste(tmp1, tmp2))
+  while (tmp1 & tmp2) {
     theta <- theta+1
+    print(paste(theta))
     new_perm <- sample.int(Nparticles)
     # mixture weights
     lWmix_perm <- rep(0, times = Nparticles)
@@ -158,13 +166,15 @@ marginal_spatial_light_adaptive <- function(ess_target, u_info, x, obs, cir_left
       sum_over_neighbours_obs_right <-sum(tmp_obs_right)
       sum_over_neighbours_obs_merged <- sum(tmp_obs)
       # contribution of f_{t, u}
-      transition_node <- log(sum(exp(-rowSums(sweep(matrix(history[all_nodes_history], ncol = how_many_nodes, byrow = TRUE), 2, mx[all_nodes])^2/(2*sigmaX)))))
-      transition_left <- log(sum(exp(-rowSums(sweep(matrix(history[all_nodes_history_left], ncol = how_many_nodes_left, byrow = TRUE), 2, mx[all_nodes_left])^2/(2*sigmaX)))))
-      transition_right <- log(sum(exp(-rowSums(sweep(matrix(history[all_nodes_history_right], ncol = how_many_nodes_right, byrow = TRUE), 2, mx[all_nodes_right])^2/(2*sigmaX)))))
+      transition_node <- log(mean(exp(-rowSums(sweep(matrix(history[all_nodes_history], ncol = how_many_nodes, byrow = TRUE), 2, mx[all_nodes])^2/(2*sigmaX)))))
+      transition_left <- log(mean(exp(-rowSums(sweep(matrix(history[all_nodes_history_left], ncol = how_many_nodes_left, byrow = TRUE), 2, mx[all_nodes_left])^2/(2*sigmaX)))))
+      transition_right <- log(mean(exp(-rowSums(sweep(matrix(history[all_nodes_history_right], ncol = how_many_nodes_right, byrow = TRUE), 2, mx[all_nodes_right])^2/(2*sigmaX)))))
       lWmix_perm[n] <- - 0.5*(nu+nodes_dimension)*log(1+abs(sum_over_neighbours_obs_merged)/nu) +
         0.5*(nu+nodes_dimension_child)*(log(1+abs(sum_over_neighbours_obs_left)/nu) + log(1+abs(sum_over_neighbours_obs_right)/nu)) +
         transition_node - transition_right - transition_left
+
     }
+    print(paste(lWmix_perm))
     if(u_info$u == 1 & u_info$direction == "h"){
       lWmix_perm <- lWmix_perm + c(lW_left) + c(lW_right[new_perm])
     }
@@ -176,6 +186,10 @@ marginal_spatial_light_adaptive <- function(ess_target, u_info, x, obs, cir_left
     ess_ss <- ess_ss + sum(Wmix^2)
     ess <- ess_s^2/ess_ss
     lWmix <- c(lWmix, lWmix_perm)
+    print(paste(ess))
+    tmp1 <- (ess < ess_target)
+    tmp2 <- (theta<=ceiling(sqrt(Nparticles)))
+    print(paste(tmp1, tmp2))
   }
   # write.table(data.frame("u" = u_info$u, "direction" = u_info$direction, "theta" = theta), file = "data/adaptive_spatial.csv", sep = ",", append = TRUE, quote = FALSE,
   #             col.names = FALSE, row.names = FALSE)
