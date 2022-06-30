@@ -41,7 +41,6 @@ marginal_lgssm_light <- function(i, u, nv, ci, W, Nparticles, theta, lambda, tau
 
 # Adaptive Lightweight resampling for linear Gaussian SSM
 marginal_lgssm_light_adaptive <- function(ess_target, i, u, nv, ci, lW, Nparticles, lambda, tau, x, history){
-  print(paste(u))
   # binary tree
   nchild <- 2
   integral_per_dimension <- array(0, dim = c(Nparticles, Nparticles, 2*nv))
