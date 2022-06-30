@@ -62,11 +62,9 @@ marginal_lgssm_light_adaptive <- function(ess_target, i, u, nv, ci, lW, Nparticl
   integral_left <- ifelse(all(integral_left< .Machine$double.eps), rep(0, Nparticles), log(integral_left))
   integral_right <- ifelse(all(integral_right< .Machine$double.eps), rep(0, Nparticles), log(integral_right))
   if(u == 1){
-    lWmix <- lW[, (nchild*(i-1)+1)] + lW[, i*nchild] - 0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2/(tau+lambda) -
-                                                                      2*x[, (ci[1]+nv-1)] * x[, (ci[1]+nv)])
+    lWmix <- lW[, (nchild*(i-1)+1)] + lW[, i*nchild] + lambda*x[, (ci[1]+nv-1)] * x[, (ci[1]+nv)]
   } else{
-    lWmix <- -0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2/(tau+lambda) -
-                              2*x[, (ci[1]+nv-1)] * x[, (ci[1]+nv)])
+    lWmix <- lambda*x[, (ci[1]+nv-1)] * x[, (ci[1]+nv)]
   }
   lWmix <- lWmix + integral_merged - integral_left - integral_right
   max.lWmix <- max(lWmix)
@@ -98,11 +96,9 @@ marginal_lgssm_light_adaptive <- function(ess_target, i, u, nv, ci, lW, Nparticl
     integral_merged <- ifelse(all(integral_merged < .Machine$double.eps), rep(0, Nparticles), log(integral_merged))
     integral_right <- ifelse(all(integral_right< .Machine$double.eps), rep(0, Nparticles), log(integral_right))
     if(u == 1){
-      lWmix_perm <- lW[, (nchild*(i-1)+1)] + lW[new_perm, i*nchild] -0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2/(tau+lambda) -
-                                                                                     2*x[, (ci[1]+nv-1)] * x[new_perm, (ci[1]+nv)])
+      lWmix_perm <- lW[, (nchild*(i-1)+1)] + lW[new_perm, i*nchild] + lambda*x[, (ci[1]+nv-1)] * x[new_perm, (ci[1]+nv)]
     } else{
-      lWmix_perm <- -0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2/(tau+lambda) -
-                                     2*x[, (ci[1]+nv-1)] * x[new_perm, (ci[1]+nv)])
+      lWmix_perm <- lambda*x[, (ci[1]+nv-1)] * x[new_perm, (ci[1]+nv)]
     }
     lWmix_perm <- lWmix_perm + integral_merged - integral_left - integral_right
     permutation <- c(permutation, new_perm)
