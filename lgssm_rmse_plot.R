@@ -5,13 +5,19 @@ df <- read.csv(paste0("data/lgssm_tempering/lgssm_d32N100ID1"))
 df$N <- "10^2"
 df$d <- "32"
 df$run <- 1
-dfnew <- read.csv(paste0("data/lgssm_marginal/marginal_lgssm_d32N100ID1"))
-dfnew$N <- "10^2"
-dfnew$d <- "32"
-dfnew$run <- 1
-dfnew$algo <- "dac"
-df <- rbind(df, dfnew)
-dfnew <- read.csv(paste0("data/lgssm_marginal/adaptive_marginal_lgssm_d32N100ID1"))
+# dfnew <- read.csv(paste0("data/lgssm_marginal/marginal_lgssm_d32N100ID1"))
+# dfnew$N <- "10^2"
+# dfnew$d <- "32"
+# dfnew$run <- 1
+# dfnew$algo <- "dac"
+# df <- rbind(df, dfnew)
+# dfnew <- read.csv(paste0("data/lgssm_marginal/adaptive_marginal_lgssm_d32N100ID1"))
+# dfnew$N <- "10^2"
+# dfnew$d <- "32"
+# dfnew$algo <- "dac-ada"
+# dfnew$run <- 1
+# df <- rbind(df, dfnew)
+dfnew <- read.csv(paste0("data/lgssm_marginal_new/new_adaptive_marginal_lgssm_d32N100ID1"))
 dfnew$N <- "10^2"
 dfnew$d <- "32"
 dfnew$algo <- "dac-ada"
@@ -22,13 +28,19 @@ dfnew$N <- "10^2"
 dfnew$d <- "256"
 dfnew$run <- 1
 df <- rbind(df, dfnew)
-dfnew <- read.csv(paste0("data/lgssm_marginal/marginal_lgssm_d256N100ID1"))
-dfnew$N <- "10^2"
-dfnew$d <- "256"
-dfnew$run <- 1
-dfnew$algo <- "dac"
-df <- rbind(df, dfnew)
-dfnew <- read.csv(paste0("data/lgssm_marginal/adaptive_marginal_lgssm_d256N100ID1"))
+# dfnew <- read.csv(paste0("data/lgssm_marginal/marginal_lgssm_d256N100ID1"))
+# dfnew$N <- "10^2"
+# dfnew$d <- "256"
+# dfnew$run <- 1
+# dfnew$algo <- "dac"
+# df <- rbind(df, dfnew)
+# dfnew <- read.csv(paste0("data/lgssm_marginal/adaptive_marginal_lgssm_d256N100ID1"))
+# dfnew$N <- "10^2"
+# dfnew$d <- "256"
+# dfnew$algo <- "dac-ada"
+# dfnew$run <- 1
+# df <- rbind(df, dfnew)
+dfnew <- read.csv(paste0("data/lgssm_marginal_new/new_adaptive_marginal_lgssm_d256N100ID1"))
 dfnew$N <- "10^2"
 dfnew$d <- "256"
 dfnew$algo <- "dac-ada"
@@ -39,13 +51,19 @@ dfnew$N <- "10^2"
 dfnew$d <- "2048"
 dfnew$run <- 1
 df <- rbind(df, dfnew)
-dfnew <- read.csv(paste0("data/lgssm_marginal/marginal_lgssm_d2048N100ID1"))
-dfnew$N <- "10^2"
-dfnew$d <- "2048"
-dfnew$run <- 1
-dfnew$algo <- "dac"
-df <- rbind(df, dfnew)
-dfnew <- read.csv(paste0("data/lgssm_marginal/adaptive_marginal_lgssm_d2048N100ID1"))
+# dfnew <- read.csv(paste0("data/lgssm_marginal/marginal_lgssm_d2048N100ID1"))
+# dfnew$N <- "10^2"
+# dfnew$d <- "2048"
+# dfnew$run <- 1
+# dfnew$algo <- "dac"
+# df <- rbind(df, dfnew)
+# dfnew <- read.csv(paste0("data/lgssm_marginal/adaptive_marginal_lgssm_d2048N100ID1"))
+# dfnew$N <- "10^2"
+# dfnew$d <- "2048"
+# dfnew$algo <- "dac-ada"
+# dfnew$run <- 1
+# df <- rbind(df, dfnew)
+dfnew <- read.csv(paste0("data/lgssm_marginal_new/new_adaptive_marginal_lgssm_d2048N100ID1"))
 dfnew$N <- "10^2"
 dfnew$d <- "2048"
 dfnew$algo <- "dac-ada"
@@ -58,13 +76,19 @@ for (id in 2:50){
   dfnew$d <- "32"
   dfnew$run <- id
   df <- rbind(df, dfnew)
-  dfnew <- read.csv(paste0("data/lgssm_marginal/marginal_lgssm_d32N100ID", id, sep = ""))
-  dfnew$N <- "10^2"
-  dfnew$d <- "32"
-  dfnew$algo <- "dac"
-  dfnew$run <- id
-  df <- rbind(df, dfnew)
-  dfnew <- read.csv(paste0("data/lgssm_marginal/adaptive_marginal_lgssm_d32N100ID", id, sep = ""))
+  # dfnew <- read.csv(paste0("data/lgssm_marginal/marginal_lgssm_d32N100ID", id, sep = ""))
+  # dfnew$N <- "10^2"
+  # dfnew$d <- "32"
+  # dfnew$algo <- "dac"
+  # dfnew$run <- id
+  # df <- rbind(df, dfnew)
+  # dfnew <- read.csv(paste0("data/lgssm_marginal/adaptive_marginal_lgssm_d32N100ID", id, sep = ""))
+  # dfnew$N <- "10^2"
+  # dfnew$d <- "32"
+  # dfnew$algo <- "dac-ada"
+  # dfnew$run <- id
+  # df <- rbind(df, dfnew)
+  dfnew <- read.csv(paste0("data/lgssm_marginal_new/new_adaptive_marginal_lgssm_d32N100ID", id, sep = ""))
   dfnew$N <- "10^2"
   dfnew$d <- "32"
   dfnew$algo <- "dac-ada"
@@ -76,13 +100,19 @@ for (id in 2:50){
   dfnew$d <- "256"
   dfnew$run <- id
   df <- rbind(df, dfnew)
-  dfnew <- read.csv(paste0("data/lgssm_marginal/marginal_lgssm_d256N100ID", id, sep = ""))
-  dfnew$N <- "10^2"
-  dfnew$d <- "256"
-  dfnew$algo <- "dac"
-  dfnew$run <- id
-  df <- rbind(df, dfnew)
-  dfnew <- read.csv(paste0("data/lgssm_marginal/adaptive_marginal_lgssm_d256N100ID", id, sep = ""))
+  # dfnew <- read.csv(paste0("data/lgssm_marginal/marginal_lgssm_d256N100ID", id, sep = ""))
+  # dfnew$N <- "10^2"
+  # dfnew$d <- "256"
+  # dfnew$algo <- "dac"
+  # dfnew$run <- id
+  # df <- rbind(df, dfnew)
+  # dfnew <- read.csv(paste0("data/lgssm_marginal/adaptive_marginal_lgssm_d256N100ID", id, sep = ""))
+  # dfnew$N <- "10^2"
+  # dfnew$d <- "256"
+  # dfnew$algo <- "dac-ada"
+  # dfnew$run <- id
+  # df <- rbind(df, dfnew)
+  dfnew <- read.csv(paste0("data/lgssm_marginal_new/new_adaptive_marginal_lgssm_d256N100ID", id, sep = ""))
   dfnew$N <- "10^2"
   dfnew$d <- "256"
   dfnew$algo <- "dac-ada"
@@ -94,14 +124,21 @@ for (id in 2:50){
   dfnew$d <- "2048"
   dfnew$run <- id
   df <- rbind(df, dfnew)
-  filename <- paste0("data/lgssm_marginal/marginal_lgssm_d2048N100ID", id, sep = "")
-  dfnew <- read.csv(filename)
-  dfnew$N <- "10^2"
-  dfnew$d <- "2048"
-  dfnew$algo <- "dac"
-  dfnew$run <- id
-  df <- rbind(df, dfnew)
-  filename <- paste0("data/lgssm_marginal/adaptive_marginal_lgssm_d2048N100ID", id, sep = "")
+  # filename <- paste0("data/lgssm_marginal/marginal_lgssm_d2048N100ID", id, sep = "")
+  # dfnew <- read.csv(filename)
+  # dfnew$N <- "10^2"
+  # dfnew$d <- "2048"
+  # dfnew$algo <- "dac"
+  # dfnew$run <- id
+  # df <- rbind(df, dfnew)
+  # filename <- paste0("data/lgssm_marginal/adaptive_marginal_lgssm_d2048N100ID", id, sep = "")
+  # dfnew <- read.csv(filename)
+  # dfnew$N <- "10^2"
+  # dfnew$d <- "2048"
+  # dfnew$algo <- "dac-ada"
+  # dfnew$run <- id
+  # df <- rbind(df, dfnew)
+  filename <- paste0("data/lgssm_marginal_new/new_adaptive_marginal_lgssm_d2048N100ID", id, sep = "")
   dfnew <- read.csv(filename)
   dfnew$N <- "10^2"
   dfnew$d <- "2048"
@@ -116,14 +153,21 @@ for (id in 1:50){
   dfnew$d <- "32"
   dfnew$run <- id
   df <- rbind(df, dfnew)
-  filename <- paste0("data/lgssm_marginal/marginal_lgssm_d32N1000ID", id, sep = "")
-  dfnew <- read.csv(filename)
-  dfnew$N <- "10^3"
-  dfnew$d <- "32"
-  dfnew$algo <- "dac"
-  dfnew$run <- id
-  df <- rbind(df, dfnew)
-  filename <- paste0("data/lgssm_marginal/adaptive_marginal_lgssm_d32N1000ID", id, sep = "")
+  # filename <- paste0("data/lgssm_marginal/marginal_lgssm_d32N1000ID", id, sep = "")
+  # dfnew <- read.csv(filename)
+  # dfnew$N <- "10^3"
+  # dfnew$d <- "32"
+  # dfnew$algo <- "dac"
+  # dfnew$run <- id
+  # df <- rbind(df, dfnew)
+  # filename <- paste0("data/lgssm_marginal/adaptive_marginal_lgssm_d32N1000ID", id, sep = "")
+  # dfnew <- read.csv(filename)
+  # dfnew$N <- "10^3"
+  # dfnew$d <- "32"
+  # dfnew$algo <- "dac-ada"
+  # dfnew$run <- id
+  # df <- rbind(df, dfnew)
+  filename <- paste0("data/lgssm_marginal_new/new_adaptive_marginal_lgssm_d32N1000ID", id, sep = "")
   dfnew <- read.csv(filename)
   dfnew$N <- "10^3"
   dfnew$d <- "32"
@@ -136,33 +180,40 @@ for (id in 1:50){
   dfnew$d <- "256"
   dfnew$run <- id
   df <- rbind(df, dfnew)
-  filename <- paste0("data/lgssm_marginal/marginal_lgssm_d256N1000ID", id, sep = "")
-  dfnew <- read.csv(filename)
-  dfnew$N <- "10^3"
-  dfnew$d <- "256"
-  dfnew$algo <- "dac"
-  dfnew$run <- id
-  df <- rbind(df, dfnew)
-  filename <- paste0("data/lgssm_marginal/adaptive_marginal_lgssm_d256N1000ID", id, sep = "")
+  # filename <- paste0("data/lgssm_marginal/marginal_lgssm_d256N1000ID", id, sep = "")
+  # dfnew <- read.csv(filename)
+  # dfnew$N <- "10^3"
+  # dfnew$d <- "256"
+  # dfnew$algo <- "dac"
+  # dfnew$run <- id
+  # df <- rbind(df, dfnew)
+  # filename <- paste0("data/lgssm_marginal/adaptive_marginal_lgssm_d256N1000ID", id, sep = "")
+  # dfnew <- read.csv(filename)
+  # dfnew$N <- "10^3"
+  # dfnew$d <- "256"
+  # dfnew$algo <- "dac-ada"
+  # dfnew$run <- id
+  # df <- rbind(df, dfnew)
+  filename <- paste0("data/lgssm_marginal_new/new_adaptive_marginal_lgssm_d256N1000ID", id, sep = "")
   dfnew <- read.csv(filename)
   dfnew$N <- "10^3"
   dfnew$d <- "256"
   dfnew$algo <- "dac-ada"
   dfnew$run <- id
   df <- rbind(df, dfnew)
-  filename <- paste0("data/lgssm_tempering/lgssm_d2048N1000ID", id, sep = "")
-  dfnew <- read.csv(filename)
-  dfnew$N <- "10^3"
-  dfnew$d <- "2048"
-  dfnew$run <- id
-  df <- rbind(df, dfnew)
-  filename <- paste0("data/lgssm_marginal/adaptive_marginal_lgssm_d2048N1000ID", id, sep = "")
-  dfnew <- read.csv(filename)
-  dfnew$N <- "10^3"
-  dfnew$d <- "2048"
-  dfnew$algo <- "dac-ada"
-  dfnew$run <- id
-  df <- rbind(df, dfnew)
+  # filename <- paste0("data/lgssm_tempering/lgssm_d2048N1000ID", id, sep = "")
+  # dfnew <- read.csv(filename)
+  # dfnew$N <- "10^3"
+  # dfnew$d <- "2048"
+  # dfnew$run <- id
+  # df <- rbind(df, dfnew)
+  # filename <- paste0("data/lgssm_marginal/adaptive_marginal_lgssm_d2048N1000ID", id, sep = "")
+  # dfnew <- read.csv(filename)
+  # dfnew$N <- "10^3"
+  # dfnew$d <- "2048"
+  # dfnew$algo <- "dac-ada"
+  # dfnew$run <- id
+  # df <- rbind(df, dfnew)
 }
 for (id in 1:50){
   filename <- paste0("data/lgssm_tempering/lgssm_d32N10000ID", id, sep = "")
@@ -171,12 +222,12 @@ for (id in 1:50){
   dfnew$d <- "32"
   dfnew$run <- id
   df <- rbind(df, dfnew)
-  dfnew <- read.csv(paste0("data/lgssm_marginal/adaptive_marginal_lgssm_d32N10000ID", id, sep = ""))
-  dfnew$N <- "10^4"
-  dfnew$d <- "32"
-  dfnew$algo <- "dac-ada"
-  dfnew$run <- id
-  df <- rbind(df, dfnew)
+  # dfnew <- read.csv(paste0("data/lgssm_marginal/adaptive_marginal_lgssm_d32N10000ID", id, sep = ""))
+  # dfnew$N <- "10^4"
+  # dfnew$d <- "32"
+  # dfnew$algo <- "dac-ada"
+  # dfnew$run <- id
+  # df <- rbind(df, dfnew)
   filename <- paste0("data/lgssm_tempering/lgssm_d256N10000ID", id, sep = "")
   dfnew <- read.csv(filename)
   dfnew$N <- "10^4"
@@ -184,15 +235,15 @@ for (id in 1:50){
   dfnew$run <- id
   df <- rbind(df, dfnew)
 }
-for (id in c(1:36, 38:50)){
-  filename <- paste0("data/lgssm_marginal/adaptive_marginal_lgssm_d256N10000ID", id, sep = "")
-  dfnew <- read.csv(filename)
-  dfnew$N <- "10^4"
-  dfnew$d <- "256"
-  dfnew$algo <- "dac-ada"
-  dfnew$run <- id
-  df <- rbind(df, dfnew)
-}
+# for (id in c(1:36, 38:50)){
+#   filename <- paste0("data/lgssm_marginal/adaptive_marginal_lgssm_d256N10000ID", id, sep = "")
+#   dfnew <- read.csv(filename)
+#   dfnew$N <- "10^4"
+#   dfnew$d <- "256"
+#   dfnew$algo <- "dac-ada"
+#   dfnew$run <- id
+#   df <- rbind(df, dfnew)
+# }
 df <- df[, -1]
 df <- df[df$algo != "dac_ada", ]
 df <- df[df$algo != "dac-light", ]
@@ -200,7 +251,7 @@ Time.step <- ncol(df) - 7
 colnames(df)[(Time.step+1):(Time.step+3)] <- c("w1", "ks", "runtime")
 
 tmp <- aggregate(. ~ algo + N + d, data = df, FUN = "mean")
-rmse_data <- data.frame(rep(1:Time.step, times = 26), rep(tmp$algo, each = 100), rep(tmp$N, each = 100), rep(tmp$d, each = 100))
+rmse_data <- data.frame(rep(1:Time.step, times = 17), rep(tmp$algo, each = 100), rep(tmp$N, each = 100), rep(tmp$d, each = 100))
 colnames(rmse_data) <- c("Time.step", "algo", "N", "d")
 rmse_data <- rmse_data[order(rmse_data$algo, rmse_data$N, rmse_data$d), ]
 tmp <- tmp[order(tmp$algo, tmp$N, tmp$d), ]
