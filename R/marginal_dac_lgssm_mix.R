@@ -1,4 +1,3 @@
-
 # Mixture resampling DaC for linear Gaussian SSM
 marginal_dac_lgssm_mix <- function(history, obs, tau, lambda, sigmaY){
   # dimension and number of particles
@@ -31,7 +30,6 @@ marginal_dac_lgssm_mix <- function(history, obs, tau, lambda, sigmaY){
 
     # updated particles/normalizing constant
     xNew <- matrix(0, nrow = Nparticles, ncol = d)
-
     for (i in 1:nodes){
 
       # mixture weights
@@ -41,12 +39,26 @@ marginal_dac_lgssm_mix <- function(history, obs, tau, lambda, sigmaY){
       if(u == 1){
         for (n1 in 1:Nparticles) {
           for (n2 in 1:Nparticles) {
+            mx <- x[n1, ]
+            mx[(ci[1]+nv):ci[2]] <- x[n2, (ci[1]+nv):ci[2]]
+            integral_per_dimension <- matrix(0, nrow = Nparticles, ncol = 2*nv)
+            for (j in 2:(2*nv)) {
+              dimension <- (ci[1]:ci[2])[j]
+              integral_per_dimension[, j] <- -0.5*(tau+lambda)*(mx[dimension] - 0.5*tau*history[, dimension]/(tau+lambda))^2 -
+                0.5*lambda*tau*(mx[dimension-1] * history[, dimension])/(tau+lambda)
+            }
+            if(ci[1] == 1){
+              integral_per_dimension[, 1] <- -0.5*tau*(mx[1] - 0.5*history[, 1])^2
+            } else {
+              integral_per_dimension[, 1] <- -0.5*(tau+lambda)*(mx[ci[1]] - 0.5*tau*history[, ci[1]]/(tau+lambda))^2
+            }
+            integral_merged <- mean(exp(rowSums(integral_per_dimension)))
+            integral_left <- mean(exp(rowSums(integral_per_dimension[, 1:nv, drop = FALSE])))
+            integral_right <- mean(exp(rowSums(integral_per_dimension[, (nv+1):(2*nv), drop = FALSE])))
             lWmix[n1, n2] <- lW[n1, (nchild*(i-1)+1)] + lW[n2, i*nchild] -
-              -0.5*lambda * (lambda *x[n1, (ci[1]+nv-1)]^2/(tau+lambda) -
-                               2*x[n1, (ci[1]+nv-1)] * x[n2, (ci[1]+nv)]) +
-              log(mean(exp(-0.5*(x[n1, (ci[1]+nv-1)]-history[, ci[1]+nv])^2/(tau+lambda) -
-                             0.5*lambda*tau*history[, ci[1]+nv] * x[n1, (ci[1]+nv-1)]/(tau+lambda)))) -
-              log(mean(exp(-0.5*(x[n1, (ci[1]+nv-1)]-history[, ci[1]+nv])^2/(tau+lambda))))
+                              0.5*lambda * (lambda *x[n1, (ci[1]+nv-1)]^2/(tau+lambda) -
+                              2*x[n1, (ci[1]+nv-1)] * x[n2, (ci[1]+nv)]) +
+                              log(integral_merged) - log(integral_left) - log(integral_right)
           }
         }
         max.lWmix <- max(lWmix)
@@ -54,11 +66,25 @@ marginal_dac_lgssm_mix <- function(history, obs, tau, lambda, sigmaY){
       } else {
         for (n1 in 1:Nparticles) {
           for (n2 in 1:Nparticles) {
-            lWmix[n1, n2] <- -0.5*lambda * (lambda *x[n1, (ci[1]+nv-1)]^2/(tau+lambda) -
-                                              2*x[n1, (ci[1]+nv-1)] * x[n2, (ci[1]+nv)]) +
-              log(mean(exp(-0.5*(x[n1, (ci[1]+nv-1)]-history[, ci[1]+nv])^2/(tau+lambda) -
-                             0.5*lambda*tau*history[, ci[1]+nv] * x[n1, (ci[1]+nv-1)]/(tau+lambda)))) -
-              log(mean(exp(-0.5*(x[n1, (ci[1]+nv-1)]-history[, ci[1]+nv])^2/(tau+lambda))))
+            mx <- x[n1, ]
+            mx[(ci[1]+nv):ci[2]] <- x[n2, (ci[1]+nv):ci[2]]
+            integral_per_dimension <- matrix(0, nrow = Nparticles, ncol = 2*nv)
+            for (j in 2:(2*nv)) {
+              dimension <- (ci[1]:ci[2])[j]
+              integral_per_dimension[, j] <- -0.5*(tau+lambda)*(mx[dimension] - 0.5*tau*history[, dimension]/(tau+lambda))^2 -
+                0.5*lambda*tau*(mx[dimension-1] * history[, dimension])/(tau+lambda)
+            }
+            if(ci[1] == 1){
+              integral_per_dimension[, 1] <- -0.5*tau*(mx[1] - 0.5*history[, 1])^2
+            } else {
+              integral_per_dimension[, 1] <- -0.5*(tau+lambda)*(mx[ci[1]] - 0.5*tau*history[, ci[1]]/(tau+lambda))^2
+            }
+            integral_merged <- mean(exp(rowSums(integral_per_dimension)))
+            integral_left <- mean(exp(rowSums(integral_per_dimension[, 1:nv, drop = FALSE])))
+            integral_right <- mean(exp(rowSums(integral_per_dimension[, (nv+1):(2*nv), drop = FALSE])))
+            lWmix[n1, n2] <-  -0.5*lambda * (lambda *x[n1, (ci[1]+nv-1)]^2/(tau+lambda) -
+                              2*x[n1, (ci[1]+nv-1)] * x[n2, (ci[1]+nv)]) +
+                              log(integral_merged) - log(integral_left) - log(integral_right)
           }
         }
         max.lWmix <- max(lWmix)

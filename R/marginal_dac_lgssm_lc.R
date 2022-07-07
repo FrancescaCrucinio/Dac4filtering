@@ -65,7 +65,7 @@ marginal_dac_lgssm_lc <- function(history, obs, tau, lambda, sigmaY){
       }
       lWmix <- - 0.5*lambda * (lambda *x[indices1, (ci[1]+nv-1)]^2/(tau+lambda) -
                                         2*x[indices1, (ci[1]+nv-1)] * x[indices2, (ci[1]+nv)]) +
-                  integral_merged - integral_left - integral_right
+                  log(integral_merged) - log(integral_left) - log(integral_right)
       max.lWmix <- max(lWmix)
       WNew[, i] <- exp(lWmix - max.lWmix)
       # update particles
