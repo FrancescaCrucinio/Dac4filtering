@@ -42,26 +42,32 @@ marginal_dac_lgssm_lc <- function(history, obs, tau, lambda, sigmaY){
       # child 2 (with random permutation)
       indices2 <- sample(stratified_resample(W[, nchild*i], Nparticles))
       # weights
-      integral_per_dimension <- array(0, dim = c(Nparticles, Nparticles, 2*nv))
-      # marginalize out past (each row corresponds to a particle)
-      for (j in 2:(2*nv)) {
-        dimension <- (ci[1]:ci[2])[j]
-        integral_per_dimension[, , j] <- -0.5*(tau+lambda)*outer(x[, dimension], 0.5*tau*history[, dimension]/(tau+lambda), "-")^2 -
-          0.5*lambda*tau*outer(x[, dimension-1], history[, dimension], "*")/(tau+lambda)
+      integral_merged <- rep(0, times = Nparticles)
+      integral_left <- rep(0, times = Nparticles)
+      integral_right <- rep(0, times = Nparticles)
+      for (n in 1:Nparticles) {
+        mx <- x[indices1[n], ]
+        mx[(ci[1]+nv):ci[2]] <- x[indices2[n], (ci[1]+nv):ci[2]]
+        integral_per_dimension <- matrix(0, nrow = Nparticles, ncol = 2*nv)
+        for (j in 2:(2*nv)) {
+          dimension <- (ci[1]:ci[2])[j]
+          integral_per_dimension[, j] <- -0.5*(tau+lambda)*(mx[dimension] - 0.5*tau*history[, dimension]/(tau+lambda))^2 -
+            0.5*lambda*tau*(mx[dimension-1] * history[, dimension])/(tau+lambda)
+        }
+        if(ci[1] == 1){
+          integral_per_dimension[, 1] <- -0.5*tau*(mx[1] - 0.5*history[, 1])^2
+        } else {
+          integral_per_dimension[, 1] <- -0.5*(tau+lambda)*(mx[ci[1]] - 0.5*tau*history[, ci[1]]/(tau+lambda))^2
+        }
+        integral_merged[n] <- mean(exp(rowSums(integral_per_dimension)))
+        integral_left[n] <- mean(exp(rowSums(integral_per_dimension[, 1:nv, drop = FALSE])))
+        integral_right[n] <- mean(exp(rowSums(integral_per_dimension[, (nv+1):(2*nv), drop = FALSE])))
       }
-      if(ci[1] == 1){
-        integral_per_dimension[, , 1] <- -0.5*tau*outer(x[, 1], 0.5*history[, 1], "-")^2
-      } else {
-        integral_per_dimension[, , 1] <- -0.5*(tau+lambda)*outer(x[, ci[1]], 0.5*tau*history[, ci[1]]/(tau+lambda), "-")^2
-      }
-      integral_merged <- rowMeans(exp(rowSums(integral_per_dimension, dims = 2)))
-      integral_left <- rowMeans(exp(rowSums(integral_per_dimension[, , 1:nv, drop = FALSE], dims = 2)))
-      integral_right <- rowMeans(exp(rowSums(integral_per_dimension[, , (nv+1):(2*nv), drop = FALSE], dims = 2)))
-      lW <- -0.5*lambda * (lambda *x[indices1, (ci[1]+nv-1)]^2/(tau+lambda) -
-                             2*x[indices1, (ci[1]+nv-1)] * x[indices2, (ci[1]+nv)]) +
-                          log(integral_merged) - log(integral_left) - log(integral_right)
-      max.lW <- max(lW)
-      WNew[, i] <- exp(lW - max.lW)
+      lWmix <- - 0.5*lambda * (lambda *x[indices1, (ci[1]+nv-1)]^2/(tau+lambda) -
+                                        2*x[indices1, (ci[1]+nv-1)] * x[indices2, (ci[1]+nv)]) +
+                  integral_merged - integral_left - integral_right
+      max.lWmix <- max(lWmix)
+      WNew[, i] <- exp(lWmix - max.lWmix)
       # update particles
       xNew[, ci[1]:ci[2]] <- cbind(x[indices1, ci[1]:(ci[1]+nv-1)], x[indices2, (ci[1]+nv):ci[2]])
     }
