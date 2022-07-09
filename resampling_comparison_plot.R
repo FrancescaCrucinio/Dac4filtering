@@ -2,9 +2,9 @@
 library(ggpubr)
 # read data
 cbPalette <- c("#E69F00", "#009E73", "#0072B2", "#D55E00", "#CC79A7")
-df <- rbind(read.csv(paste0("data/resampling_tempering/marginal_resampling_comparison_d128")))
+df <- rbind(read.csv(paste0("data/resampling_marginal/marginal_resampling_comparison_d128")))
 ggplot(data = df, aes(x = runtime, y = d_means, group = interaction(algo, N), fill = algo, colour = algo)) +
-  geom_boxplot(coef = 6, width = 5) +
+  geom_boxplot(coef = 15, width = 5) +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
