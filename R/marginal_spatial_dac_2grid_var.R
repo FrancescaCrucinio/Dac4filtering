@@ -204,7 +204,7 @@ marginal_dac_spatial_2grid_var <- function(history, obs, sigmaX, nu){
       # contribution of g_{t, u}
       sum_over_neighbours_obs_left <- (obs[1, ] - mx[1, ]) %*% solve(y.error.var[c(1, 3), c(1, 3)]) %*% (obs[1, ] - mx[1, ])
       sum_over_neighbours_obs_right <- (obs[2, ] - mx[2, ]) %*% solve(y.error.var[c(2, 4), c(2, 4)]) %*% (obs[2, ] - mx[2, ])
-      sum_over_neighbours_obs_merged <- c(obs - mx) %*% solve(y.error.var) %*% c(obs - mx)
+      sum_over_neighbours_obs_merged <- c(obs - mx) %*% y.error.prec %*% c(obs - mx)
       # contribution of f_{t, u}
       transition_integral <- sweep(history, 1:2, mx)^2/(2*sigmaX)
       transition_node <- log(sum(exp(-colSums(transition_integral, dims = 2))))
