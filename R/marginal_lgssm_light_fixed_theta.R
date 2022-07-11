@@ -65,7 +65,6 @@ marginal_lgssm_light_vectorized <- function(i, u, nv, ci, W, Nparticles, theta, 
   }
   # mixture weights
   integral_per_dimension <- array(0, dim = c(theta*Nparticles, Nparticles, 2*nv))
-  print(paste(u))
   if(u == 1){
     j <- 2*nv
     dimension <- (ci[1]:ci[2])[j]
