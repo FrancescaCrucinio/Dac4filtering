@@ -5,8 +5,6 @@ marginal_dac_lgssm_lightweight <- function(history, obs, tau, lambda, sigmaY, ad
   # dimension and number of particles
   d <- ncol(history)
   Nparticles <- nrow(history)
-  memory <- ifelse(Nparticles >= 10^3 & d == 2048, TRUE, FALSE)
-  memory <- TRUE
   # tree topology
   nchild <- 2
   nlevels <- log2(d)
@@ -43,9 +41,9 @@ marginal_dac_lgssm_lightweight <- function(history, obs, tau, lambda, sigmaY, ad
       ci <- child_indices(i, nvNew)
       # lightweight mixture resampling
       if(adaptive){
-        out <- marginal_lgssm_light_adaptive(Nparticles, i, u, nv, ci, lW, Nparticles, lambda, tau, x, history, memory)
+        out <- marginal_lgssm_light_adaptive_vectorized(Nparticles, i, u, nv, ci, lW, Nparticles, lambda, tau, x, history)
       } else {
-        out <- marginal_lgssm_light(i, u, nv, ci, W, Nparticles, theta, lambda, tau, x, history, memory)
+        out <- marginal_lgssm_light(i, u, nv, ci, W, Nparticles, theta, lambda, tau, x, history)
       }
       # update after mixture resampling
       indices <- out$resampled_indices

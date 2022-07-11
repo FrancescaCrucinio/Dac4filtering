@@ -4,8 +4,7 @@ distances$ks <- aggregate(ks ~ algo + runtime + N + run + d, data = df, FUN = "m
 time_means <- aggregate(runtime ~ algo + N + d, data = df, FUN= "mean" )
 time_means <- time_means[order(time_means$algo, time_means$N, time_means$d), ]
 distances <- distances[order(distances$algo, distances$N, distances$d), ]
-distances$runtime_mean <- c(rep(time_means$runtime[1:3], each = 50), rep(time_means$runtime[4], each = 17), rep(time_means$runtime[5:19], each = 50))
-# distances$runtime_mean <- rep(time_means$runtime, each = 50)
+distances$runtime_mean <- rep(time_means$runtime, each = 50)
 distances_mean <- data.frame(aggregate(w1 ~ algo + N + d, data = distances, FUN = "mean"))
 distances_mean$ks <- aggregate(ks ~ algo + N + d, data = distances, FUN = "mean")$ks
 distances_mean <- merge(distances_mean, time_means, by=c("algo", "N", "d"))

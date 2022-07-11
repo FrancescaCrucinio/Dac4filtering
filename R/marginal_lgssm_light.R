@@ -1,5 +1,5 @@
 # Adaptive Lightweight resampling for linear Gaussian SSM
-marginal_lgssm_light_adaptive <- function(ess_target, i, u, nv, ci, lW, Nparticles, lambda, tau, x, history, memory){
+marginal_lgssm_light_adaptive <- function(ess_target, i, u, nv, ci, lW, Nparticles, lambda, tau, x, history){
   # binary tree
   nchild <- 2
   # marginalize out past
@@ -94,7 +94,7 @@ marginal_lgssm_light_adaptive <- function(ess_target, i, u, nv, ci, lW, Nparticl
 
 
 # Adaptive Lightweight resampling for linear Gaussian SSM
-marginal_lgssm_light_adaptive_vectorized <- function(ess_target, i, u, nv, ci, lW, Nparticles, lambda, tau, x, history, memory){
+marginal_lgssm_light_adaptive_vectorized <- function(ess_target, i, u, nv, ci, lW, Nparticles, lambda, tau, x, history){
   # binary tree
   nchild <- 2
   # marginalize out past

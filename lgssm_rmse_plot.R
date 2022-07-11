@@ -245,15 +245,6 @@ for (id in 1:50){
   dfnew$d <- "2048"
   dfnew$run <- id
   df <- rbind(df, dfnew)
-  # filename <- paste0("data/lgssm_marginal/adaptive_marginal_lgssm_d2048N1000ID", id, sep = "")
-  # dfnew <- read.csv(filename)
-  # dfnew$N <- "10^3"
-  # dfnew$d <- "2048"
-  # dfnew$algo <- "dac-ada"
-  # dfnew$run <- id
-  # df <- rbind(df, dfnew)
-}
-for (id in c(1:12, 16:20)){
   filename <- paste0("data/lgssm_marginal_new/new_adaptive_marginal_lgssm_d2048N1000ID", id, sep = "")
   dfnew <- read.csv(filename)
   dfnew$N <- "10^3"
