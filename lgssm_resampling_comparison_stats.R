@@ -24,7 +24,8 @@ for (id in 1:50){
   df <- rbind(df, dfnew)
 }
 for (id in 1:50){
-  dfnew <- rbind(read.csv(paste0("data/resampling_marginal/ada_light_marginal_resampling_comparison_d", d, "N1000ID", id, "timeinterval1", sep = "")),
+  dfnew <- rbind(read.csv(paste0("data/resampling_marginal/light_marginal_resampling_comparison_d", d, "N1000ID", id, "timeinterval1", sep = "")),
+                 read.csv(paste0("data/resampling_marginal/ada_light_marginal_resampling_comparison_d", d, "N1000ID", id, "timeinterval1", sep = "")),
                  read.csv(paste0("data/resampling_marginal/lc_marginal_resampling_comparison_d", d, "N1000ID", id, "timeinterval1", sep = "")))
 
   dfnew$N <- "10^3"
