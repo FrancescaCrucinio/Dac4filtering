@@ -20,7 +20,7 @@ for (id in 1:50){
                  read.csv(paste0("data/resampling_marginal/ada_light_marginal_resampling_comparison_d", d, "N500ID", id, "timeinterval1", sep = "")),
                  read.csv(paste0("data/resampling_marginal/mix_marginal_resampling_comparison_d", d, "N500ID", id, "timeinterval1", sep = "")),
                  read.csv(paste0("data/resampling_marginal/lc_marginal_resampling_comparison_d", d, "N500ID", id, "timeinterval1", sep = "")))
-  dfnew$N <- "5*10^3"
+  dfnew$N <- "5*10^2"
   df <- rbind(df, dfnew)
 }
 for (id in 1:50){
@@ -28,6 +28,13 @@ for (id in 1:50){
                  read.csv(paste0("data/resampling_marginal/lc_marginal_resampling_comparison_d", d, "N1000ID", id, "timeinterval1", sep = "")))
 
   dfnew$N <- "10^3"
+  df <- rbind(df, dfnew)
+}
+for (id in 1:50){
+  dfnew <- rbind(read.csv(paste0("data/resampling_marginal/ada_light_marginal_resampling_comparison_d", d, "N5000ID", id, "timeinterval1", sep = "")),
+                 read.csv(paste0("data/resampling_marginal/lc_marginal_resampling_comparison_d", d, "N5000ID", id, "timeinterval1", sep = "")))
+
+  dfnew$N <- "5*10^3"
   df <- rbind(df, dfnew)
 }
 df <- df[, -1]

@@ -151,7 +151,7 @@ marginal_dac_spatial_2grid_last <- function(history, obs, sigmaX, nu){
     sum_over_neighbours_obs_merged <- c(obs - mx) %*% y.error.prec %*% c(obs - mx)
     # contribution of f_{t, u}
     transition_integral <- sweep(history, 1:2, mx)^2/(2*sigmaX)
-    transition_node <- log(sum(exp(-colSums(transition_integral, dims = 2))))
+    transition_node <- log(mean(exp(-colSums(transition_integral, dims = 2))))
     lWmix[n] <- - 0.5*(nu+4)*log(1+abs(sum_over_neighbours_obs_merged)/nu) +
       0.5*(nu+2)*(log(1+abs(sum_over_neighbours_obs_left)/nu) + log(1+abs(sum_over_neighbours_obs_right)/nu)) +
       transition_node
@@ -180,7 +180,7 @@ marginal_dac_spatial_2grid_last <- function(history, obs, sigmaX, nu){
       sum_over_neighbours_obs_merged <- c(obs - mx) %*% y.error.prec %*% c(obs - mx)
       # contribution of f_{t, u}
       transition_integral <- sweep(history, 1:2, mx)^2/(2*sigmaX)
-      transition_node <- log(sum(exp(-colSums(transition_integral, dims = 2))))
+      transition_node <- log(mean(exp(-colSums(transition_integral, dims = 2))))
       lWmix_perm[n] <- - 0.5*(nu+4)*log(1+abs(sum_over_neighbours_obs_merged)/nu) +
         0.5*(nu+2)*(log(1+abs(sum_over_neighbours_obs_left)/nu) + log(1+abs(sum_over_neighbours_obs_right)/nu)) +
         transition_node

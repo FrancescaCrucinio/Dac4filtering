@@ -26,7 +26,7 @@ for (Nparticles in c(100, 500, 1000, 5000, 10000)) {
 }
 df_bpf <- read.csv(paste0("data/spatial/new_stats_bpf_spatial_tau", -tau, "d", d, "N", 100000),
                    row.names = 1)
-dim <- 4
+dim <- 1
 t <- 10
 df_plot <- df[df$t == t & df$dim == dim,]
 df_bpf_plot <- df_bpf[df_bpf$t == t & df_bpf$dim == dim,]

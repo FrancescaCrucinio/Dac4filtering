@@ -7,7 +7,7 @@ tau <- -0.25
 Time.step <- 1
 spatial_data <- spatial_obs(d, sigmaX, nu, tau, tau_diag, Time.step)
 y.error.prec <- matrix(c(1, -0.25, -0.25, 0, -0.25, 1, 0, -0.25, -0.25, 0, 1, -0.25, 0, -0.25, -0.25, 1), nrow = 4)
-Nparticles <- 1000
+Nparticles <- 100
 history <- sqrt(sigmaX)*array(rnorm(Nparticles*d^2), dim = c(d, d, Nparticles))
 res_dac_2grid <- history
 res_dac_2grid_var <- history
