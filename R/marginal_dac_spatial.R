@@ -1,9 +1,12 @@
-marginal_dac_spatial <- function(history, obs, sigmaX, nu, tau, tau_diag){
+marginal_dac_spatial <- function(history, obs, sigmaX, nu, tau, tau_diag, adaptive = TRUE){
   # dimension and number of particles
   d <- nrow(history)
   Nparticles <- dim(history)[3]
-  theta <- ceiling(sqrt(Nparticles))
-  theta <- NULL
+  if(adaptive){
+    theta <- NULL
+  } else {
+    theta <- ceiling(sqrt(Nparticles))
+  }
   # tree topology
   nchild <- 2
   nlevels <- log2(d)

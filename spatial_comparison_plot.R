@@ -13,16 +13,14 @@ df <- data.frame()
 for (Nparticles in c(100, 500, 1000, 5000, 10000)) {
   df_dac <- read.csv(paste0("data/spatial/new_stats_dac_spatial_tau", -tau, "d", d, "N", Nparticles),
                      row.names = 1)
+  df_dac$type <- "dac-ada"
+  df <- rbind(df, df_dac)
+}
+for (Nparticles in c(100, 500, 1000)) {
+  df_dac <- read.csv(paste0("data/spatial/nonadaptive_stats_dac_spatial_tau", -tau, "d", d, "N", Nparticles),
+                     row.names = 1)
   df_dac$type <- "dac"
   df <- rbind(df, df_dac)
-  df_dac2 <- read.csv(paste0("data/spatial/new_var_stats_dac_spatial_tau", -tau, "d", d, "N", Nparticles),
-                     row.names = 1)
-  df_dac2$type <- "dac2"
-  df <- rbind(df, df_dac2)
-  df_dac3 <- read.csv(paste0("data/spatial/new_last_stats_dac_spatial_tau", -tau, "d", d, "N", Nparticles),
-                      row.names = 1)
-  df_dac3$type <- "dac3"
-  df <- rbind(df, df_dac3)
 }
 df_bpf <- read.csv(paste0("data/spatial/new_stats_bpf_spatial_tau", -tau, "d", d, "N", 100000),
                    row.names = 1)

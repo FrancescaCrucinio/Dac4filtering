@@ -12,7 +12,7 @@ marginal_spatial_merge <- function(lW, x, obs, node_row_left, node_row_right,
                                            lW_left, lW_right, sigmaX, tau, tau_diag, nu, history)
   } else {
     out <- marginal_spatial_light(u_info, x, obs, cir_left, cir_right, cic_left, cic_right,
-                                  lW_left, lW_right, sigmaX, theta, tau, tau_diag, nu, history)
+                                  lW_left, lW_right, sigmaX, tau, tau_diag, nu, history)
   }
 
   indices <- out$resampled_indices
