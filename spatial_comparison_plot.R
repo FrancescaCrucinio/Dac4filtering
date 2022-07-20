@@ -17,7 +17,7 @@ for (Nparticles in c(100, 500, 1000, 5000, 10000)) {
   df_dac$type <- "dac-ada"
   df <- rbind(df, df_dac)
 }
-for (Nparticles in c(100, 500, 1000)) {
+for (Nparticles in c(100, 500, 1000, 5000)) {
   df_dac <- read.csv(paste0("data/spatial/nonadaptive_stats_dac_spatial_tau", -tau, "d", d, "N", Nparticles),
                      row.names = 1)
   df_dac$type <- "dac"
@@ -41,7 +41,7 @@ ggplot(data = df_plot, aes(x=N, y=mean, group = interaction(N, type), color = ty
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=30),
         text = element_text(size=30), legend.position="none")
-# ggsave("spatial2_boxplot_node12_mean.pdf", width = 8.5, height = 6, dpi = 300)
+# ggsave("spatial2_boxplot_node22_mean.pdf", width = 8.5, height = 6, dpi = 300)
 
 p <- ggplot(data = df_plot, aes(x=N, y=mean, group = interaction(N, type), color = type, fill = type))+
   geom_boxplot(coef = 10, width = 0.1, alpha = 0.3, lwd = 1) +
@@ -54,7 +54,7 @@ p <- ggplot(data = df_plot, aes(x=N, y=mean, group = interaction(N, type), color
   ) +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=30),
-        text = element_text(size=30))
+        text = element_text(size=30), legend.position="bottom")
 my_legend <- get_legend(p)
 legend_p <- as_ggplot(my_legend)
 # ggsave("spatial_legend_bpf.pdf", width = 8, height = 1, dpi = 300)
