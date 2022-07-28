@@ -36,9 +36,12 @@ marginal_lgssm_light <- function(i, u, nv, ci, W, Nparticles, theta, lambda, tau
     integral_left[n] <- mean(exp(rowSums(integral_per_dimension[, 1:nv, drop = FALSE])))
     integral_right[n] <- mean(exp(rowSums(integral_per_dimension[, (nv+1):(2*nv), drop = FALSE])))
   }
+  integral_merged <- ifelse(all(integral_merged < .Machine$double.eps), rep(0, Nparticles), log(integral_merged))
+  integral_right <- ifelse(all(integral_right < .Machine$double.eps), rep(0, Nparticles), log(integral_right))
+  integral_left <- ifelse(all(integral_left < .Machine$double.eps), rep(0, Nparticles), log(integral_left))
   lWmix <- - 0.5*lambda * (lambda *x[indices1, (ci[1]+nv-1)]^2/(tau+lambda) -
                              2*x[indices1, (ci[1]+nv-1)] * x[indices2, (ci[1]+nv)])
-  lWmix <- lWmix + log(integral_merged) - log(integral_left) - log(integral_right)
+  lWmix <- lWmix + integral_merged - integral_left - integral_right
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
   # resampling the new population
@@ -94,8 +97,11 @@ marginal_lgssm_light_vectorized <- function(i, u, nv, ci, W, Nparticles, theta, 
   integral_merged <- rowMeans(exp(rowSums(integral_per_dimension, dims = 2)))
   integral_left <- rowMeans(exp(rowSums(integral_per_dimension[, , 1:nv, drop = FALSE], dims = 2)))
   integral_right <- rowMeans(exp(rowSums(integral_per_dimension[, , (nv+1):(2*nv), drop = FALSE], dims = 2)))
+  integral_merged <- ifelse(all(integral_merged < .Machine$double.eps), rep(0, Nparticles), log(integral_merged))
+  integral_right <- ifelse(all(integral_right < .Machine$double.eps), rep(0, Nparticles), log(integral_right))
+  integral_left <- ifelse(all(integral_left < .Machine$double.eps), rep(0, Nparticles), log(integral_left))
   lWmix <- -0.5*lambda * (lambda *x[indices1, (ci[1]+nv-1)]^2/(tau+lambda) - 2*x[indices1, (ci[1]+nv-1)] * x[indices2, (ci[1]+nv)]) +
-          log(integral_merged) - log(integral_left) - log(integral_right)
+          integral_merged - integral_left - integral_right
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
   # resampling the new population

@@ -29,7 +29,10 @@ marginal_lgssm_light_adaptive <- function(ess_target, i, u, nv, ci, lW, Nparticl
     lWmix <- lambda*x[, (ci[1]+nv-1)] * x[, (ci[1]+nv)] - 0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2/(tau+lambda) -
                                                                           2*x[, (ci[1]+nv-1)] * x[, (ci[1]+nv)])
   }
-  lWmix <- lWmix + log(integral_merged) - log(integral_left) - log(integral_right)
+  integral_merged <- ifelse(all(integral_merged < .Machine$double.eps), rep(0, Nparticles), log(integral_merged))
+  integral_right <- ifelse(all(integral_right < .Machine$double.eps), rep(0, Nparticles), log(integral_right))
+  integral_left <- ifelse(all(integral_left < .Machine$double.eps), rep(0, Nparticles), log(integral_left))
+  lWmix <- lWmix + integral_merged - integral_left - integral_right
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
   # build ESS
@@ -71,7 +74,10 @@ marginal_lgssm_light_adaptive <- function(ess_target, i, u, nv, ci, lW, Nparticl
       lWmix_perm <- - 0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2/(tau+lambda) -
                                       2*x[, (ci[1]+nv-1)] * x[new_perm, (ci[1]+nv)])
     }
-    lWmix_perm <- lWmix_perm + log(integral_merged) - log(integral_left) - log(integral_right)
+    integral_merged <- ifelse(all(integral_merged < .Machine$double.eps), rep(0, Nparticles), log(integral_merged))
+    integral_right <- ifelse(all(integral_right < .Machine$double.eps), rep(0, Nparticles), log(integral_right))
+    integral_left <- ifelse(all(integral_left < .Machine$double.eps), rep(0, Nparticles), log(integral_left))
+    lWmix_perm <- lWmix_perm + integral_merged - integral_left - integral_right
     permutation <- c(permutation, new_perm)
     max.lWmix <- max(lWmix_perm)
     Wmix <- exp(lWmix_perm - max.lWmix)
@@ -119,7 +125,10 @@ marginal_lgssm_light_adaptive_vectorized <- function(ess_target, i, u, nv, ci, l
     lWmix <- lambda*x[, (ci[1]+nv-1)] * x[, (ci[1]+nv)] - 0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2/(tau+lambda) -
                                                                           2*x[, (ci[1]+nv-1)] * x[, (ci[1]+nv)])
   }
-  lWmix <- lWmix + log(integral_merged) - log(integral_left) - log(integral_right)
+  integral_merged <- ifelse(all(integral_merged < .Machine$double.eps), rep(0, Nparticles), log(integral_merged))
+  integral_right <- ifelse(all(integral_right < .Machine$double.eps), rep(0, Nparticles), log(integral_right))
+  integral_left <- ifelse(all(integral_left < .Machine$double.eps), rep(0, Nparticles), log(integral_left))
+  lWmix <- lWmix + integral_merged - integral_left - integral_right
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
   # build ESS
@@ -159,7 +168,9 @@ marginal_lgssm_light_adaptive_vectorized <- function(ess_target, i, u, nv, ci, l
       lWmix_perm <- - 0.5*lambda * (lambda *x[, (ci[1]+nv-1)]^2/(tau+lambda) -
                                       2*x[, (ci[1]+nv-1)] * x[new_perm, (ci[1]+nv)])
     }
-    lWmix_perm <- lWmix_perm + log(integral_merged) - log(integral_left) - log(integral_right)
+    integral_merged <- ifelse(all(integral_merged < .Machine$double.eps), rep(0, Nparticles), log(integral_merged))
+    integral_right <- ifelse(all(integral_right < .Machine$double.eps), rep(0, Nparticles), log(integral_right))
+    lWmix_perm <- lWmix_perm + integral_merged - integral_left - integral_right
     permutation <- c(permutation, new_perm)
     max.lWmix <- max(lWmix_perm)
     Wmix <- exp(lWmix_perm - max.lWmix)
