@@ -1,7 +1,7 @@
 ### Spatial model stats
 library(ggplot2)
 # dimension
-d <- 8
+d <- 16
 # parameters
 sigmaX <- 1
 nu <- 10
@@ -11,16 +11,10 @@ Time.step <- 10
 df <- data.frame()
 
 for (Nparticles in c(100, 500, 1000)) {
-  df_dac <- read.csv(paste0("data/spatial/new_stats_dac_spatial_tau", -tau, "d", d, "N", Nparticles),
+  df_dac <- read.csv(paste0("data/spatial/adaptive_stats_dac_spatial_tau", -tau, "d", d, "N", Nparticles),
                      row.names = 1)
   df <- rbind(df, df_dac)
 }
-for (Nparticles in 5000) {
-  df_dac <- read.csv(paste0("data/spatial/same_nt_corrected_stats_dac_spatial_tau", -tau, "d", d, "N", Nparticles),
-                     row.names = 1)
-  df <- rbind(df, df_dac)
-}
-
 # last time step
 df_end <- df[df$t == Time.step, ]
 df_iqr_mean <- aggregate(mean ~ dim + N, data = df_end, FUN = IQR)
@@ -42,13 +36,6 @@ ggplot(data = df_iqr_mean, aes(x=N, y=mean, group=dim, color=dim)) +
         axis.text = element_text(size=20), strip.text.x = element_blank(),
         legend.text=element_text(size=20), legend.title=element_text(size=30))
 # ggsave("spatial8_iqr.pdf", width = 8.5, height = 4, dpi = 300)
-
-df <- data.frame()
-for (Nparticles in c(100, 500, 1000, 5000)) {
-  df_dac <- read.csv(paste0("data/spatial/same_nt_corrected_stats_dac_spatial_tau", -tau, "d", d, "N", Nparticles),
-                     row.names = 1)
-  df <- rbind(df, df_dac)
-}
 
 
 dim <- 10
