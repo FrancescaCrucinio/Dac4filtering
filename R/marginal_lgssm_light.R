@@ -47,7 +47,6 @@ marginal_lgssm_light_adaptive <- function(ess_target, i, u, nv, ci, lW, Nparticl
     new_perm <- sample.int(Nparticles)
     # marginalize out past
     integral_merged <- rep(0, times = Nparticles)
-    # integral_left <- rep(0, times = Nparticles)
     integral_right <- rep(0, times = Nparticles)
     for (n in 1:Nparticles) {
       integral_per_dimension <- matrix(0, nrow = Nparticles, ncol = 2*nv)
@@ -64,7 +63,6 @@ marginal_lgssm_light_adaptive <- function(ess_target, i, u, nv, ci, lW, Nparticl
         integral_per_dimension[, 1] <- -0.5*(tau+lambda)*(mx[ci[1]] - 0.5*tau*history[, ci[1]]/(tau+lambda))^2
       }
       integral_merged[n] <- mean(exp(rowSums(integral_per_dimension)))
-      # integral_left[n] <- mean(exp(rowSums(integral_per_dimension[, 1:nv, drop = FALSE])))
       integral_right[n] <- mean(exp(rowSums(integral_per_dimension[, (nv+1):(2*nv), drop = FALSE])))
     }
     if(u == 1){
@@ -76,7 +74,6 @@ marginal_lgssm_light_adaptive <- function(ess_target, i, u, nv, ci, lW, Nparticl
     }
     integral_merged <- ifelse(all(integral_merged < .Machine$double.eps), rep(0, Nparticles), log(integral_merged))
     integral_right <- ifelse(all(integral_right < .Machine$double.eps), rep(0, Nparticles), log(integral_right))
-    # integral_left <- ifelse(all(integral_left < .Machine$double.eps), rep(0, Nparticles), log(integral_left))
     lWmix_perm <- lWmix_perm + integral_merged - integral_left - integral_right
     permutation <- c(permutation, new_perm)
     max.lWmix <- max(lWmix_perm)
