@@ -2,31 +2,39 @@
 library(ggpubr)
 d <- 128
 # read data
+df1 <- read.csv(paste0("data/resampling_marginal/ess10_ada_light_marginal_resampling_comparison_d", d, "N100ID1timeinterval1"))
+df1$algo <- "ess10"
 df <- rbind(read.csv(paste0("data/resampling_marginal/light_marginal_resampling_comparison_d", d, "N100ID1timeinterval1")),
             read.csv(paste0("data/resampling_marginal/ada_light_marginal_resampling_comparison_d", d, "N100ID1timeinterval1")),
             read.csv(paste0("data/resampling_marginal/mix_marginal_resampling_comparison_d", d, "N100ID1timeinterval1")),
-            read.csv(paste0("data/resampling_marginal/lc_marginal_resampling_comparison_d", d, "N100ID1timeinterval1")))
+            read.csv(paste0("data/resampling_marginal/lc_marginal_resampling_comparison_d", d, "N100ID1timeinterval1")), df1)
 df$N <- "10^2"
 for (id in 2:50){
+  df1 <- read.csv(paste0("data/resampling_marginal/ess10_ada_light_marginal_resampling_comparison_d", d, "N100ID", id, "timeinterval1", sep = ""))
+  df1$algo <- "ess10"
   dfnew <- rbind(read.csv(paste0("data/resampling_marginal/light_marginal_resampling_comparison_d", d, "N100ID", id, "timeinterval1", sep = "")),
                  read.csv(paste0("data/resampling_marginal/ada_light_marginal_resampling_comparison_d", d, "N100ID", id, "timeinterval1", sep = "")),
                  read.csv(paste0("data/resampling_marginal/mix_marginal_resampling_comparison_d", d, "N100ID", id, "timeinterval1", sep = "")),
-                 read.csv(paste0("data/resampling_marginal/lc_marginal_resampling_comparison_d", d, "N100ID", id, "timeinterval1", sep = "")))
+                 read.csv(paste0("data/resampling_marginal/lc_marginal_resampling_comparison_d", d, "N100ID", id, "timeinterval1", sep = "")), df1)
   dfnew$N <- "10^2"
   df <- rbind(df, dfnew)
 }
 for (id in 1:50){
+  df1 <- read.csv(paste0("data/resampling_marginal/ess10_ada_light_marginal_resampling_comparison_d", d, "N500ID", id, "timeinterval1", sep = ""))
+  df1$algo <- "ess10"
   dfnew <- rbind(read.csv(paste0("data/resampling_marginal/light_marginal_resampling_comparison_d", d, "N500ID", id, "timeinterval1", sep = "")),
                  read.csv(paste0("data/resampling_marginal/ada_light_marginal_resampling_comparison_d", d, "N500ID", id, "timeinterval1", sep = "")),
                  read.csv(paste0("data/resampling_marginal/mix_marginal_resampling_comparison_d", d, "N500ID", id, "timeinterval1", sep = "")),
-                 read.csv(paste0("data/resampling_marginal/lc_marginal_resampling_comparison_d", d, "N500ID", id, "timeinterval1", sep = "")))
+                 read.csv(paste0("data/resampling_marginal/lc_marginal_resampling_comparison_d", d, "N500ID", id, "timeinterval1", sep = "")), df1)
   dfnew$N <- "5*10^2"
   df <- rbind(df, dfnew)
 }
 for (id in 1:50){
+  df1 <- read.csv(paste0("data/resampling_marginal/ess10_ada_light_marginal_resampling_comparison_d", d, "N1000ID", id, "timeinterval1", sep = ""))
+  df1$algo <- "ess10"
   dfnew <- rbind(read.csv(paste0("data/resampling_marginal/light_marginal_resampling_comparison_d", d, "N1000ID", id, "timeinterval1", sep = "")),
                  read.csv(paste0("data/resampling_marginal/ada_light_marginal_resampling_comparison_d", d, "N1000ID", id, "timeinterval1", sep = "")),
-                 read.csv(paste0("data/resampling_marginal/lc_marginal_resampling_comparison_d", d, "N1000ID", id, "timeinterval1", sep = "")))
+                 read.csv(paste0("data/resampling_marginal/lc_marginal_resampling_comparison_d", d, "N1000ID", id, "timeinterval1", sep = "")), df1)
 
   dfnew$N <- "10^3"
   df <- rbind(df, dfnew)
