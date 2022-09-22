@@ -217,13 +217,20 @@ for (id in 1:50){
   dfnew$run <- id
   dfnew <- dfnew[, -1]
   df <- rbind(df, dfnew)
+  filename <- paste0("data/lgssm_results/adaptive_marginal_lgssm_d2048N1000ID", id, sep = "")
+  dfnew <- read.csv(filename)
+  dfnew$N <- "10^3"
+  dfnew$d <- "2048"
+  dfnew$run <- id
+  dfnew$algo <- "dac-ada"
+  df <- rbind(df, dfnew)
 }
 df <- df[, -1]
 Time.step <- ncol(df) - 7
 colnames(df)[(Time.step+1):(Time.step+3)] <- c("w1", "ks", "runtime")
 
 tmp <- aggregate(. ~ algo + N + d, data = df, FUN = "mean")
-rmse_data <- data.frame(rep(1:Time.step, times = 29), rep(tmp$algo, each = 100), rep(tmp$N, each = 100), rep(tmp$d, each = 100))
+rmse_data <- data.frame(rep(1:Time.step, times = 30), rep(tmp$algo, each = 100), rep(tmp$N, each = 100), rep(tmp$d, each = 100))
 colnames(rmse_data) <- c("Time.step", "algo", "N", "d")
 rmse_data <- rmse_data[order(rmse_data$algo, rmse_data$N, rmse_data$d), ]
 tmp <- tmp[order(tmp$algo, tmp$N, tmp$d), ]

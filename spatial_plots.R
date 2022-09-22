@@ -39,7 +39,7 @@ ggplot(data = df_iqr_mean, aes(x=N, y=mean, group=dim, color=dim)) +
     labels = scales::trans_format("log10", scales::math_format(10^.x))
   ) +
   facet_wrap(~type) +
-  labs(color='d') +
+  labs(color='node') +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         axis.text = element_text(size=20), strip.text.x = element_text(size = 30),
         legend.text=element_text(size=20), legend.title=element_text(size=30))
