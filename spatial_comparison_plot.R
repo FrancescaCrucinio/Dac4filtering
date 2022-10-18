@@ -2,7 +2,7 @@
 library(ggplot2)
 library(ggpubr)
 # dimension
-d <- 2
+d <- 4
 # parameters
 sigmaX <- 1
 nu <- 10
@@ -11,13 +11,13 @@ tau <- -0.25
 Time.step <- 10
 df <- data.frame()
 
-for (Nparticles in c(100, 500, 1000, 5000, 10000)) {
+for (Nparticles in c(100, 500, 1000, 5000)) {
   df_dac <- read.csv(paste0("data/spatial/new_stats_dac_spatial_tau", -tau, "d", d, "N", Nparticles),
                      row.names = 1)
   df_dac$type <- "dac-ada"
   df <- rbind(df, df_dac)
 }
-for (Nparticles in c(100, 500, 1000, 5000)) {
+for (Nparticles in c(100, 500, 1000)) {
   df_dac <- read.csv(paste0("data/spatial/nonadaptive_stats_dac_spatial_tau", -tau, "d", d, "N", Nparticles),
                      row.names = 1)
   df_dac$type <- "dac"
@@ -25,7 +25,7 @@ for (Nparticles in c(100, 500, 1000, 5000)) {
 }
 df_bpf <- read.csv(paste0("data/spatial/new_stats_bpf_spatial_tau", -tau, "d", d, "N", 100000),
                    row.names = 1)
-dim <- 4
+dim <- 7
 t <- 10
 df_plot <- df[df$t == t & df$dim == dim,]
 df_bpf_plot <- df_bpf[df_bpf$t == t & df_bpf$dim == dim,]
@@ -41,7 +41,7 @@ ggplot(data = df_plot, aes(x=N, y=mean, group = interaction(N, type), color = ty
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=30),
         text = element_text(size=30), legend.position="none")
-# ggsave("spatial2_boxplot_node22_mean.pdf", width = 8.5, height = 6, dpi = 300)
+# ggsave("spatial4_boxplot_node32_mean.pdf", width = 8.5, height = 6, dpi = 300)
 
 p <- ggplot(data = df_plot, aes(x=N, y=mean, group = interaction(N, type), color = type, fill = type))+
   geom_boxplot(coef = 10, width = 0.1, alpha = 0.3, lwd = 1) +

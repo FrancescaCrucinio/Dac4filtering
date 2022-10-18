@@ -1,7 +1,7 @@
 # Plot of MSE for different resampling schemes for linear Gaussian SSM
 library(ggpubr)
 # read data
-cbPalette <- c("#E69F00", "#009E73", "#0072B2", "#D55E00", "#CC79A7")
+cbPalette <- c("#E69F00", "#009E73", "#0072B2", "#D55E00", "#CC79A7", "#FFFFB3")
 df <- rbind(read.csv(paste0("data/resampling_marginal/marginal_resampling_comparison_d128")))
 ggplot(data = df, aes(x = runtime, y = d_means, group = interaction(algo, N), fill = algo, colour = algo)) +
   geom_boxplot(coef = 15, width = 5) +

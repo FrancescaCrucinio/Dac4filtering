@@ -2,20 +2,26 @@
 ID <- 1
 set.seed(1234*ID)
 # dimension
-d <- 2
+d <- 8
 # parameters
 sigmaX <- 1
 nu <- 10
 tau_diag <- 1
 tau <- -0.25
-y.error.prec <- matrix(c(1, -0.25, -0.25, 0, -0.25, 1, 0, -0.25, -0.25, 0, 1, -0.25, 0, -0.25, -0.25, 1), nrow = 4)
+y.error.prec <- matrix(0, nrow = d^2, ncol = d^2)
+diag(y.error.prec) <- tau_diag
+vertical_neighbours <- ((0:d^2) * (d^2 + 1) + d+1)
+horizontal_neighbours <- (0:(d^2-1)) * (d^2+1) + 2
+y.error.prec[vertical_neighbours[(vertical_neighbours <= d^4)]] <- tau
+y.error.prec[horizontal_neighbours[mod(horizontal_neighbours, 2) == 0]] <- tau
+y.error.prec[upper.tri(y.error.prec)] <- t(y.error.prec)[upper.tri(y.error.prec)]
 # number of time steps
 Time.step <- 10
 # data
 timeinterval <- 1
 ti_begin <- 1 + (timeinterval - 1)*10
 ti_end <- timeinterval*10
-Nparticles <- 100000
+Nparticles <- 100
 # initial state
 res_bpf <- matrix(rnorm(Nparticles*d^2, sd = sqrt(sigmaX)), nrow = Nparticles, ncol = d^2)
 df_bpf <- data.frame(matrix(ncol = 6, nrow = 0))

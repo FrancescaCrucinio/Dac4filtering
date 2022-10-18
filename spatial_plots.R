@@ -47,6 +47,7 @@ ggplot(data = df_iqr_mean, aes(x=N, y=mean, group=dim, color=dim)) +
 
 
 dim <- 1
+# dim <- 120
 t <- 10
 df_plot <- df[df$t == t & df$dim == dim,]
 ggplot(data = df_plot, aes(x=runtime, y=mean, group = interaction(N, type), color = type))+
@@ -58,7 +59,7 @@ ggplot(data = df_plot, aes(x=runtime, y=mean, group = interaction(N, type), colo
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=30),
         text = element_text(size=30), legend.position="none")
-# ggsave("spatial16_boxplot_node11_mean.pdf", width = 8.5, height = 6, dpi = 300)
+# ggsave("spatial16_boxplot_node88_mean.pdf", width = 8.5, height = 6, dpi = 300)
 
 p <- ggplot(data = df_plot, aes(x=runtime, y=mean, group = interaction(N, type), color = type))+
   geom_boxplot(coef = 10, alpha = 0.1, lwd = 1) +
