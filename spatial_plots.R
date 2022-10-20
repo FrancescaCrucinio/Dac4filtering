@@ -1,7 +1,7 @@
 ### Spatial model stats
 library(ggplot2)
 # dimension
-d <- 16
+d <- 8
 # parameters
 sigmaX <- 1
 nu <- 10
@@ -21,6 +21,10 @@ for (Nparticles in c(100, 500, 1000)) {
                      row.names = 1)
   df_dac$type <- "dac"
   df <- rbind(df, df_dac)
+}
+if (d == 8) {
+  df_bpf <- read.csv(paste0("data/spatial/new_stats_bpf_spatial_tau", -tau, "d", d, "N", 100000),
+                     row.names = 1)
 }
 # last time step
 df_end <- df[df$t == Time.step, ]
@@ -48,10 +52,15 @@ ggplot(data = df_iqr_mean, aes(x=N, y=mean, group=dim, color=dim)) +
 
 dim <- 1
 # dim <- 120
+dim <- 48
 t <- 10
 df_plot <- df[df$t == t & df$dim == dim,]
-ggplot(data = df_plot, aes(x=runtime, y=mean, group = interaction(N, type), color = type))+
+if (d == 8) {df_bpf_plot <- df_bpf[df_bpf$t == t & df_bpf$dim == dim,]}
+ggplot(data = df_plot, aes(x=runtime, y=mean, group = interaction(N, type), color = type, fill = type))+
   geom_boxplot(coef = 10, alpha = 0.1, lwd = 1) +
+  geom_hline(yintercept = mean(df_bpf_plot$mean), lwd = 1, linetype = "dashed") +
+  geom_hline(yintercept = quantile(df_bpf_plot$mean, 0.25), lwd = 1, linetype = "dashed") +
+  geom_hline(yintercept = quantile(df_bpf_plot$mean, 0.75), lwd = 1, linetype = "dashed") +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
@@ -59,7 +68,7 @@ ggplot(data = df_plot, aes(x=runtime, y=mean, group = interaction(N, type), colo
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=30),
         text = element_text(size=30), legend.position="none")
-# ggsave("spatial16_boxplot_node88_mean.pdf", width = 8.5, height = 6, dpi = 300)
+# ggsave("spatial8_boxplot_node86_mean.pdf", width = 8.5, height = 6, dpi = 300)
 
 p <- ggplot(data = df_plot, aes(x=runtime, y=mean, group = interaction(N, type), color = type))+
   geom_boxplot(coef = 10, alpha = 0.1, lwd = 1) +
