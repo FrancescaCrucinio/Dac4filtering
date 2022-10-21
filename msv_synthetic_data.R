@@ -8,10 +8,10 @@ d <- 30
 x <- matrix(0, nrow = Time.step+1, ncol = d)
 y <- matrix(0, nrow = Time.step, ncol = p)
 # initial state
-x[1, ] <- mvrnorm(n = 1, mu, diag(Sigma))
+x[1, ] <- mvrnorm(n = 1, mu, diag(Sigma^2))
 # loop over time
 for(i in 2:(Time.step+1)){
-  x[i, ] <- mu + diag(Phi)%*%(x[i-1, ]-mu) + mvrnorm(n = 1, rep(0, d), diag(Sigma))
+  x[i, ] <- mu + diag(Phi)%*%(x[i-1, ]-mu) + mvrnorm(n = 1, rep(0, d), diag(Sigma^2))
   cov_matrix <- Lambda %*% diag(exp(x[i, (p+1):d])) %*% t(Lambda) + diag(exp(x[i, 1:p]))
   y[i-1, ] <- mvrnorm(n = 1, rep(0, p), cov_matrix)
 }
