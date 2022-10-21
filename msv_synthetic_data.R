@@ -1,5 +1,5 @@
 # Load parameters
-load("~/Documents/Dac4filtering/msv_parameters.RData")
+load("~/Documents/Dac4filtering/data/msv_parameters.RData")
 # first semester of 2013
 set.seed(1234)
 Time.step <- 122
