@@ -14,15 +14,18 @@ marginal_msv_light_fixed_theta <- function(i, u, nv, ci, W, Nparticles, theta, l
     # child 2
     indices2 <- sample.int(Nparticles, size = theta*Nparticles, replace = TRUE)
   }
-  all_nodes_means <- Phi[ci[1]:ci[2]] * sweep(history[ci[1]:ci[2], ], mu[ci[1]:ci[2]], 2) + mu[ci[1]:ci[2]]
+  all_nodes_means <- sweep(sweep(history[, ci[1]:ci[2]], 2, mu[ci[1]:ci[2]]) %*% diag(Phi[ci[1]:ci[2]]), 2,
+                           mu[ci[1]:ci[2]], FUN = "+")
 
   # mixture weights
   for (n in 1:(theta*Nparticles)) {
     mx <- x[indices1[n], ]
     mx[(ci[1]+nv):ci[2]] <- x[indices2[n], (ci[1]+nv):ci[2]]
+    transition_node <- mean(exp(-rowSums(sweep(all_nodes_means, 2, mx)^2 %*% diag(1/Sigma[ci[1]:ci[2]]))))
+    transition_left <- mean(exp(-rowSums(sweep(all_nodes_means[, ci[1]:(ci[1]+nv-1), drop = FALSE], 2, mx[ci[1]:(ci[1]+nv-1)])^2 %*% diag(1/Sigma[ci[1]:(ci[1]+nv-1)], nrow = nv))))
+    transition_right <- mean(exp(-rowSums(sweep(all_nodes_means[, (ci[1]+nv):ci[2], drop = FALSE], 2, mx[(ci[1]+nv):ci[2]])^2 %*% diag(1/Sigma[(ci[1]+nv):ci[2]], nrow = nv))))
+    lWmix[n] <- log(transition_node) - log(transition_right) - log(transition_left)
   }
-
-  lWmix <-
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
   # resampling the new population
