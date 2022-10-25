@@ -58,7 +58,7 @@ marginal_dac_msv <- function(history, obs, mu, Phi, Lambda, Sigma, adaptive = FA
       if(adaptive){
         out <- marginal_msv_light()
       } else {
-        out <- marginal_msv_light_fixed_theta_nofactor(i, u, nv, ci, W, Nparticles, theta, mu, Phi, Sigma, x, history)
+        out <- marginal_msv_light_fixed_theta_nofactor_vectorized(i, u, nv, ci, W, Nparticles, theta, mu, Phi, Sigma, x, history)
       }
       # update after mixture resampling
       indices <- out$resampled_indices
@@ -91,9 +91,9 @@ marginal_dac_msv <- function(history, obs, mu, Phi, Lambda, Sigma, adaptive = FA
         out <- marginal_msv_light()
       } else {
         if(i == 1){
-          out <- marginal_msv_light_fixed_theta_nofactor(i, u, nv_first, ci, W, Nparticles, theta, mu, Phi, Sigma, x, history)
+          out <- marginal_msv_light_fixed_theta_nofactor_vectorized(i, u, nv_first, ci, W, Nparticles, theta, mu, Phi, Sigma, x, history)
         } else {
-          out <- marginal_msv_light_fixed_theta_nofactor(i, u, nv, ci, W, Nparticles, theta, mu, Phi, Sigma, x, history)
+          out <- marginal_msv_light_fixed_theta_nofactor_vectorized(i, u, nv, ci, W, Nparticles, theta, mu, Phi, Sigma, x, history)
         }
       }
       # update after mixture resampling
