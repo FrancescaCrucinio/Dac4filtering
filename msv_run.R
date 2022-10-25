@@ -15,7 +15,7 @@ d <- p + r
 # number of time steps
 Time.step <- 1
 # number of particles
-Nparticles <- 1000
+Nparticles <- 5
 
 res_dac <- mvrnorm(n = Nparticles, mu, diag(Sigma^2))
 tic()

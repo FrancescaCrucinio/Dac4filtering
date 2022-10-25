@@ -1,5 +1,5 @@
 # Lightweight resampling for linear Gaussian SSM
-marginal_msv_light_fixed_theta_factor <- function(i, u, nv, ci, W, Nparticles, theta, mu, Phi, Sigma, Lambda, x, history){
+marginal_msv_light_fixed_theta_factor <- function(i, u, nv, ci, W, Nparticles, theta, mu, Phi, Sigma, Lambda, x, history, obs){
   nchild <- 2
   # resample on each children
   if(u == 1){
