@@ -19,3 +19,12 @@ load("/Users/francescacrucinio/Documents/Dac4filtering/data/exrates.RData")
 colnames(y) <- colnames(dat)
 write.csv(x=data.frame(y), file="data/synthetic_data_msv_y", row.names = FALSE)
 write.csv(x=data.frame(x), file="data/synthetic_data_msv_x", row.names = FALSE)
+
+# run factorstochvol
+res <- fsvsample(y, factors = 4, draws = 50000, zeromean = TRUE, thin = 10, quiet = TRUE, restric = "auto")
+cov_n <- rowMeans(covmat(res)[, , , 1], dims = 2)
+colnames(cov_n) <- colnames(dat)
+rownames(cov_n) <- colnames(dat)
+write.csv(x=data.frame(cov_n), file="data/synthetic_data_msv_cov_mat", row.names = FALSE)
+
+
