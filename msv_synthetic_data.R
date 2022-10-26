@@ -15,5 +15,7 @@ for(i in 2:(Time.step+1)){
   cov_matrix <- Lambda %*% diag(exp(x[i, (p+1):d])) %*% t(Lambda) + diag(exp(x[i, 1:p]))
   y[i-1, ] <- mvrnorm(n = 1, rep(0, p), cov_matrix)
 }
+load("/Users/francescacrucinio/Documents/Dac4filtering/data/exrates.RData")
+colnames(y) <- colnames(dat)
 write.csv(x=data.frame(y), file="data/synthetic_data_msv_y", row.names = FALSE)
 write.csv(x=data.frame(x), file="data/synthetic_data_msv_x", row.names = FALSE)
