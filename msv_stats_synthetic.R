@@ -43,3 +43,10 @@ filename <- paste0("synthetic_corrplot_dac_estimated_parameters_N", N, ".pdf", s
 pdf(file = filename)
 corrplot(cor_dac_estimated_parameters_mean, order = 'hclust')
 dev.off()
+
+
+true_x <- as.matrix(read.csv(file="data/synthetic_data_msv_x"))[Time.step+1, ]
+true_cov <- cov2cor(Lambda %*% diag(exp(true_x[(p+1):d])) %*% t(Lambda) + diag(exp(true_x[1:p])))
+colnames(true_cov) <- colnames(y)
+rownames(true_cov) <- colnames(y)
+corrplot(true_cov, order = 'hclust')
