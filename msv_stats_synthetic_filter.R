@@ -26,8 +26,8 @@ for (i in 1:30) {
   x_levels[i] <- paste0("X", i)
 }
 # df <- aggregate(. ~ time + type, data = df, FUN = "mean")
-df <- df[, c(3:32, 1:2, 33:34)]
-dim_selection <- c(1, 7, 27:30)
+# df <- df[, c(3:32, 1:2, 33:34)]
+dim_selection <- c(1, 20, 28)
 df_plot <- gather(df[df$type == "mean", dim_selection], "dim")
 colnames(df_plot)[2] <- "mean"
 df_plot$var <-  gather(df[df$type == "var", dim_selection], "dim")[, 2]

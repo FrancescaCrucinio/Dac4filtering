@@ -6,10 +6,10 @@ marginal_dac_msv <- function(history, obs, mu, Phi, Lambda, Sigma, adaptive = FA
   r <- 4
   # latent space dimension
   d <- p+r
-  # number of samples for lightweight mixture
-  theta <- ceiling(sqrt(Nparticles))
   # number of particles
   Nparticles <- nrow(history)
+  # number of samples for lightweight mixture
+  theta <- ceiling(sqrt(Nparticles))
   # tree topology
   nchild <- 2
   nlevels <- ceil(log2(d))
@@ -31,7 +31,7 @@ marginal_dac_msv <- function(history, obs, mu, Phi, Lambda, Sigma, adaptive = FA
     sample_from_past <- sample.int(Nparticles, Nparticles, replace = TRUE)
     x[, i] <- mu[i] + Phi[i]*(history[sample_from_past, i] - mu[i]) + Sigma[i]*rnorm(Nparticles)
     lW[, i] <- 0
-    W[, i] <- 1
+    W[, i] <- 1/Nparticles
   }
 
   # loop over first two levels of tree excluding leaves
