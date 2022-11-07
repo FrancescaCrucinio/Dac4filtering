@@ -9,12 +9,14 @@ true_x <- read.csv(file="data/synthetic_data_msv_x")
 Time.step <- 122
 p <- 26
 d <- 30
-df <- read.csv("data/msv/means_dac_msv_syn_d30N500ID1", row.names = 1)
+N <- "1000"
+filename <- paste0("data/msv/means_dac_msv_syn_d30N", N, "ID1", sep = "")
+df <- read.csv(filename, row.names = 1)
 df$time <- 1:122
 df$run <- 1
 df$type <- rep(c("mean", "var", "min", "q1", "q2", "q3", "max"), each = Time.step)
 # for (id in 2:50){
-#   filename <- paste0("data/msv/means_dac_msv_syn_d30N500ID", id, sep = "")
+#   filename <- paste0("data/msv/means_dac_msv_syn_d30N", N, "ID", id, sep = "")
 #   dfnew <- read.csv(filename, row.names = 1)
 #   dfnew$run <- id
 #   dfnew$time <- 1:122
@@ -37,9 +39,7 @@ df_plot$q2 <-  gather(df[df$type == "q2", dim_selection], "dim")[, 2]
 df_plot$q3 <-  gather(df[df$type == "q3", dim_selection], "dim")[, 2]
 df_plot$max <-  gather(df[df$type == "max", dim_selection], "dim")[, 2]
 df_plot$time <- 1:122
-df_plot_true_x <- gather(true_x[2:123, dim_selection], "dim")
-df_plot_true_x$time <- 1:122
-df_plot_true_x$N <- "truth"
+df_plot$truth <- gather(true_x[2:123, dim_selection], "dim")[, 2]
 colnames(y) <- x_levels[1:p]
 df_plot_y <- gather(y[, dim_selection[dim_selection %in% 1:26]], "dim")
 df_plot_y$time <- 1:122
@@ -47,16 +47,17 @@ df_plot_y$N <- "obs"
 
 ggplot(data = df_plot, aes(x = time, y = mean)) +
   geom_ribbon(aes(ymin = q1, ymax = q3), fill = "grey70") +
-  geom_line(color = "black") +
-  geom_line(data = df_plot_true_x, aes(x = time, y = value), color = "blue") +
-  geom_line(data = df_plot_y, aes(x = time, y = value), color = "red") +
+  geom_line(aes(color = "filter")) +
+  geom_line(aes(x = time, y = truth, color = "truth")) +
+  geom_line(data = df_plot_y, aes(x = time, y = value, color = "obs")) +
   facet_wrap(~factor(dim, levels = x_levels[dim_selection]), scales = "free", nrow = 3) +
+  scale_color_manual(values=c("black", "blue", "red")) +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank(),
-        axis.text = element_text(size=5),
+        axis.text = element_text(size=15),
         strip.text.x = element_blank(),
         legend.title = element_blank(), legend.text=element_text(size=20),
-        text = element_text(size=5))
-
+        text = element_text(size=15))
+# ggsave("marginal_msv_synthetic_filtering.pdf", width = 12, height = 8, dpi = 300)
 
 # for (id in 1:50){
 #   filename <- paste0("data/msv/means_dac_msv_syn_d30N500ID", id, sep = "")
@@ -106,6 +107,3 @@ ggplot(data = df_plot, aes(x = time, y = mean)) +
 #         legend.title = element_blank(), legend.text=element_text(size=20),
 #         text = element_text(size=5))
 
-
-tmp[tmp$type == "mean", 1]
-tmp[tmp$type == "min", 1]
