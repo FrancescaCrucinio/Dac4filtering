@@ -47,7 +47,7 @@ cor_dac_estimated_parameters_mean <- cor_dac_estimated_parameters_mean[currency_
 out_dac2 <- corrplot(cor_dac_estimated_parameters_mean, order = 'original')
 filename <- paste0("synthetic_corrplot_dac_estimated_parameters_N", N, ".pdf", sep = "")
 # pdf(file = filename)
-# out_dac2
+# corrplot(cor_dac_estimated_parameters_mean, order = 'original')
 # dev.off()
 
 
