@@ -26,7 +26,7 @@ Lambda <- rowMeans(res$facload, dims = 2)
 save(mu, Phi, Sigma, Lambda, list = c("mu", "Phi", "Sigma", "Lambda"), file = "msv_parameters.RData")
 
 ### first semester of 2013
-first_semester2013 <- dat[dat$date > "2013-01-04" & dat$date < "2013-07-01", ]
+first_semester2013 <- dat[dat$date > "2013-01-04" & dat$date <= "2013-07-01", ]
 write.csv(x=first_semester2013[, 1:26], file="data/real_data_msv_y", row.names = FALSE)
 # run factorstochvol on last semester
 n <- dim(first_semester2013)[1] # days
