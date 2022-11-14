@@ -1,7 +1,6 @@
 # devtools::load_all("/storage/u1693998/Dac4filtering")
 # ID <- as.numeric(Sys.getenv("SGE_TASK_ID"))
 ID <- 1
-set.seed(1234*ID)
 # get data
 y <- as.matrix(read.csv(file="data/synthetic_data_msv_nofactor_y"))
 true_x <- read.csv(file="data/synthetic_data_msv_nofactor_x")
@@ -17,12 +16,18 @@ diag(SigmaV) <- 1
 SigmaUV <- matrix(-0.1, nrow =d, ncol = d)
 diag(SigmaUV) <- -0.2
 Sigma0 <- SigmaU/(1-phi^2)
+Sigma0_inv <- solve(Sigma0)
 SigmaX <- SigmaU - SigmaUV %*% solve(SigmaV) %*% SigmaUV
 # number of particles
-Nparticles <- 100
+Nparticles <- 1000
 
+set.seed(1234*ID)
 res_dac <- array(0, dim = c(Time.step, Nparticles, d))
-res_dac[1, , ] <- mvrnorm(n = Nparticles, rep(0, d), Sigma0)
+res_dac[1, , ] <- marginal_dac_msv_first_step(y[1, ], SigmaV, Sigma0, Nparticles)
+
+colMeans(res_dac[1,,])
+true_x[1,]
+(colMeans(res_dac[1,,]) - true_x[1,])^2
 tic()
 for (t in 1:Time.step) {
   res_dac[t+1, , ] <- marginal_dac_msv(res_dac[t, , ], y[t, ], mu, Phi, Lambda, Sigma, adaptive = FALSE)
