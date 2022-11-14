@@ -18,7 +18,7 @@ marginal_dac_msv <- function(history, obs_current, obs_past, SigmaU, SigmaV, Sig
   mu <- t(apply(history, 1, function(x){ phi*x + SigmaUV %*% solve(SigmaV) %*% diag(1/sqrt(exp(x))) %*% obs_past}))
   for (i in 1:d){
     sample_from_past <- sample.int(Nparticles, Nparticles, replace = TRUE)
-    x[, i] <- mu[sample_from_past, i] + SigmaX[i, i]*rnorm(Nparticles)
+    x[, i] <- mu[sample_from_past, i] + sqrt(SigmaX[i, i])*rnorm(Nparticles)
     lW[, i] <- -0.5*(obs_current[i])^2/(exp(x[, i])*SigmaV[i,i])
     max.lW <- max(lW[, i])
     W[, i] <- exp(lW[, i] - max.lW)
@@ -39,7 +39,8 @@ marginal_dac_msv <- function(history, obs_current, obs_past, SigmaU, SigmaV, Sig
       if(adaptive){
         out <- marginal_msv_light()
       } else {
-        out <- marginal_msv_nofactor_light_fixed_theta()
+        out <- marginal_msv_nofactor_light_fixed_theta(i, u, nv, ci, W, Nparticles, theta, SigmaX, SigmaV, SigmaUV, phi,
+                                                       x, obs_current, obs_past, history)
       }
       # update after mixture resampling
       indices <- out$resampled_indices

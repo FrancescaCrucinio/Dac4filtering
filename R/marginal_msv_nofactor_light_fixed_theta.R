@@ -1,4 +1,5 @@
-marginal_msv_nofactor_light_fixed_theta <- function(i, u, nv, ci, W, Nparticles, theta, mu, Phi, Sigma, Lambda, x, history, obs){
+marginal_msv_nofactor_light_fixed_theta <- function(i, u, nv, ci, W, Nparticles, theta, SigmaX, SigmaV, SigmaUV, phi,
+                                                    x, obs_current, obs_past, history){
   nchild <- 2
   # resample on each children
   if(u == 1){
@@ -16,16 +17,17 @@ marginal_msv_nofactor_light_fixed_theta <- function(i, u, nv, ci, W, Nparticles,
 
   # mixture weights
   lWmix <- rep(0, times = theta*Nparticles)
+  # precompute mean vector
+  mu <- t(apply(history, 1, function(x){ phi*x + SigmaUV %*% solve(SigmaV) %*% diag(1/sqrt(exp(x))) %*% obs_past}))
   for (n in 1:(theta*Nparticles)) {
     # contribution of f_{t, u}
     mx <- x[indices1[n], ]
     mx[(ci[1]+nv):ci[2]] <- x[indices2[n], (ci[1]+nv):ci[2]]
+    centred_mx <- -sweep(mu, 2, mx, '-')
     # # contribution of f_{t, u}
-    # transition_node <- -0.5*mx[ci[1]:ci[2]] %*% solve(Sigma0[ci[1]:ci[2], ci[1]:ci[2]]) %*% mx[ci[1]:ci[2]]
-    # transition_left <- -0.5*mx[ci[1]:(ci[1]+nv-1)] %*% solve(Sigma0[ci[1]:(ci[1]+nv-1), ci[1]:(ci[1]+nv-1), drop = FALSE]) %*%
-    #   mx[ci[1]:(ci[1]+nv-1)]
-    # transition_right <- -0.5*mx[(ci[1]+nv):ci[2]] %*% solve(Sigma0[(ci[1]+nv):ci[2], (ci[1]+nv):ci[2], drop = FALSE]) %*%
-    #   mx[(ci[1]+nv):ci[2]]
+    transition_node <- -0.5*centred_mx[ci[1]:ci[2]] %*% solve(SigmaX[ci[1]:ci[2], ci[1]:ci[2]]) %*% centred_mx[ci[1]:ci[2]]
+    transition_left <- -0.5*centred_mx[ci[1]:(ci[1]+nv-1)] %*% solve(SigmaX[ci[1]:(ci[1]+nv-1), ci[1]:(ci[1]+nv-1)]) %*% centred_mx[ci[1]:(ci[1]+nv-1)]
+    transition_right <- -0.5*centred_mx[(ci[1]+nv):ci[2]] %*% solve(SigmaX[(ci[1]+nv):ci[2], (ci[1]+nv):ci[2]]) %*% centred_mx[(ci[1]+nv):ci[2]]
     # contribution of g_{t,u}
     obs_covariance <- diag(sqrt(exp(mx))) %*% SigmaV %*% diag(sqrt(exp(mx)))
     obs_node <- -0.5*obs_current[ci[1]:ci[2]] %*% solve(obs_covariance[ci[1]:ci[2], ci[1]:ci[2]]) %*% obs_current[ci[1]:ci[2]]
@@ -33,8 +35,7 @@ marginal_msv_nofactor_light_fixed_theta <- function(i, u, nv, ci, W, Nparticles,
       obs_current[ci[1]:(ci[1]+nv-1)]
     obs_right <- -0.5*obs_current[(ci[1]+nv):ci[2]] %*% solve(obs_covariance[(ci[1]+nv):ci[2], (ci[1]+nv):ci[2], drop = FALSE]) %*%
       obs_current[(ci[1]+nv):ci[2]]
-
-    lWmix <- obs_node - obs_left - obs_right
+    lWmix <- transition_node - transition_left - transition_right + obs_node - obs_left - obs_right
   }
   max.lWmix <- max(lWmix)
   Wmix <- exp(lWmix - max.lWmix)
@@ -85,4 +86,8 @@ marginal_msv_nofactor_light_fixed_theta_first_step <- function(i, u, nv, ci, W, 
   # resampling the new population
   indices <- stratified_resample(Wmix/sum(Wmix), Nparticles)
   return(list("resampled_indices" = cbind(indices1[indices], indices2[indices]), "resampled_particles_lW" = lWmix[indices]))
+}
+
+transition_weight <- function(x) {
+  -0.5*(mx - x)
 }
