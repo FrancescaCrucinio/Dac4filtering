@@ -24,7 +24,9 @@ Nparticles <- 100
 
 set.seed(1234*ID)
 res_dac <- array(0, dim = c(Time.step, Nparticles, d))
+tic()
 res_dac[1, , ] <- marginal_dac_msv_first_step(y[1, ], SigmaV, Sigma0, Nparticles)
+toc()
 tic()
 for (t in 2:Time.step) {
   res_dac[t, , ] <- marginal_dac_msv(res_dac[t-1, , ], y[t, ], y[t-1, ], SigmaU, SigmaV, SigmaUV, SigmaX, phi, adaptive = FALSE)
@@ -38,6 +40,11 @@ means.along <- function(a, i) {
   rowMeans(b, dims = n - 1)
 }
 
-plot(1:Time.step, true_x[1:Time.step, 1], type = "l", col = "black")
-lines(1:Time.step, means.along(res_dac, 2)[, 1], type = "l", col = "red")
+dim <- 1
+plot(1:Time.step, true_x[1:Time.step, dim], type = "l", col = "black", ylim = c(min(true_x[1:Time.step, dim], means.along(res_dac, 2)[, dim]),
+                                                                             max(true_x[1:Time.step, dim], means.along(res_dac, 2)[, dim])))
+lines(1:Time.step, means.along(res_dac, 2)[, dim], type = "l", col = "red")
 
+
+means.along(res_dac, 2)[1,]
+4.510652 1.879582 2.589651 3.163248
