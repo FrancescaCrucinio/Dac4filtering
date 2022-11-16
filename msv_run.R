@@ -20,7 +20,7 @@ Sigma0 <- SigmaU/(1-phi^2)
 Sigma0_inv <- solve(Sigma0)
 SigmaX <- SigmaU - SigmaUV %*% solve(SigmaV) %*% SigmaUV
 # number of particles
-Nparticles <- 100
+Nparticles <- 10
 
 set.seed(1234*ID)
 res_dac <- array(0, dim = c(Time.step, Nparticles, d))
@@ -45,6 +45,5 @@ plot(1:Time.step, true_x[1:Time.step, dim], type = "l", col = "black", ylim = c(
                                                                              max(true_x[1:Time.step, dim], means.along(res_dac, 2)[, dim])))
 lines(1:Time.step, means.along(res_dac, 2)[, dim], type = "l", col = "red")
 
-
-means.along(res_dac, 2)[1,]
-4.510652 1.879582 2.589651 3.163248
+means.along(res_dac, 2)[, dim]
+2.615580 3.694466 2.695154 4.646588 5.568223 5.895837 7.121134 6.432346 5.123554 4.464981
