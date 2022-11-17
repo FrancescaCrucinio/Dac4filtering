@@ -1,6 +1,6 @@
 # Load parameters
 # first semester of 2013
-set.seed(1234)
+set.seed(7777)
 Time.step <- 100
 d <- 4
 # model parameters

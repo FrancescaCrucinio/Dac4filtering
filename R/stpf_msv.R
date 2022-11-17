@@ -23,10 +23,7 @@ stpf_msv_first_step <- function(Nparticles, M, obs_current, Sigma0, SigmaV){
     x[i, , j] <- x[i, ancestors, j]
     j <- 2
     # propose
-    mu_conditional <- rep(0, nrow = M)
-    for (k in 1:M) {
-      mu_conditional[k] <- Sigma0[j, 1:(j-1)] %*% solve(Sigma0[1:(j-1), 1:(j-1)]) %*% x[i, k, 1:(j-1)]
-    }
+    mu_conditional <- sapply(x[i, , 1:(j-1)], function(s){Sigma0[j, 1:(j-1)] %*% solve(Sigma0[1:(j-1), 1:(j-1)]) %*% as.matrix(s)})
     x[i, , j] <- mu_conditional + sqrt(Sigma0[j, j] - Sigma0[j, 1:(j-1)] %*% solve(Sigma0[1:(j-1), 1:(j-1)]) %*% Sigma0[j, 1:(j-1)])[1]*rnorm(M)
     # weights
     lW <- -0.5*apply(x[i, , 1:j], 1, function(s) {obs_current[1:j] %*% solve(diag(sqrt(exp(s))) %*% SigmaV[1:j, 1:j] %*% diag(sqrt(exp(s)))) %*% obs_current[1:j]}) +
@@ -40,10 +37,7 @@ stpf_msv_first_step <- function(Nparticles, M, obs_current, Sigma0, SigmaV){
     x[i, , 1:j] <- x[i, ancestors, 1:j]
     for(j in 3:d){
       # propose
-      mu_conditional <- rep(0, nrow = M)
-      for (k in 1:M) {
-        mu_conditional[k] <- Sigma0[j, 1:(j-1)] %*% solve(Sigma0[1:(j-1), 1:(j-1)]) %*% x[i, k, 1:(j-1)]
-      }
+      mu_conditional <- apply(x[i, , 1:(j-1)], 1, function(s){Sigma0[j, 1:(j-1)] %*% solve(Sigma0[1:(j-1), 1:(j-1)]) %*% s})
       x[i, , j] <- mu_conditional + sqrt(Sigma0[j, j] - Sigma0[j, 1:(j-1)] %*% solve(Sigma0[1:(j-1), 1:(j-1)]) %*% Sigma0[j, 1:(j-1)])[1]*rnorm(M)
       # weights
       lW <- -0.5*apply(x[i, , 1:j], 1, function(s) {obs_current[1:j] %*% solve(diag(sqrt(exp(s))) %*% SigmaV[1:j, 1:j] %*% diag(sqrt(exp(s)))) %*% obs_current[1:j]}) +
@@ -95,7 +89,7 @@ stpf_msv <- function(xOld, obs_current, obs_past, phi, SigmaUV, SigmaV, SigmaX){
     x[i, , j] <- x[i, ancestors, j]
     j <- 2
     # propose
-    mu_conditional <- rep(0, nrow = M)
+    mu_conditional <- rep(0, times = M)
     for (k in 1:M) {
       mu_conditional[k] <- mu[k, j] + SigmaX[j, 1:(j-1)] %*% solve(SigmaX[1:(j-1), 1:(j-1)]) %*% (x[i, k, 1:(j-1)] - mu[k, 1:(j-1)])
     }
@@ -113,7 +107,7 @@ stpf_msv <- function(xOld, obs_current, obs_past, phi, SigmaUV, SigmaV, SigmaX){
     x[i, , 1:j] <- x[i, ancestors, 1:j]
     for(j in 3:d){
       # propose
-      mu_conditional <- rep(0, nrow = M)
+      mu_conditional <- rep(0, times = M)
       for (k in 1:M) {
         mu_conditional[k] <- mu[k, j] + SigmaX[j, 1:(j-1)] %*% solve(SigmaX[1:(j-1), 1:(j-1)]) %*% (x[i, k, 1:(j-1)] - mu[k, 1:(j-1)])
       }

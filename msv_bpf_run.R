@@ -20,14 +20,24 @@ Sigma0 <- SigmaU/(1-phi^2)
 Sigma0_inv <- solve(Sigma0)
 SigmaX <- SigmaU - SigmaUV %*% solve(SigmaV) %*% SigmaUV
 # number of particles
-Nparticles <- 50
-M <- 20
+Nparticles <- 1000
 
-res_stpf <- array(0, dim = c(Time.step, Nparticles, M, d))
+res_bpf <- array(0, dim = c(Time.step, Nparticles, d))
 tic()
-res_stpf[1, , , ] <- stpf_msv_first_step(Nparticles, M, y[1, ], Sigma0, SigmaV)
+lW <- rep(0, times = Nparticles)
+for (i in 1:Nparticles) {
+  res_bpf[1, i, ] <- mvrnorm(n = 1, rep(0, d), Sigma0)
+  obs_covariance <- diag(sqrt(exp(res_bpf[1, i, ]))) %*% SigmaV %*% diag(sqrt(exp(res_bpf[1, i, ])))
+  lW[i] <- -0.5*(y[1, ] %*% solve(obs_covariance) %*% y[1, ])
+}
+max.lW <- max(lW)
+W <- exp(lW - max(lW))
+W <- W/sum(W)
+ancestors <- stratified_resample(W, Nparticles)
+res_bpf[1, , ] <- res_bpf[1, ancestors, ]
+
 for (t in 2:Time.step) {
-  res_stpf[t, , , ] <- stpf_msv(res_stpf[t-1, , , ], y[t, ], y[t-1, ], phi, SigmaUV, SigmaV, SigmaX)
+  res_bpf[t, , ] <- msv_bpf(res_bpf[t-1, , ], y[t-1, ], y[t, ], SigmaV, SigmaUV, SigmaX, phi)
   print(paste(t))
 }
 runtime <- toc()
@@ -37,9 +47,16 @@ dim <- 1
 stpf_mean <- apply(res_stpf, c(1,4), mean)[, dim]
 stpf_q1 <- apply(res_stpf, c(1,4), quantile, 0.25)[, dim]
 stpf_q3 <- apply(res_stpf, c(1,4), quantile, 0.75)[, dim]
+bpf_mean <- apply(res_bpf, c(1,3), mean)[, dim]
+bpf_q1 <- apply(res_bpf, c(1,3), quantile, 0.25)[, dim]
+bpf_q3 <- apply(res_bpf, c(1,3), quantile, 0.75)[, dim]
+
 plot(1:Time.step, true_x[1:Time.step, dim], type = "l", col = "black", ylim = c(-10, 10))
 lines(1:Time.step, stpf_mean, type = "l", col = "red")
 lines(1:Time.step, stpf_q1, type = "l", col = "red", lty = "dashed")
 lines(1:Time.step, stpf_q3, type = "l", col = "red", lty = "dashed")
-lines(1:Time.step, y[1:Time.step, dim], type = "l", col = "blue", lty = "dashed")
+lines(1:Time.step, bpf_mean, type = "l", col = "green")
+lines(1:Time.step, bpf_q1, type = "l", col = "green", lty = "dashed")
+lines(1:Time.step, bpf_q3, type = "l", col = "green", lty = "dashed")
+
 
