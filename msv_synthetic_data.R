@@ -4,7 +4,7 @@ set.seed(7777)
 Time.step <- 100
 d <- 4
 # model parameters
-phi <- 0.91
+phi <- 0.091
 SigmaU <- matrix(0.3, nrow =d, ncol = d)
 diag(SigmaU) <- 1
 SigmaV <- matrix(0.2, nrow =d, ncol = d)

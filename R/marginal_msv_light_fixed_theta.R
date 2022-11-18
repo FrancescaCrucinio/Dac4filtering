@@ -21,17 +21,13 @@ marginal_msv_light_fixed_theta_first_step <- function(i, u, nv, ci, W, Nparticle
     mx[(ci[1]+nv):ci[2]] <- x[indices2[n], (ci[1]+nv):ci[2]]
     # contribution of f_{t, u}
     transition_node <- -0.5*mx[ci[1]:ci[2]] %*% solve(Sigma0[ci[1]:ci[2], ci[1]:ci[2]]) %*% mx[ci[1]:ci[2]]
-    transition_left <- -0.5*mx[ci[1]:(ci[1]+nv-1)] %*% solve(Sigma0[ci[1]:(ci[1]+nv-1), ci[1]:(ci[1]+nv-1), drop = FALSE]) %*%
-      mx[ci[1]:(ci[1]+nv-1)]
-    transition_right <- -0.5*mx[(ci[1]+nv):ci[2]] %*% solve(Sigma0[(ci[1]+nv):ci[2], (ci[1]+nv):ci[2], drop = FALSE]) %*%
-      mx[(ci[1]+nv):ci[2]]
+    transition_left <- -0.5*mx[ci[1]:(ci[1]+nv-1)] %*% solve(Sigma0[ci[1]:(ci[1]+nv-1), ci[1]:(ci[1]+nv-1), drop = FALSE]) %*% mx[ci[1]:(ci[1]+nv-1)]
+    transition_right <- -0.5*mx[(ci[1]+nv):ci[2]] %*% solve(Sigma0[(ci[1]+nv):ci[2], (ci[1]+nv):ci[2], drop = FALSE]) %*% mx[(ci[1]+nv):ci[2]]
     # contribution of g_{t,u}
     obs_covariance <- diag(sqrt(exp(mx[ci[1]:ci[2]]))) %*% SigmaV[ci[1]:ci[2], ci[1]:ci[2]] %*% diag(sqrt(exp(mx[ci[1]:ci[2]])))
     obs_node <- -0.5*obs[ci[1]:ci[2]] %*% solve(obs_covariance) %*% obs[ci[1]:ci[2]]
-    obs_left <- -0.5*obs[ci[1]:(ci[1]+nv-1)] %*% solve(obs_covariance[1:nv, 1:nv, drop = FALSE]) %*%
-      obs[ci[1]:(ci[1]+nv-1)]
-    obs_right <- -0.5*obs[(ci[1]+nv):ci[2]] %*% solve(obs_covariance[(nv+1):(2*nv), (nv+1):(2*nv), drop = FALSE]) %*%
-      obs[(ci[1]+nv):ci[2]]
+    obs_left <- -0.5*obs[ci[1]:(ci[1]+nv-1)] %*% solve(obs_covariance[1:nv, 1:nv, drop = FALSE]) %*% obs[ci[1]:(ci[1]+nv-1)]
+    obs_right <- -0.5*obs[(ci[1]+nv):ci[2]] %*% solve(obs_covariance[(nv+1):(2*nv), (nv+1):(2*nv), drop = FALSE]) %*% obs[(ci[1]+nv):ci[2]]
     lWmix[n] <- transition_node - transition_left - transition_right + obs_node - obs_left - obs_right
   }
   max.lWmix <- max(lWmix)
@@ -99,23 +95,21 @@ marginal_msv_light_fixed_theta <- function(i, u, nv, ci, W, Nparticles, theta, S
   # mixture weights
   lWmix <- rep(0, times = theta*Nparticles)
   # precompute mean vector
-  mu <- t(apply(history, 1, function(x){ phi*x + SigmaUV %*% solve(SigmaV) %*% diag(1/sqrt(exp(x))) %*% obs_past}))
+  mu <- t(apply(history, 1, function(s){ phi*s + SigmaUV %*% solve(SigmaV) %*% diag(1/sqrt(exp(s))) %*% obs_past}))
   for (n in 1:(theta*Nparticles)) {
     # contribution of f_{t, u}
     mx <- x[indices1[n], ]
     mx[(ci[1]+nv):ci[2]] <- x[indices2[n], (ci[1]+nv):ci[2]]
     centred_mx <- -sweep(mu, 2, mx, '-')
     # # contribution of f_{t, u}
-    transition_node <- -0.5*mean(apply(centred_mx[, ci[1]:ci[2]], 1, function(x) {x %*% solve(SigmaX[ci[1]:ci[2], ci[1]:ci[2]]) %*% x }))
-    transition_left <- -0.5*mean(apply(centred_mx[, ci[1]:(ci[1]+nv-1), drop = F], 1, function(x) {x %*% solve(SigmaX[ci[1]:(ci[1]+nv-1), ci[1]:(ci[1]+nv-1)]) %*% x }))
-    transition_right <- -0.5*mean(apply(centred_mx[, (ci[1]+nv):ci[2], drop = F], 1, function(x) {x %*% solve(SigmaX[(ci[1]+nv):ci[2], (ci[1]+nv):ci[2]]) %*% x }))
+    transition_node <- -0.5*mean(apply(centred_mx[, ci[1]:ci[2]], 1, function(s) {s %*% solve(SigmaX[ci[1]:ci[2], ci[1]:ci[2]]) %*% s }))
+    transition_left <- -0.5*mean(apply(centred_mx[, ci[1]:(ci[1]+nv-1), drop = F], 1, function(s) {s %*% solve(SigmaX[ci[1]:(ci[1]+nv-1), ci[1]:(ci[1]+nv-1)]) %*% s }))
+    transition_right <- -0.5*mean(apply(centred_mx[, (ci[1]+nv):ci[2], drop = F], 1, function(s) {s %*% solve(SigmaX[(ci[1]+nv):ci[2], (ci[1]+nv):ci[2]]) %*% s }))
     # contribution of g_{t,u}
-    obs_covariance <- diag(sqrt(exp(mx))) %*% SigmaV %*% diag(sqrt(exp(mx)))
-    obs_node <- -0.5*obs_current[ci[1]:ci[2]] %*% solve(obs_covariance[ci[1]:ci[2], ci[1]:ci[2]]) %*% obs_current[ci[1]:ci[2]]
-    obs_left <- -0.5*obs_current[ci[1]:(ci[1]+nv-1)] %*% solve(obs_covariance[ci[1]:(ci[1]+nv-1), ci[1]:(ci[1]+nv-1), drop = FALSE]) %*%
-      obs_current[ci[1]:(ci[1]+nv-1)]
-    obs_right <- -0.5*obs_current[(ci[1]+nv):ci[2]] %*% solve(obs_covariance[(ci[1]+nv):ci[2], (ci[1]+nv):ci[2], drop = FALSE]) %*%
-      obs_current[(ci[1]+nv):ci[2]]
+    obs_covariance <- diag(sqrt(exp(mx[ci[1]:ci[2]]))) %*% SigmaV[ci[1]:ci[2], ci[1]:ci[2]] %*% diag(sqrt(exp(mx[ci[1]:ci[2]])))
+    obs_node <- -0.5*obs_current[ci[1]:ci[2]] %*% solve(obs_covariance) %*% obs_current[ci[1]:ci[2]]
+    obs_left <- -0.5*obs_current[ci[1]:(ci[1]+nv-1)] %*% solve(obs_covariance[1:nv, 1:nv, drop = FALSE]) %*% obs_current[ci[1]:(ci[1]+nv-1)]
+    obs_right <- -0.5*obs_current[(ci[1]+nv):ci[2]] %*% solve(obs_covariance[(nv+1):(2*nv), (nv+1):(2*nv), drop = FALSE]) %*% obs_current[(ci[1]+nv):ci[2]]
     lWmix[n] <- transition_node - transition_left - transition_right + obs_node - obs_left - obs_right
   }
   max.lWmix <- max(lWmix)
