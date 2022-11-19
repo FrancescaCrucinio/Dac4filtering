@@ -20,8 +20,8 @@ Sigma0 <- SigmaU/(1-phi^2)
 Sigma0_inv <- solve(Sigma0)
 SigmaX <- SigmaU - SigmaUV %*% solve(SigmaV) %*% SigmaUV
 # number of particles
-Nparticles <- 50
-M <- 20
+Nparticles <- 10
+M <- 2
 
 res_stpf <- array(0, dim = c(Time.step, Nparticles, M, d))
 tic()
