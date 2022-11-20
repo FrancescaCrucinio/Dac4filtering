@@ -2,8 +2,8 @@
 # ID <- as.numeric(Sys.getenv("SGE_TASK_ID"))
 ID <- 1
 # get data
-y <- as.matrix(read.csv(file="data/synthetic_data_msv_nofactor_y"))
-true_x <- read.csv(file="data/synthetic_data_msv_nofactor_x")
+y <- as.matrix(read.csv(file="data/synthetic_data_msv_y"))
+true_x <- read.csv(file="data/synthetic_data_msv_x")
 d <- dim(y)[2]
 Time.step <- dim(y)[1]
 Time.step <- 10
@@ -20,7 +20,7 @@ Sigma0 <- SigmaU/(1-phi^2)
 Sigma0_inv <- solve(Sigma0)
 SigmaX <- SigmaU - SigmaUV %*% solve(SigmaV) %*% SigmaUV
 # number of particles
-Nparticles <- 200
+Nparticles <- 20
 
 set.seed(1234*ID)
 res_dac <- array(0, dim = c(Time.step, Nparticles, d))

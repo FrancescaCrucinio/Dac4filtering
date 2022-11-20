@@ -2,7 +2,7 @@
 # first semester of 2013
 set.seed(1234)
 Time.step <- 100
-d <- 4
+d <- 128
 # model parameters
 phi <- 0.1
 SigmaU <- matrix(0.3, nrow =d, ncol = d)

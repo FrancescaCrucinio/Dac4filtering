@@ -17,8 +17,8 @@ SigmaX <- SigmaU - SigmaUV %*% solve(SigmaV) %*% SigmaUV
 # number of time steps
 Time.step <- 100
 # number of particles
-Nparticles <- 1000
-
+Nparticles <- 50
+M <- 20
 m_stpf <- matrix(0, nrow = Time.step, ncol = d)
 v_stpf <- matrix(0, nrow = Time.step, ncol = d)
 q1_stpf <- matrix(0, nrow = Time.step, ncol = d)
@@ -29,10 +29,10 @@ max_stpf <- matrix(0, nrow = Time.step, ncol = d)
 runtime <- rep(0, times = Time.step)
 tic()
 t <- 1
-y <- unname(data.matrix(read.csv(file="/storage/u1693998/data/synthetic_data_msv_y", nrows = 1, skip = t-1)))
+y <- c(data.matrix(read.csv(file="/storage/u1693998/data/synthetic_data_msv_y", nrows = 1, skip = t-1, header = FALSE)))
 res_stpf <-  stpf_msv_first_step(Nparticles, M, y, Sigma0, SigmaV)
 m_stpf[t, ] <- apply(res_stpf, 3, mean)
-v_stpf[t, ] <- apply(res_stpf, 3, var)
+v_stpf[t, ] <- apply(res_stpf, 3, function(x) {var(c(x))})
 q1_stpf[t, ] <- apply(res_stpf, 3, quantile, probs = 0.25)
 q2_stpf[t, ] <- apply(res_stpf, 3, quantile, probs = 0.5)
 q3_stpf[t, ] <- apply(res_stpf, 3, quantile, probs = 0.75)
@@ -43,18 +43,18 @@ print(paste(t))
 runtime[t] <- toc()
 for (t in 2:Time.step) {
   tic()
-  y <- unname(data.matrix(read.csv(file="/storage/u1693998/data/synthetic_data_msv_y", nrows = 1, skip = t-1)))
+  y <- c(data.matrix(read.csv(file="/storage/u1693998/data/synthetic_data_msv_y", nrows = 1, skip = t-1, header = FALSE)))
   res_stpf <- stpf_msv(res_stpf, y, y_past, phi, SigmaUV, SigmaV, SigmaX)
-  m_stpf[t, ] <- colMeans(res_stpf)
-  v_stpf[t, ] <- colVars(res_stpf)
-  q1_stpf[t, ] <- apply(res_stpf, 2, quantile, probs = 0.25)
-  q2_stpf[t, ] <- apply(res_stpf, 2, quantile, probs = 0.5)
-  q3_stpf[t, ] <- apply(res_stpf, 2, quantile, probs = 0.75)
-  min_stpf[t, ] <- apply(res_stpf, 2, min)
-  max_stpf[t, ] <- apply(res_stpf, 2, max)
+  m_stpf[t, ] <- apply(res_stpf, 3, mean)
+  v_stpf[t, ] <- apply(res_stpf, 3, function(x) {var(c(x))})
+  q1_stpf[t, ] <- apply(res_stpf, 3, quantile, probs = 0.25)
+  q2_stpf[t, ] <- apply(res_stpf, 3, quantile, probs = 0.5)
+  q3_stpf[t, ] <- apply(res_stpf, 3, quantile, probs = 0.75)
+  min_stpf[t, ] <- apply(res_stpf, 3, min)
+  max_stpf[t, ] <- apply(res_stpf, 3, max)
   y_past <- y
   print(paste(t))
-  runtime <- toc()
+  runtime[t] <- toc()
 }
 df <- data.frame(rbind(m_stpf, v_stpf, min_stpf, q1_stpf, q2_stpf, q3_stpf, max_stpf))
 df$runtime <- sum(runtime)

@@ -34,12 +34,11 @@ marginal_dac_msv_first_step <- function(obs, SigmaV, Sigma0, Nparticles, adaptiv
       if(adaptive){
         out <- marginal_msv_light()
       } else {
-        out <- marginal_msv_light_fixed_theta_first_step_vectorized(i, u, nv, ci, W, Nparticles, theta, SigmaV, Sigma0, x, obs)
+        out <- marginal_msv_light_fixed_theta_first_step(i, u, nv, ci, W, Nparticles, theta, SigmaV, Sigma0, x, obs)
       }
       # update after mixture resampling
       indices <- out$resampled_indices
       xNew[, ci[1]:ci[2]] <- cbind(x[indices[, 1], ci[1]:(ci[1]+nv-1)], x[indices[, 2], (ci[1]+nv):ci[2]])
-      print(colMeans(xNew))
     }
     x <- xNew
     nv <- nvNew
@@ -93,7 +92,6 @@ marginal_dac_msv <- function(history, obs_current, obs_past, SigmaV, SigmaUV, Si
       # update after mixture resampling
       indices <- out$resampled_indices
       xNew[, ci[1]:ci[2]] <- cbind(x[indices[, 1], ci[1]:(ci[1]+nv-1)], x[indices[, 2], (ci[1]+nv):ci[2]])
-      print(colMeans(xNew))
     }
     x <- xNew
     nv <- nvNew
