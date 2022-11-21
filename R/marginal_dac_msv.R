@@ -32,7 +32,7 @@ marginal_dac_msv_first_step <- function(obs, SigmaV, Sigma0, Nparticles, adaptiv
       ci <- child_indices(i, nvNew)
       # lightweight mixture resampling
       if(adaptive){
-        out <- marginal_msv_light()
+        out <- marginal_msv_light_first_step(Nparticles, i, u, nv, ci, lW, Nparticles, theta, SigmaV, Sigma0, x, obs)
       } else {
         out <- marginal_msv_light_fixed_theta_first_step(i, u, nv, ci, W, Nparticles, theta, SigmaV, Sigma0, x, obs)
       }
@@ -84,7 +84,8 @@ marginal_dac_msv <- function(history, obs_current, obs_past, SigmaV, SigmaUV, Si
       ci <- child_indices(i, nvNew)
       # lightweight mixture resampling
       if(adaptive){
-        out <- marginal_msv_light()
+        out <- marginal_msv_light(Nparticles, i, u, nv, ci, lW, Nparticles, theta, SigmaX, SigmaV, SigmaUV, phi,
+                                  x, obs_current, obs_past, history)
       } else {
         out <- marginal_msv_light_fixed_theta_vectorized(i, u, nv, ci, W, Nparticles, theta, SigmaX, SigmaV, SigmaUV, phi,
                                                        x, obs_current, obs_past, history)

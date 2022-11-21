@@ -2,26 +2,26 @@
 # ID <- as.numeric(Sys.getenv("SGE_TASK_ID"))
 ID <- 1
 # get data
-y <- as.matrix(read.csv(file="data/synthetic_data_msv_nofactor_y"))
-true_x <- read.csv(file="data/synthetic_data_msv_nofactor_x")
-d <- dim(y)[2]
-Time.step <- dim(y)[1]
-Time.step <- 100
-# parameters
-phi <- 0.91
-Phi <- diag(rep(phi, times = d))
-SigmaU <- matrix(0.3, nrow =d, ncol = d)
-diag(SigmaU) <- 1
-SigmaV <- matrix(0.2, nrow =d, ncol = d)
-diag(SigmaV) <- 1
-SigmaUV <- matrix(-0.1, nrow =d, ncol = d)
-diag(SigmaUV) <- -0.2
-Sigma0 <- SigmaU/(1-phi^2)
-Sigma0_inv <- solve(Sigma0)
-SigmaX <- SigmaU - SigmaUV %*% solve(SigmaV) %*% SigmaUV
+y <- as.matrix(read.csv(file="data/synthetic_data_msv_y"))
+true_x <- read.csv(file="data/synthetic_data_msv_x")
+# d <- dim(y)[2]
+# Time.step <- dim(y)[1]
+# Time.step <- 100
+# # parameters
+# phi <- 0.1
+# Phi <- diag(rep(phi, times = d))
+# SigmaU <- matrix(0.3, nrow =d, ncol = d)
+# diag(SigmaU) <- 1
+# SigmaV <- matrix(0.2, nrow =d, ncol = d)
+# diag(SigmaV) <- 1
+# SigmaUV <- matrix(-0.1, nrow =d, ncol = d)
+# diag(SigmaUV) <- -0.2
+# Sigma0 <- SigmaU/(1-phi^2)
+# Sigma0_inv <- solve(Sigma0)
+# SigmaX <- SigmaU - SigmaUV %*% solve(SigmaV) %*% SigmaUV
 # number of particles
-Nparticles <- 10
-M <- 2
+Nparticles <- 50
+M <- 20
 
 res_stpf <- array(0, dim = c(Time.step, Nparticles, M, d))
 tic()
@@ -41,5 +41,3 @@ plot(1:Time.step, true_x[1:Time.step, dim], type = "l", col = "black", ylim = c(
 lines(1:Time.step, stpf_mean, type = "l", col = "red")
 lines(1:Time.step, stpf_q1, type = "l", col = "red", lty = "dashed")
 lines(1:Time.step, stpf_q3, type = "l", col = "red", lty = "dashed")
-lines(1:Time.step, y[1:Time.step, dim], type = "l", col = "blue", lty = "dashed")
-

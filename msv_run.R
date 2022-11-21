@@ -20,16 +20,16 @@ Sigma0 <- SigmaU/(1-phi^2)
 Sigma0_inv <- solve(Sigma0)
 SigmaX <- SigmaU - SigmaUV %*% solve(SigmaV) %*% SigmaUV
 # number of particles
-Nparticles <- 20
+Nparticles <- 100
 
 set.seed(1234*ID)
 res_dac <- array(0, dim = c(Time.step, Nparticles, d))
 tic()
-res_dac[1, , ] <- marginal_dac_msv_first_step(y[1, ], SigmaV, Sigma0, Nparticles)
+res_dac[1, , ] <- marginal_dac_msv_first_step(y[1, ], SigmaV, Sigma0, Nparticles, adaptive = TRUE)
 toc()
 tic()
 for (t in 2:10) {
-  res_dac[t, , ] <- marginal_dac_msv(res_dac[t-1, , ], y[t, ], y[t-1, ], SigmaV, SigmaUV, SigmaX, phi, adaptive = FALSE)
+  res_dac[t, , ] <- marginal_dac_msv(res_dac[t-1, , ], y[t, ], y[t-1, ], SigmaV, SigmaUV, SigmaX, phi, adaptive = TRUE)
   print(paste(t))
 }
 runtime <- toc()
