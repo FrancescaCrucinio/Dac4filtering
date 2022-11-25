@@ -44,10 +44,12 @@ colnames(df_plot2) <- "mean"
 df_plot2$time <- 1:Time.step
 df_plot2$q1 <-  c(df[df$type == "q1", dim_selection], df_dac[df_dac$type == "q1", dim_selection])
 df_plot2$q3 <-  c(df[df$type == "q3", dim_selection], df_dac[df_dac$type == "q3", dim_selection])
+df_plot2$iqr <-  c(df[df$type == "q3", dim_selection] - df[df$type == "q1", dim_selection],
+                   df_dac[df_dac$type == "q3", dim_selection] - df_dac[df_dac$type == "q1", dim_selection])
 df_plot2$algo <- rep(c("stpf", "dac"), each = Time.step*length(dim_selection))
 df_plot2$truth <- true_x[, dim_selection]
 ggplot(data = df_plot2, aes(x = time, y = mean)) +
-  geom_ribbon(aes(ymin = q1, ymax = q3), fill = "grey70") +
+  geom_ribbon(aes(ymin = mean - 1.5*iqr, ymax = mean + 1.5*iqr), fill = "grey70") +
   geom_line() +
   geom_line(aes(x = time, y = truth, color = "truth"), lwd = 1) +
   facet_wrap(~factor(algo), nrow = 2) +

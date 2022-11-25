@@ -63,29 +63,32 @@ for (t in 2:Time.step) {
 runtime <- toc()
 
 # plot
-dim <- 4
+dim <- 1
 stpf_mean <- apply(res_stpf, c(1,4), mean)[, dim]
 stpf_q1 <- apply(res_stpf, c(1,4), quantile, 0.25)[, dim]
 stpf_q3 <- apply(res_stpf, c(1,4), quantile, 0.75)[, dim]
+stpf_iqr <- stpf_q3 - stpf_q1
 bpf_mean <- apply(res_bpf, c(1,3), mean)[, dim]
 bpf_q1 <- apply(res_bpf, c(1,3), quantile, 0.25)[, dim]
 bpf_q3 <- apply(res_bpf, c(1,3), quantile, 0.75)[, dim]
+bpf_iqr <- bpf_q3 - bpf_q1
 dac_mean <- apply(res_dac, c(1, 3), mean)[, dim]
 dac_q1 <- apply(res_dac, c(1,3 ), quantile, 0.25)[, dim]
 dac_q3 <- apply(res_dac, c(1, 3), quantile, 0.75)[, dim]
+dac_iqr <- dac_q3 - dac_q1
 
 cbPalette <- c("#E69F00", "#009E73", "#0072B2", "#D55E00", "#CC79A7")
 pdf("msv_comparison_d4.pdf", width = 8, height = 6)
 plot(1:Time.step, true_x[1:Time.step, dim], type = "l", col = "black", ylim = c(-3, 4), lwd = 3, xlab = "Time", ylab = "Mean")
 lines(1:Time.step, stpf_mean[1:Time.step], type = "l", col = cbPalette[1], lty = "dashed", lwd = 2)
-# lines(1:Time.step, stpf_q1[1:Time.step], type = "l", col = cbPalette[1], lty = "dashed")
-# lines(1:Time.step, stpf_q3[1:Time.step], type = "l", col = cbPalette[1], lty = "dashed")
+polygon(c(1:Time.step, rev(1:Time.step)), c(stpf_mean[1:Time.step] - 1.5*stpf_iqr, rev(stpf_mean[1:Time.step] + 1.5*stpf_iqr)),
+        col = adjustcolor(cbPalette[1], alpha.f=0.2), lty = 0)
 lines(1:Time.step, bpf_mean[1:Time.step], type = "l", col = cbPalette[2], lty = "dashed", lwd = 2)
-# lines(1:Time.step, bpf_q1[1:Time.step], type = "l", col = cbPalette[2], lty = "dashed")
-# lines(1:Time.step, bpf_q3[1:Time.step], type = "l", col = cbPalette[2], lty = "dashed")
+polygon(c(1:Time.step, rev(1:Time.step)), c(bpf_mean[1:Time.step] - 1.5*bpf_iqr, rev(bpf_mean[1:Time.step] + 1.5*bpf_iqr)),
+        col = adjustcolor(cbPalette[2], alpha.f=0.2), lty = 0)
 lines(1:Time.step, dac_mean, type = "l", col = cbPalette[5], lty = "dashed", lwd = 2)
-# lines(1:Time.step, dac_q1, type = "l", col = cbPalette[5], lty = "dashed")
-# lines(1:Time.step, dac_q3, type = "l", col = cbPalette[5], lty = "dashed")
+polygon(c(1:Time.step, rev(1:Time.step)), c(dac_mean[1:Time.step] - 1.5*dac_iqr, rev(dac_mean[1:Time.step] + 1.5*dac_iqr)),
+        col = adjustcolor(cbPalette[5], alpha.f=0.2), lty = 0)
 legend("bottom", legend=c("truth", "stpf", "bpf", "dac"),
        col=c("black", cbPalette[1], cbPalette[2], cbPalette[5]), lty=c(1, 2, 2, 2), cex=1.1, ncol = 4, lwd = c(3, 2, 2, 2 ))
 dev.off()
