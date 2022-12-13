@@ -1,6 +1,6 @@
 # Dac4filtering
 
-R package implementing the divide-and-conquer sequential Monte Carlo approach for high dimensional filtering described in [``A divide and conquer sequential Monte Carlo approach to high dimensional filtering"](https://arxiv.org/abs/2009.09974).
+R package implementing the divide-and-conquer sequential Monte Carlo approach for high dimensional filtering described in [``A divide and conquer sequential Monte Carlo approach to high dimensional filtering"](https://arxiv.org/abs/2211.14201).
 
 
 ## Authors
